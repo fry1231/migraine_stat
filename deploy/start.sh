@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd /usr/migraine_stat/
-python -m src.main
+python3 -m src.main
