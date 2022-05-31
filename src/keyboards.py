@@ -3,14 +3,19 @@ from aiogram.types import ReplyKeyboardRemove, \
     InlineKeyboardMarkup, InlineKeyboardButton
 
 
-schedule = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-schedule.add(InlineKeyboardButton('1 день', callback_data='schedule_1'))
-schedule.add(InlineKeyboardButton('2 дня', callback_data='schedule_2'))
-schedule.add(InlineKeyboardButton('3 дня', callback_data='schedule_3'))
-schedule.add(InlineKeyboardButton('1 неделю', callback_data='schedule_7'))
+# period_kb = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+# period_kb.insert(InlineKeyboardButton('1 день', callback_data=f'{callback_prefix}_1'))
 
-paincase = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-paincase.add(InlineKeyboardButton('1 день', callback_data='schedule_1'))
-paincase.add(InlineKeyboardButton('2 дня', callback_data='schedule_2'))
-paincase.add(InlineKeyboardButton('3 дня', callback_data='schedule_3'))
-paincase.add(InlineKeyboardButton('1 неделю', callback_data='schedule_7'))
+
+def get_days_choose_kb(callback_prefix, include_month=False):
+    period_kb = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    period_kb.insert(InlineKeyboardButton('1 день', callback_data=f'{callback_prefix}_1'))
+    period_kb.insert(InlineKeyboardButton('2 дня', callback_data=f'{callback_prefix}_2'))
+    period_kb.insert(InlineKeyboardButton('3 дня', callback_data=f'{callback_prefix}_3'))
+    period_kb.insert(InlineKeyboardButton('1 неделю', callback_data=f'{callback_prefix}_7'))
+    if include_month:
+        period_kb.insert(InlineKeyboardButton('1 месяц', callback_data=f'{callback_prefix}_31'))
+        period_kb.insert(InlineKeyboardButton('Весь период', callback_data=f'{callback_prefix}_-1'))
+    else:
+        period_kb.row(InlineKeyboardButton('Отключить оповещения', callback_data=f'{callback_prefix}_-1'))
+    return period_kb

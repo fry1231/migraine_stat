@@ -21,8 +21,11 @@ class PainCase(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     datetime = Column(DateTime)
+    durability = Column(Integer)
+    intensity = Column(Integer)
+    aura = Column(Boolean)
     provocateurs = Column(String)
-    medecine = Column(Boolean)
+    symptoms = Column(String)
     description = Column(String)
     owner_id = Column(Integer, ForeignKey("users.telegram_id"))
 

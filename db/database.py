@@ -20,9 +20,9 @@ if not database_exists(engine.url):
 SessionLocal = sessionmaker(
     engine,
     expire_on_commit=False,
-    autocommit=False,
-    autoflush=False,
-    future=True
+    autocommit=True,
+    autoflush=True,
+    # future=True
 )
 logging.info(f"DB {SQLALCHEMY_DATABASE_URL} connected")
 

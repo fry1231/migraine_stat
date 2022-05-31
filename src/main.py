@@ -2,10 +2,15 @@ import logging
 from aiogram import executor
 import asyncio
 import aioschedule
-from src.routes import dp
-from db import crud
+from src.bot import dp, bot
+from src.routes import *
+from src.fsm_forms import *
+from db import crud, models
 from datetime import datetime
+from db.database import SessionLocal, engine
 
+
+models.Base.metadata.create_all(bind=engine)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
