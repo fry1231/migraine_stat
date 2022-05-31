@@ -1,12 +1,13 @@
 import pandas as pd
 import random
 from aiogram import types
+import io
 
 from tabulate import tabulate
 from src.fsm_forms import *
 import src.keyboards as kb
 from src.bot import dp, bot
-from src.utils import notify_me
+from src.utils import notify_me, render_mpl_table
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -84,13 +85,20 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
         drugs_statistics['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
         drugs_statistics['Кол-во'].append(event.amount)
     drugs_statistics = pd.DataFrame(drugs_statistics)
-    text = tabulate(drugs_statistics, headers='keys', tablefmt="github")
-    await bot.send_message(
-        user_id,
-        f'<pre>{text}</pre>',
-        reply_markup=types.ReplyKeyboardRemove(),
-        parse_mode=ParseMode.HTML,
-    )
+    fig, ax = render_mpl_table(drugs_statistics)
+    with io.BytesIO() as buf:
+        fig.savefig(buf, format='png')
+        buf.seek(0)
+        # await bot.send_photo(user_id, types.InputFile(buf, 'drugs_statistics.png'))
+        await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.png'))
+        # buf.close()
+    # text = tabulate(drugs_statistics, headers='keys', tablefmt="github")
+    # await bot.send_message(
+    #     user_id,
+    #     f'<pre>{text}</pre>',
+    #     reply_markup=types.ReplyKeyboardRemove(),
+    #     parse_mode=ParseMode.HTML,
+    # )
 
 
 @dp.message_handler(commands=['check_pains'])
@@ -120,20 +128,19 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
         pains_statistics['Часов'].append(event.durability)
         pains_statistics['Сила'].append(event.intensity)
         pains_statistics['Аура'].append(event.aura)
-        if len(event.children) == 1:
-            pains_statistics['Лекарство'].append(event.children[0].drugname)
-            pains_statistics['Кол-во'].append(event.children[0].amount)
+        if len(event.medecine_taken) == 1:
+            pains_statistics['Лекарство'].append(event.medecine_taken[0].drugname)
+            pains_statistics['Кол-во'].append(event.medecine_taken[0].amount)
         else:
             pains_statistics['Лекарство'].append(None)
             pains_statistics['Кол-во'].append(None)
     pains_statistics = pd.DataFrame(pains_statistics)
-    text = tabulate(pains_statistics, headers='keys', tablefmt="github")
-    await bot.send_message(
-        user_id,
-        f'<pre>{text}</pre>',
-        reply_markup=types.ReplyKeyboardRemove(),
-        parse_mode=ParseMode.HTML,
-    )
+    fig, ax = render_mpl_table(pains_statistics)
+    with io.BytesIO() as buf:
+        fig.savefig(buf, format='png')
+        buf.seek(0)
+        # await bot.send_photo(user_id, types.InputFile(buf, 'pains_statistics.png'))
+        await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.png'))
 
 
 @dp.message_handler(commands=['download_db'])

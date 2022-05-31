@@ -20,7 +20,7 @@ if not database_exists(engine.url):
 SessionLocal = sessionmaker(
     engine,
     expire_on_commit=False,
-    autocommit=True,
+    autocommit=False,
     autoflush=True,
     # future=True
 )
