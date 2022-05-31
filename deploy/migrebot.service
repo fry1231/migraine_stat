@@ -1,0 +1,13 @@
+[Unit]
+After=network.service
+Description=Migrebot
+
+[Service]
+Type=simple
+WorkingDirectory=/usr/migraine_stat
+ExecStart=deploy/start.sh
+# User=do-user
+
+[Install]
+WantedBy=multi-user.target
+# WantedBy=default.target
