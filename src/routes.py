@@ -1,15 +1,12 @@
-from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher import FSMContext
+import pandas as pd
+import random
+from aiogram import types
 
-from db import crud, models
-from db.models import User, DrugUse, PainCase, Drug
-from db.database import SessionLocal, engine
 from tabulate import tabulate
 from src.fsm_forms import *
 import src.keyboards as kb
 from src.bot import dp, bot
-import pandas as pd
+from src.utils import notify_me
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -21,10 +18,14 @@ async def send_welcome(message: types.Message):
     user = crud.get_user(telegram_id=user_id)
     if not user:
         crud.create_user(telegram_id=user_id, notify_every=-1)
-
+        await notify_me(f'--notification\n'
+                        f'Created user\n'
+                        f'user_id {user_id}\n'
+                        f'first_name {message.from_user.first_name}\n'
+                        f'user_name {message.from_user.username}')
     text = """
     Привет! Список доступных комманд:\n
-    🔘 /reschedule - настроить время опросов
+    🔘 /reschedule - настроить периодичность опросов
     🔘 /pain - сделать запись бо-бо
     🔘 /druguse - сделать запись использования лекарства
     🔘 /check_drugs - узнать статистику употребления лекарств
@@ -134,9 +135,38 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
         parse_mode=ParseMode.HTML,
     )
 
-# @dp.message_handler()
-# async def echo(message: types.Message):
-#     # old style:
-#     # await bot.send_message(message.chat.id, message.text)
-#
-#     await message.answer(message.text)
+
+@dp.message_handler(commands=['download_db'])
+async def get_db(message: types.Message):
+    db = types.InputFile('./db/sql_app.db')
+    await bot.send_document(message.from_user.id, db)
+
+
+async def regular_report(user_id: int, missing_days: int):
+    """
+    Ask if there was pain during the days
+    """
+    hi_s = ["Салам алейкум", "Hi", "Hello", "Ahlan wa sahlan", "Marhaba", "Hola", "Прывитанне", "Здравейте", "Jo napot", "Chao", "Aloha", "Hallo", "Geia sou", "Гамарджоба", "Shalom", "Selamat", "Godan daginn", "Buenas dias", "Buon giorno", "Ave", "Lab dien", "Sveiki", "Sveikas", "Guten Tag", "Goddag", "Dzien dobry", "Ola", "Buna", "Здраво", "Dobry den", "Sawatdi", "Merhaba", "Привіт", "Paivaa", "Bonjour", "Namaste", "Zdravo", "Dobry den", "God dag", "Saluton", "Tervist", "Konnichi wa"]
+    text = f"{random.choice(hi_s)}! Болела ли голова за последние(ий) {missing_days} дня/дней/день?"
+    await bot.send_message(
+        user_id,
+        text,
+        reply_markup=kb.yes_no_missing
+    )
+
+
+@dp.message_handler()
+async def handle_other(message: types.Message):
+    """
+    Handle messages depending on its context
+    """
+    if message.text == 'Да :(':
+        await add_paincase_entry(message)
+    elif message.text == 'Нет, всё хорошо! / Уже добавлено':
+        nice_words = ["Прекрасно", "Восхитительно", "Чудесно", "Великолепно", "Круто", "Здорово", "Дивно", "Чотко",
+                      "Благодать", "Потрясающе", "Изумительно", "Роскошно", "Отменно", "Бесподобно", "Шикарно",
+                      "Распрекрасно", "Прелестно", "Любо-дорого", "Похвально", "Обворожительно", "Балдёж", "Каеф",
+                      "Неплохо", "Превосходно"]
+        await message.reply(f'{random.choice(nice_words)}!', reply_markup=types.ReplyKeyboardRemove())
+    elif message.text.lower().strip().startswith('спас'):
+        await message.reply('Рад стараться)', reply_markup=types.ReplyKeyboardRemove())

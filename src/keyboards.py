@@ -3,8 +3,9 @@ from aiogram.types import ReplyKeyboardRemove, \
     InlineKeyboardMarkup, InlineKeyboardButton
 
 
-# period_kb = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-# period_kb.insert(InlineKeyboardButton('1 день', callback_data=f'{callback_prefix}_1'))
+yes_no_missing = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+yes_no_missing.insert(KeyboardButton('Да :('))
+yes_no_missing.insert(KeyboardButton('Нет, всё хорошо! / Уже добавлено'))
 
 
 def get_days_choose_kb(callback_prefix, include_month=False):

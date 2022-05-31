@@ -18,6 +18,9 @@ logging.basicConfig(level=logging.INFO)
 
 # Schedule notification task
 async def notify_users():
+    """
+    Ask if there was a headache during missing period, defined in notify_every attr
+    """
     users = crud.get_users()
     t = datetime.today()
     for user in users:
@@ -27,7 +30,7 @@ async def notify_users():
         notification_period_minutes = notification_period_days * 24 * 60
         dt = (t - user.last_notified).seconds / 60
         if dt >= notification_period_minutes - 1:
-            pass
+            await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
 
 
 async def scheduler():
@@ -38,6 +41,14 @@ async def scheduler():
 
 
 async def on_startup(_):
+    await bot.set_my_commands([
+        types.bot_command.BotCommand('reschedule', 'настроить периодичность опросов'),
+        types.bot_command.BotCommand('pain', 'сделать запись бо-бо'),
+        types.bot_command.BotCommand('druguse', 'сделать запись использования лекарства'),
+        types.bot_command.BotCommand('check_drugs', 'узнать статистику употребления лекарств'),
+        types.bot_command.BotCommand('check_pains', 'узнать статистику болей'),
+        types.bot_command.BotCommand('add_drug', 'добавить используемое лекарство'),
+    ])
     asyncio.create_task(scheduler())
 
 
