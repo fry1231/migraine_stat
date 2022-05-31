@@ -5,7 +5,7 @@ Description=Migrebot
 [Service]
 Type=simple
 WorkingDirectory=/usr/migraine_stat
-ExecStart=deploy/start.sh
+ExecStart=/usr/migraine_stat/deploy/start.sh
 # User=do-user
 
 [Install]
