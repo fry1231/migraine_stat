@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 # Schedule notification task
-def notify_users():
+async def notify_users():
     """
     Ask if there was a headache during missing period, defined in notify_every attr
     """
@@ -43,6 +43,7 @@ async def scheduler():
 
 
 async def on_startup(_):
+    await notify_me('Bot restarted')
     await bot.set_my_commands([
         types.bot_command.BotCommand('reschedule', 'настроить периодичность опросов'),
         types.bot_command.BotCommand('pain', 'сделать запись бо-бо'),
