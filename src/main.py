@@ -8,6 +8,7 @@ from src.fsm_forms import *
 from db import crud, models
 from datetime import datetime
 from db.database import SessionLocal, engine
+from src.utils import notify_me
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -17,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 # Schedule notification task
-async def notify_users():
+def notify_users():
     """
     Ask if there was a headache during missing period, defined in notify_every attr
     """
@@ -28,9 +29,10 @@ async def notify_users():
         if notification_period_days == -1:  # If user did not specify it yet
             continue
         notification_period_minutes = notification_period_days * 24 * 60
-        dt = (t - user.last_notified).seconds / 60
+        dt = (t - user.last_notified).total_seconds() / 60
         if dt >= notification_period_minutes - 1:
             await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
+            await notify_me(f'User {user.telegram_id} notified')
 
 
 async def scheduler():
