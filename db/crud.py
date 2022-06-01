@@ -36,7 +36,7 @@ def get_users():
         return session.query(User).all()
 
 
-def create_user(telegram_id: str,
+def create_user(telegram_id: int,
                 notify_every: int):
     with get_session() as session:
         db_user = User(telegram_id=telegram_id, notify_every=notify_every, last_notified=datetime.min)
@@ -44,11 +44,18 @@ def create_user(telegram_id: str,
         return db_user
 
 
-def reschedule(telegram_id: str,
+def reschedule(telegram_id: int,
                notify_every: int):
     with get_session() as session:
         db_user = session.query(User).filter(User.telegram_id == telegram_id).first()
         db_user.notify_every = notify_every
+        return db_user
+
+
+def change_last_notified(telegram_id: int):
+    with get_session() as session:
+        db_user = session.query(User).filter(User.telegram_id == telegram_id).first()
+        db_user.last_notified = datetime.now()
         return db_user
 
 

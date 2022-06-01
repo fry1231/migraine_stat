@@ -33,10 +33,11 @@ async def notify_users():
         if dt >= notification_period_minutes - 1:
             await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
             await notify_me(f'User {user.telegram_id} notified')
+            crud.change_last_notified(user.telegram_id)
 
 
 async def scheduler():
-    aioschedule.every().hour.at(":00").do(notify_users)
+    aioschedule.every().day.at("21:00").do(notify_users)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(60)
