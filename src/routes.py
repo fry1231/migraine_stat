@@ -181,7 +181,7 @@ async def handle_other(message: types.Message):
                       "Распрекрасно", "Прелестно", "Любо-дорого", "Похвально", "Обворожительно", "Балдёж", "Каеф",
                       "Неплохо", "Превосходно"]
         await message.reply(f'{random.choice(nice_words)}!', reply_markup=types.ReplyKeyboardRemove())
-    elif message.text.lower().strip().startswith('спас'):
+    elif message.text.lower().strip().startswith('спасибо'):
         await message.reply('Рад стараться)', reply_markup=types.ReplyKeyboardRemove())
     else:
         await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} writes:\n'
