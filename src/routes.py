@@ -151,7 +151,7 @@ async def get_db(message: types.Message):
 
 @dp.message_handler(commands=['write_polina'])
 async def get_db(message: types.Message):
-    text = message.text
+    text = message.text.replace('/write_polina', '')
     await notify_me(text)
     # await bot.send_document(message.from_user.id, db)
 
@@ -184,3 +184,6 @@ async def handle_other(message: types.Message):
         await message.reply(f'{random.choice(nice_words)}!', reply_markup=types.ReplyKeyboardRemove())
     elif message.text.lower().strip().startswith('спас'):
         await message.reply('Рад стараться)', reply_markup=types.ReplyKeyboardRemove())
+    else:
+        await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} writes:\n'
+                        f'{message.text}')
