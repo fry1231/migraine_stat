@@ -151,9 +151,8 @@ async def get_db(message: types.Message):
 
 @dp.message_handler(commands=['write_polina'])
 async def get_db(message: types.Message):
-    text = message.text.replace('/write_polina', '')
-    await notify_me(text)
-    # await bot.send_document(message.from_user.id, db)
+    text = message.text.replace('/write_polina', '').strip()
+    await bot.send_message(956743055, text)
 
 
 async def regular_report(user_id: int, missing_days: int):
