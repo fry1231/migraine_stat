@@ -76,8 +76,8 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
     n_days = int(callback_query.data.split('_')[-1])
     user_druguses = crud.get_user_druguses(user_id=user_id, period_days=n_days)
     drugs_statistics = {
-        'Лекарство': [],
         'Дата': [],
+        'Лекарство': [],
         'Кол-во': []
     }
     for event in user_druguses:
@@ -86,23 +86,19 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
         drugs_statistics['Кол-во'].append(event.amount)
     drugs_statistics = pd.DataFrame(drugs_statistics)
     fig, ax = render_mpl_table(drugs_statistics)
+
     with io.BytesIO() as buf:
         fig.savefig(buf, format='png')
         buf.seek(0)
-        # await bot.send_photo(user_id, types.InputFile(buf, 'drugs_statistics.png'))
         await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.png'))
-        # buf.close()
-    # text = tabulate(drugs_statistics, headers='keys', tablefmt="github")
-    # await bot.send_message(
-    #     user_id,
-    #     f'<pre>{text}</pre>',
-    #     reply_markup=types.ReplyKeyboardRemove(),
-    #     parse_mode=ParseMode.HTML,
-    # )
 
+    with io.BytesIO() as buf:
+        drugs_statistics.to_excel(buf)
+        buf.seek(0)
+        await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.xlsx'))
 
 @dp.message_handler(commands=['check_pains'])
-async def get_drugs_statistics(message: types.Message):
+async def get_pain_statistics(message: types.Message):
     """
     Get paincase statistics
     """
@@ -111,7 +107,7 @@ async def get_drugs_statistics(message: types.Message):
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('paincase'))
-async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
+async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     n_days = int(callback_query.data.split('_')[-1])
     user_paincases = crud.get_user_pains(user_id=user_id, period_days=n_days)
@@ -121,13 +117,19 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
         'Сила': [],
         'Аура': [],
         'Лекарство': [],
-        'Кол-во': []
+        'Кол-во': [],
+        'Триггеры': [],
+        'Симптомы': [],
+        'Примечания': []
     }
     for event in user_paincases:
         pains_statistics['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
         pains_statistics['Часов'].append(event.durability)
         pains_statistics['Сила'].append(event.intensity)
         pains_statistics['Аура'].append(event.aura)
+        pains_statistics['Триггеры'].append(event.provocateurs)
+        pains_statistics['Симптомы'].append(event.symptoms)
+        pains_statistics['Примечания'].append(event.description)
         if len(event.medecine_taken) == 1:
             pains_statistics['Лекарство'].append(event.medecine_taken[0].drugname)
             pains_statistics['Кол-во'].append(event.medecine_taken[0].amount)
@@ -135,12 +137,16 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
             pains_statistics['Лекарство'].append(None)
             pains_statistics['Кол-во'].append(None)
     pains_statistics = pd.DataFrame(pains_statistics)
-    fig, ax = render_mpl_table(pains_statistics)
+    fig, ax = render_mpl_table(pains_statistics[["Дата", "Часов", "Сила", "Аура", "Лекарство", "Кол-во"]])
     with io.BytesIO() as buf:
         fig.savefig(buf, format='png')
         buf.seek(0)
-        # await bot.send_photo(user_id, types.InputFile(buf, 'pains_statistics.png'))
         await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.png'))
+
+    with io.BytesIO() as buf:
+        pains_statistics.to_excel(buf)
+        buf.seek(0)
+        await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.xlsx'))
 
 
 @dp.message_handler(commands=['download_db'])
@@ -178,7 +184,7 @@ async def handle_other(message: types.Message):
     elif message.text == 'Нет, всё хорошо! / Уже добавлено':
         nice_words = ["Прекрасно", "Восхитительно", "Чудесно", "Великолепно", "Круто", "Здорово", "Дивно", "Чотко",
                       "Благодать", "Потрясающе", "Изумительно", "Роскошно", "Отменно", "Бесподобно", "Шикарно",
-                      "Распрекрасно", "Прелестно", "Любо-дорого", "Похвально", "Обворожительно", "Балдёж", "Каеф",
+                      "Распрекрасно", "Прелестно", "Любо-дорого", "Похвально", "Обворожительно", "Балдёж", "Кайф",
                       "Неплохо", "Превосходно"]
         await message.reply(f'{random.choice(nice_words)}!', reply_markup=types.ReplyKeyboardRemove())
     elif message.text.lower().strip().startswith('спасибо'):
