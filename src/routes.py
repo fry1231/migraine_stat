@@ -18,12 +18,17 @@ async def send_welcome(message: types.Message):
     user_id = message.from_user.id
     user = crud.get_user(telegram_id=user_id)
     if not user:
-        crud.create_user(telegram_id=user_id, notify_every=-1)
+        first_name = message.from_user.first_name
+        user_name = message.from_user.username
+        crud.create_user(telegram_id=user_id,
+                         notify_every=-1,
+                         first_name=first_name,
+                         user_name=user_name)
         await notify_me(f'--notification\n'
                         f'Created user\n'
                         f'user_id {user_id}\n'
-                        f'first_name {message.from_user.first_name}\n'
-                        f'user_name {message.from_user.username}')
+                        f'first_name {first_name}\n'
+                        f'user_name {user_name}')
     text = """
     Привет!
     Этот бот предназначен для ведения дневника головных болей.
