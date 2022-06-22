@@ -38,12 +38,12 @@ def is_date_valid(text):
     return True
 
 
-def is_drugname_valid(text):
-    text = text.strip()
-    _, valid_drugnames = kb.get_drugs_kb_and_drugnames()
-    if text not in valid_drugnames and text != 'Следующий вопрос':
-        return False
-    return True
+# def is_drugname_valid(text):
+#     text = text.strip()
+#     _, valid_drugnames = kb.get_drugs_kb_and_drugnames()
+#     if text not in valid_drugnames and text != 'Следующий вопрос':
+#         return False
+#     return True
 
 
 @dp.message_handler(state='*', commands='cancel')
@@ -196,12 +196,14 @@ async def process_was_medecine_taken(message: types.Message, state: FSMContext):
         await message.reply("Примечания, если имеются:", reply_markup=kb.add_description_kb)
     else:
         await ReportPainCaseForm.drugname.set()
-        await message.reply("Название таблетки:", reply_markup=kb.get_drugs_kb_and_drugnames()[0])
+        await message.reply("Название таблетки:",
+                            reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)[0])
 
 
-@dp.message_handler(lambda message: not is_drugname_valid(message.text), state=ReportPainCaseForm.drugname)
+@dp.message_handler(lambda message: message.text.strip() != '', state=ReportPainCaseForm.drugname)
 async def process_drugname_invalid(message: types.Message):
-    return await message.reply("Такого варианта нет, повторите.", reply_markup=kb.get_drugs_kb_and_drugnames()[0])
+    return await message.reply("Сообщение не может быть пустым, повторите",
+                               reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)[0])
 
 
 @dp.message_handler(state=ReportPainCaseForm.drugname)
@@ -240,7 +242,7 @@ async def process_amount(message: types.Message, state: FSMContext):
     to_exclude = [el.strip() for el in data['drugname'].split(',')]
     await ReportPainCaseForm.drugname.set()
     await message.reply('Можно добавить ещё или нажать на "Следующий вопрос"',
-                        reply_markup=kb.get_drugs_kb_and_drugnames(exclude=to_exclude, add_next=True)[0])
+                        reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id, exclude=to_exclude, add_next=True)[0])
 
 
 @dp.message_handler(state=ReportPainCaseForm.description)

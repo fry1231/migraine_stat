@@ -98,7 +98,8 @@ async def process_is_temp_reducer(message: types.Message, state: FSMContext):
     crud.add_drug(name=data['name'],
                   daily_max=data['daily_max'],
                   is_painkiller=data['is_painkiller'],
-                  is_temp_reducer=data['is_temp_reducer'])
+                  is_temp_reducer=data['is_temp_reducer'],
+                  user_id=message.from_user.id)
     await bot.send_message(
                 message.chat.id,
                 md.text(

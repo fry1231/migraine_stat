@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from datetime import datetime, date, timedelta
 from .models import User, PainCase, DrugUse, Drug
 from .database import SessionLocal, engine
+from sqlalchemy import and_, or_, not_
 
 
 # def wrap_session(db):
@@ -125,14 +126,27 @@ def get_user_druguses(user_id: int,
 def add_drug(name: str,
              daily_max: int,
              is_painkiller: bool,
-             is_temp_reducer: bool):
+             is_temp_reducer: bool,
+             user_id: int):
     with get_session() as session:
-        db_drug = Drug(name=name, daily_max=daily_max, is_painkiller=is_painkiller, is_temp_reducer=is_temp_reducer)
+        db_drug = Drug(name=name,
+                       daily_max=daily_max,
+                       is_painkiller=is_painkiller,
+                       is_temp_reducer=is_temp_reducer,
+                       owner_id=user_id)
         session.add(db_drug)
         return db_drug
 
 
-def get_drugs():
+def get_drugs(owner: int = None):
     with get_session() as session:
-        db_drugs = session.query(Drug).all()
+        if owner:
+            db_drugs = session.query(Drug).filter(
+                or_(
+                    Drug.owner_id == owner,
+                    Drug.owner_id == -1
+                )
+            ).all()
+        else:
+            db_drugs = session.query(Drug).all()
         return db_drugs

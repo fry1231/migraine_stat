@@ -28,12 +28,12 @@ def is_date_valid(text):
     return True
 
 
-def is_drugname_valid(text):
-    text = text.strip()
-    _, valid_drugnames = kb.get_drugs_kb_and_drugnames()
-    if text not in valid_drugnames:
-        return False
-    return True
+# def is_drugname_valid(text):
+#     text = text.strip()
+#     _, valid_drugnames = kb.get_drugs_kb_and_drugnames()
+#     if text not in valid_drugnames:
+#         return False
+#     return True
 
 
 @dp.message_handler(state='*', commands='cancel')
@@ -82,12 +82,13 @@ async def process_datetime(message: types.Message, state: FSMContext):
         else:
             data['datetime'] = datetime.strptime(text, '%d.%m.%Y')
     await ReportDrugUseForm.next()
-    await message.reply("Что принимали?", reply_markup=kb.get_drugs_kb_and_drugnames()[0])
+    await message.reply("Что принимали?", reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)[0])
 
 
-@dp.message_handler(lambda message: not is_drugname_valid(message.text), state=ReportDrugUseForm.drugname)
+@dp.message_handler(lambda message: message.text.strip() == '', state=ReportDrugUseForm.drugname)
 async def process_drugname_invalid(message: types.Message):
-    return await message.reply("Такого варианта нет, повторите.", reply_markup=kb.get_drugs_kb_and_drugnames()[0])
+    return await message.reply("Сообщение не может быть пустым, повторите",
+                               reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)[0])
 
 
 @dp.message_handler(state=ReportDrugUseForm.drugname)

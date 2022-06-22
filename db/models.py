@@ -16,6 +16,7 @@ class User(Base):
 
     paincases = relationship("PainCase", back_populates="owner")
     druguses = relationship("DrugUse", back_populates="owner")
+    drugs = relationship("Drug", back_populates="owner")
 
 
 class PainCase(Base):
@@ -57,3 +58,6 @@ class Drug(Base):
     daily_max = Column(Integer)
     is_painkiller = Column(Boolean)
     is_temp_reducer = Column(Boolean)
+    owner_id = Column(Integer, ForeignKey("users.telegram_id"))
+
+    owner = relationship("User", back_populates="drugs")
