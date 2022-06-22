@@ -206,13 +206,20 @@ async def process_drugname_invalid(message: types.Message):
 
 @dp.message_handler(state=ReportPainCaseForm.drugname)
 async def process_drugname(message: types.Message, state: FSMContext):
+    text = message.text.strip()
     async with state.proxy() as data:
-        data['drugname'] = message.text.strip()
-    await ReportPainCaseForm.amount.set()
-    await message.reply("Количество принятого?", reply_markup=kb.drug_amount_kb)
+        if text == 'Следующий вопрос':
+            await ReportPainCaseForm.description.set()
+            await message.reply("Примечания, если имеются:", reply_markup=kb.add_description_kb)
+        else:
+            if 'drugname' not in data:
+                data['drugname'] = message.text.strip()
+            else:
+                data['drugname'] += f', {text}'
+            await ReportPainCaseForm.amount.set()
+            await message.reply("Количество принятого в мг? (можно написать)", reply_markup=kb.drug_amount_kb)
 
 
-# Check daily_max. Gotta be digit
 @dp.message_handler(lambda message: not message.text.isdigit(), state=ReportPainCaseForm.amount)
 async def process_amount_invalid(message: types.Message):
     """
@@ -224,10 +231,16 @@ async def process_amount_invalid(message: types.Message):
 @dp.message_handler(lambda message: message.text.isdigit(), state=ReportPainCaseForm.amount)
 async def process_amount(message: types.Message, state: FSMContext):
     # Update state and data
+    amount = int(message.text.strip())
     async with state.proxy() as data:
-        data['amount'] = int(message.text.strip())
-    await ReportPainCaseForm.description.set()
-    await message.reply("Примечания, если имеются:", reply_markup=kb.add_description_kb)
+        if 'amount' not in data:
+            data['amount'] = str(amount)
+        else:
+            data['amount'] += f', {amount}'
+    to_exclude = [el.strip() for el in data['drugname'].split(',')]
+    await ReportPainCaseForm.drugname.set()
+    await message.reply('Можно добавить ещё или нажать на "Следующий вопрос"',
+                        reply_markup=kb.get_drugs_kb_and_drugnames(exclude=to_exclude, add_next=True)[0])
 
 
 @dp.message_handler(state=ReportPainCaseForm.description)

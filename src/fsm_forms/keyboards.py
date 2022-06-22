@@ -36,12 +36,17 @@ def get_date_kb():
     return date_kb
 
 
-def get_drugs_kb_and_drugnames():
+def get_drugs_kb_and_drugnames(exclude: list = None, add_next: bool = False):
     drugs = crud.get_drugs()
     drugs_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     drugnames = [drug.name for drug in drugs]
+    if exclude:
+        drugnames = [drugname for drugname in drugnames if drugname not in exclude]
     _ = [drugs_kb.insert(name) for name in drugnames]
-    drugs_kb.add('Cancel')
+    if add_next:
+        drugs_kb.row('Следующий вопрос')
+    else:
+        drugs_kb.add('Cancel')
     return drugs_kb, drugnames
 
 

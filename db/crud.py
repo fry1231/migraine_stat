@@ -69,7 +69,7 @@ def report_paincase(who: int,
                     symptoms: str,
                     description: str,
                     drugname: str = None,
-                    amount: int = None,
+                    amount: str = None,
                     **kwargs):
     with get_session() as session:
         db_pain = PainCase(datetime=when, durability=durability, intensity=intensity, aura=aura,
