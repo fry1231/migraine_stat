@@ -11,6 +11,8 @@ class User(Base):
     telegram_id = Column(Integer, primary_key=True, index=True)
     last_notified = Column(DateTime, default=datetime.min)
     notify_every = Column(Integer, default=-1)
+    first_name = Column(String)
+    user_name = Column(String)
 
     paincases = relationship("PainCase", back_populates="owner")
     druguses = relationship("DrugUse", back_populates="owner")

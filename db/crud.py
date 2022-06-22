@@ -37,9 +37,15 @@ def get_users():
 
 
 def create_user(telegram_id: int,
-                notify_every: int):
+                notify_every: int,
+                first_name: str,
+                user_name: str):
     with get_session() as session:
-        db_user = User(telegram_id=telegram_id, notify_every=notify_every, last_notified=datetime.min)
+        db_user = User(telegram_id=telegram_id,
+                       notify_every=notify_every,
+                       last_notified=datetime.min,
+                       first_name=first_name,
+                       user_name=user_name)
         session.add(db_user)
         return db_user
 
