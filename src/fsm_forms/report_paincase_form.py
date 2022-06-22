@@ -41,7 +41,7 @@ def is_date_valid(text):
 def is_drugname_valid(text):
     text = text.strip()
     _, valid_drugnames = kb.get_drugs_kb_and_drugnames()
-    if text not in valid_drugnames:
+    if text not in valid_drugnames and text != 'Следующий вопрос':
         return False
     return True
 
