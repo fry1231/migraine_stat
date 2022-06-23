@@ -200,7 +200,7 @@ async def process_was_medecine_taken(message: types.Message, state: FSMContext):
                             reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)[0])
 
 
-@dp.message_handler(lambda message: message.text.strip() != '', state=ReportPainCaseForm.drugname)
+@dp.message_handler(lambda message: message.text.strip() == '', state=ReportPainCaseForm.drugname)
 async def process_drugname_invalid(message: types.Message):
     return await message.reply("Сообщение не может быть пустым, повторите",
                                reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)[0])
