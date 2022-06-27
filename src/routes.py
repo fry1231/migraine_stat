@@ -169,6 +169,19 @@ async def get_db(message: types.Message):
     await bot.send_message(956743055, text)
 
 
+@dp.message_handler(commands=['listusers'])
+async def get_db(message: types.Message):
+    users = crud.get_users()
+    text = ''
+    for user in users:
+        text += f"""ID {user.telegram_id}
+        name {user.first_name}
+        tg {user.user_name}
+        not {user.notify_every}
+        """
+    await notify_me(text)
+
+
 async def regular_report(user_id: int, missing_days: int):
     """
     Ask if there was pain during the days
