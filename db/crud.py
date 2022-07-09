@@ -51,6 +51,13 @@ def create_user(telegram_id: int,
         return db_user
 
 
+def delete_user(telegram_id: int):
+    with get_session() as session:
+        db_user = session.query(User).filter(User.telegram_id == telegram_id).first()
+        session.delete(db_user)
+        return True
+
+
 def reschedule(telegram_id: int,
                notify_every: int):
     with get_session() as session:

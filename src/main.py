@@ -1,5 +1,6 @@
 import logging
 from aiogram import executor
+from aiogram.utils.exceptions import BotBlocked
 import asyncio
 import aioschedule
 from src.bot import dp, bot
@@ -9,6 +10,7 @@ from db import crud, models
 from datetime import datetime
 from db.database import SessionLocal, engine
 from src.utils import notify_me
+import traceback
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -31,9 +33,15 @@ async def notify_users():
         notification_period_minutes = notification_period_days * 24 * 60
         dt = (t - user.last_notified).total_seconds() / 60
         if dt >= notification_period_minutes - 1:
-            await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
-            await notify_me(f'User {user.telegram_id} notified')
-            crud.change_last_notified(user.telegram_id)
+            try:
+                await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
+                await notify_me(f'User {user.telegram_id} notified')
+                crud.change_last_notified(user.telegram_id)
+            except BotBlocked:
+                if crud.delete_user(user.telegram_id):
+                    await notify_me(f'User {user.telegram_id} ({user.user_name} / {user.first_name}) deleted')
+                else:
+                    await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')
 
 
 async def scheduler():
@@ -57,8 +65,11 @@ async def on_startup(_):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-    )
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    try:
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+        )
+        executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    except:
+        await notify_me(traceback.format_exc())
