@@ -32,7 +32,7 @@ async def notify_users():
             continue
         notification_period_minutes = notification_period_days * 24 * 60
         dt = (t - user.last_notified).total_seconds() / 60
-        if dt >= notification_period_minutes - 1:
+        if dt >= notification_period_minutes - 5:
             try:
                 await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
                 await notify_me(f'User {user.telegram_id} notified')
