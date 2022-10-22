@@ -1,6 +1,6 @@
 import logging
 from aiogram import executor
-from aiogram.utils.exceptions import BotBlocked
+from aiogram.utils.exceptions import BotBlocked, UserDeactivated
 import asyncio
 import aioschedule
 from src.bot import dp, bot
@@ -37,7 +37,7 @@ async def notify_users():
                 await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
                 await notify_me(f'User {user.telegram_id} notified')
                 crud.change_last_notified(user.telegram_id)
-            except BotBlocked:
+            except (BotBlocked, UserDeactivated):
                 if crud.delete_user(user.telegram_id):
                     await notify_me(f'User {user.telegram_id} ({user.user_name} / {user.first_name}) deleted')
                 else:
