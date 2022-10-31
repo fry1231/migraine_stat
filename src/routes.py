@@ -209,7 +209,7 @@ async def execute_raw(message: types.Message):
         output = ''
         for record in results:
             if not isinstance(record, str):
-                record = str(record.__dict__)
+                record = ", ".join([f'{k}: {v}' for k, v in record.items()])
             output += record
             output += '\n'
         await notify_me(output)
