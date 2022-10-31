@@ -204,7 +204,7 @@ async def regular_report(user_id: int, missing_days: int):
 async def execute_raw(message: types.Message):
     user_id = message.from_user.id
     if user_id == 358774905:
-        text = message.text.replace('execute', '').strip()
+        text = message.text.replace('/execute', '').strip()
         results = crud.execute_raw(text)
         output = ''
         for record in results:
