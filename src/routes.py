@@ -105,6 +105,7 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
         buf.seek(0)
         await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.xlsx'))
 
+
 @dp.message_handler(commands=['check_pains'])
 async def get_pain_statistics(message: types.Message):
     """
@@ -159,8 +160,10 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
 
 @dp.message_handler(commands=['download_db'])
 async def get_db(message: types.Message):
-    db = types.InputFile('./db/sql_app.db')
-    await bot.send_document(message.from_user.id, db)
+    user_id = message.from_user.id
+    if user_id == 358774905:
+        db = types.InputFile('./db/sql_app.db')
+        await bot.send_document(message.from_user.id, db)
 
 
 @dp.message_handler(commands=['write_polina'])
@@ -171,15 +174,17 @@ async def get_db(message: types.Message):
 
 @dp.message_handler(commands=['listusers'])
 async def get_db(message: types.Message):
-    users = crud.get_users()
-    text = ''
-    for user in users:
-        text += f"""ID {user.telegram_id}
-        name {user.first_name}
-        tg {user.user_name}
-        not {user.notify_every}
-        """
-    await notify_me(text)
+    user_id = message.from_user.id
+    if user_id == 358774905:
+        users = crud.get_users()
+        text = ''
+        for user in users:
+            text += f"""ID {user.telegram_id}
+            name {user.first_name}
+            tg {user.user_name}
+            not {user.notify_every}
+            """
+        await notify_me(text)
 
 
 async def regular_report(user_id: int, missing_days: int):
@@ -193,6 +198,19 @@ async def regular_report(user_id: int, missing_days: int):
         text,
         reply_markup=kb.yes_no_missing
     )
+
+
+@dp.message_handler(commands=['execute'])
+async def execute_raw(message: types.Message):
+    user_id = message.from_user.id
+    if user_id == 358774905:
+        text = message.text.replace('execute', '').strip()
+        results = crud.execute_raw(text)
+        output = ''
+        for record in results:
+            output += record
+            output += '\n'
+        await notify_me(output)
 
 
 @dp.message_handler()

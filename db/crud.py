@@ -3,6 +3,7 @@ from datetime import datetime, date, timedelta
 from .models import User, PainCase, DrugUse, Drug
 from .database import SessionLocal, engine
 from sqlalchemy import and_, or_, not_
+from sqlalchemy import text as raw_query
 
 
 # def wrap_session(db):
@@ -157,3 +158,11 @@ def get_drugs(owner: int = None):
         else:
             db_drugs = session.query(Drug).all()
         return db_drugs
+
+
+def execute_raw(command: str):
+    sql = raw_query(command)
+    results = engine.execute(sql)
+    if results is not None:
+        return results
+    return 'Executed successfully'

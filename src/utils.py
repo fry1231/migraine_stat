@@ -6,7 +6,11 @@ import six
 
 
 async def notify_me(text):
-    await bot.send_message(358774905, text)
+    if len(text) > 4096:
+        for pos in range(0, len(text), 4096):
+            await bot.send_message(358774905, text[pos:pos + 4096])
+    else:
+        await bot.send_message(358774905, text)
 
 
 def render_mpl_table(data, col_width=3.0, row_height=0.625, font_size=14,
