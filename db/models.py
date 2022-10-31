@@ -53,8 +53,8 @@ class DrugUse(Base):
 
 class Drug(Base):
     __tablename__ = "drugs"
-
-    name = Column(String, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
     daily_max = Column(Integer)
     is_painkiller = Column(Boolean)
     is_temp_reducer = Column(Boolean)
