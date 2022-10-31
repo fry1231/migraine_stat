@@ -208,6 +208,8 @@ async def execute_raw(message: types.Message):
         results = crud.execute_raw(text)
         output = ''
         for record in results:
+            if not isinstance(record, str):
+                record = str(record.__dict__)
             output += record
             output += '\n'
         await notify_me(output)
