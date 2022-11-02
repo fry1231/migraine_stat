@@ -8,6 +8,7 @@ from src.fsm_forms import *
 import src.keyboards as kb
 from src.bot import dp, bot
 from src.utils import notify_me, render_mpl_table
+import traceback
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -80,30 +81,34 @@ async def get_drugs_statistics(message: types.Message):
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('druguse'))
 async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
-    user_id = callback_query.from_user.id
-    n_days = int(callback_query.data.split('_')[-1])
-    user_druguses = crud.get_user_druguses(user_id=user_id, period_days=n_days)
-    drugs_statistics = {
-        'Дата': [],
-        'Лекарство': [],
-        'Кол-во': []
-    }
-    for event in user_druguses:
-        drugs_statistics['Лекарство'].append(event.drugname)
-        drugs_statistics['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
-        drugs_statistics['Кол-во'].append(event.amount)
-    drugs_statistics = pd.DataFrame(drugs_statistics)
-    fig, ax = render_mpl_table(drugs_statistics)
+    try:
+        user_id = callback_query.from_user.id
+        n_days = int(callback_query.data.split('_')[-1])
+        user_druguses = crud.get_user_druguses(user_id=user_id, period_days=n_days)
+        drugs_statistics = {
+            'Дата': [],
+            'Лекарство': [],
+            'Кол-во': []
+        }
+        for event in user_druguses:
+            drugs_statistics['Лекарство'].append(event.drugname)
+            drugs_statistics['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
+            drugs_statistics['Кол-во'].append(event.amount)
+        drugs_statistics = pd.DataFrame(drugs_statistics)
+        fig, ax = render_mpl_table(drugs_statistics)
 
-    with io.BytesIO() as buf:
-        fig.savefig(buf, format='png')
-        buf.seek(0)
-        await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.png'))
+        with io.BytesIO() as buf:
+            fig.savefig(buf, format='png')
+            buf.seek(0)
+            await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.png'))
 
-    with io.BytesIO() as buf:
-        drugs_statistics.to_excel(buf)
-        buf.seek(0)
-        await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.xlsx'))
+        with io.BytesIO() as buf:
+            drugs_statistics.to_excel(buf)
+            buf.seek(0)
+            await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.xlsx'))
+    except Exception as e:
+        await notify_me(f'User {user_id}. Error while get_drugs_statistics_callback'
+                        f'\n\n{traceback.format_exc()}')
 
 
 @dp.message_handler(commands=['check_pains'])
@@ -117,45 +122,49 @@ async def get_pain_statistics(message: types.Message):
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('paincase'))
 async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
-    user_id = callback_query.from_user.id
-    n_days = int(callback_query.data.split('_')[-1])
-    user_paincases = crud.get_user_pains(user_id=user_id, period_days=n_days)
-    pains_statistics = {
-        'Дата': [],
-        'Часов': [],
-        'Сила': [],
-        'Аура': [],
-        'Лекарство': [],
-        'Кол-во': [],
-        'Триггеры': [],
-        'Симптомы': [],
-        'Примечания': []
-    }
-    for event in user_paincases:
-        pains_statistics['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
-        pains_statistics['Часов'].append(event.durability)
-        pains_statistics['Сила'].append(event.intensity)
-        pains_statistics['Аура'].append(event.aura)
-        pains_statistics['Триггеры'].append(event.provocateurs)
-        pains_statistics['Симптомы'].append(event.symptoms)
-        pains_statistics['Примечания'].append(event.description)
-        if len(event.medecine_taken) == 1:
-            pains_statistics['Лекарство'].append(event.medecine_taken[0].drugname)
-            pains_statistics['Кол-во'].append(event.medecine_taken[0].amount)
-        else:
-            pains_statistics['Лекарство'].append(None)
-            pains_statistics['Кол-во'].append(None)
-    pains_statistics = pd.DataFrame(pains_statistics)
-    fig, ax = render_mpl_table(pains_statistics[["Дата", "Часов", "Сила", "Аура", "Лекарство", "Кол-во"]])
-    with io.BytesIO() as buf:
-        fig.savefig(buf, format='png')
-        buf.seek(0)
-        await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.png'))
+    try:
+        user_id = callback_query.from_user.id
+        n_days = int(callback_query.data.split('_')[-1])
+        user_paincases = crud.get_user_pains(user_id=user_id, period_days=n_days)
+        pains_statistics = {
+            'Дата': [],
+            'Часов': [],
+            'Сила': [],
+            'Аура': [],
+            'Лекарство': [],
+            'Кол-во': [],
+            'Триггеры': [],
+            'Симптомы': [],
+            'Примечания': []
+        }
+        for event in user_paincases:
+            pains_statistics['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
+            pains_statistics['Часов'].append(event.durability)
+            pains_statistics['Сила'].append(event.intensity)
+            pains_statistics['Аура'].append(event.aura)
+            pains_statistics['Триггеры'].append(event.provocateurs)
+            pains_statistics['Симптомы'].append(event.symptoms)
+            pains_statistics['Примечания'].append(event.description)
+            if len(event.medecine_taken) == 1:
+                pains_statistics['Лекарство'].append(event.medecine_taken[0].drugname)
+                pains_statistics['Кол-во'].append(event.medecine_taken[0].amount)
+            else:
+                pains_statistics['Лекарство'].append(None)
+                pains_statistics['Кол-во'].append(None)
+        pains_statistics = pd.DataFrame(pains_statistics)
+        fig, ax = render_mpl_table(pains_statistics[["Дата", "Часов", "Сила", "Аура", "Лекарство", "Кол-во"]])
+        with io.BytesIO() as buf:
+            fig.savefig(buf, format='png')
+            buf.seek(0)
+            await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.png'))
 
-    with io.BytesIO() as buf:
-        pains_statistics.to_excel(buf)
-        buf.seek(0)
-        await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.xlsx'))
+        with io.BytesIO() as buf:
+            pains_statistics.to_excel(buf)
+            buf.seek(0)
+            await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.xlsx'))
+    except Exception as e:
+        await notify_me(f'User {user_id}. Error while get_pain_statistics_callback'
+                        f'\n\n{traceback.format_exc()}')
 
 
 @dp.message_handler(commands=['download_db'])
