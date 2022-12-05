@@ -54,11 +54,11 @@ async def scheduler():
 async def on_startup(_):
     await notify_me('Bot restarted')
     await bot.set_my_commands([
-        types.bot_command.BotCommand('reschedule', 'настроить периодичность опросов'),
-        types.bot_command.BotCommand('pain', 'сделать запись бо-бо'),
-        types.bot_command.BotCommand('druguse', 'сделать запись использования лекарства'),
-        types.bot_command.BotCommand('check_drugs', 'узнать статистику употребления лекарств'),
-        types.bot_command.BotCommand('check_pains', 'узнать статистику болей'),
+        types.bot_command.BotCommand('reschedule', 'периодичность опросов'),
+        types.bot_command.BotCommand('pain', 'запись бо-бо'),
+        types.bot_command.BotCommand('druguse', 'запись использования лекарства'),
+        types.bot_command.BotCommand('check_drugs', 'статистика употребления лекарств'),
+        types.bot_command.BotCommand('check_pains', 'статистика болей'),
         types.bot_command.BotCommand('add_drug', 'добавить используемое лекарство'),
     ])
     asyncio.create_task(scheduler())

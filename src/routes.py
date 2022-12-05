@@ -67,7 +67,10 @@ async def reschedule_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     n_days = int(callback_query.data.split('_')[-1])
     crud.reschedule(telegram_id=user_id, notify_every=n_days)
-    await bot.send_message(user_id, f'Установлено оповещение раз в {n_days} дней')
+    if n_days == -1:
+        await bot.send_message(user_id, f'Оповещение отключено')
+    else:
+        await bot.send_message(user_id, f'Установлено оповещение раз в {n_days} дней')
 
 
 @dp.message_handler(commands=['check_drugs'])
@@ -237,10 +240,28 @@ async def handle_other(message: types.Message):
                       "Распрекрасно", "Прелестно", "Любо-дорого", "Похвально", "Обворожительно", "Балдёж", "Кайф",
                       "Неплохо", "Превосходно"]
         await message.reply(f'{random.choice(nice_words)}!', reply_markup=types.ReplyKeyboardRemove())
-    elif message.text.lower().strip().startswith('спасибо'):
-        await message.reply('Рад стараться)', reply_markup=types.ReplyKeyboardRemove())
-        await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} writes:\n'
-                        f'{message.text}')
+    # elif message.text.lower().strip().startswith('спасибо'):
+    #     await message.reply('Рад стараться!)', reply_markup=types.ReplyKeyboardRemove())
+    #     await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} writes:\n'
+    #                     f'{message.text}')
+    elif message.from_user.id == 358774905:
+        if message.reply_to_message is not None:
+            message_with_credentials: types.Message = message.reply_to_message
+            splitted = message_with_credentials.text.split('\n')
+            user_id_row = [el for el in splitted if el.startswith('user_id=')][-1]
+            user_id = int(user_id_row.replace('user_id=', ''))
+
+            message_id_row = [el for el in splitted if el.startswith('message_id=')][-1]
+            reply_message_id = int(message_id_row.replace('message_id=', ''))
+
+            text_to_reply = message.text
+
+            await bot.send_message(chat_id=user_id,
+                                   text=text_to_reply,
+                                   reply_to_message_id=reply_message_id)
     else:
-        await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} writes:\n'
-                        f'{message.text}')
+        await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} '
+                        f'writes:\n'
+                        f'{message.text}\n\n'
+                        f'user_id={message.from_user.id}\n'
+                        f'message_id={message.message_id}')
