@@ -259,6 +259,7 @@ async def handle_other(message: types.Message):
             await bot.send_message(chat_id=user_id,
                                    text=text_to_reply,
                                    reply_to_message_id=reply_message_id)
+            await notify_me('Message sent')
     else:
         await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} '
                         f'writes:\n'
