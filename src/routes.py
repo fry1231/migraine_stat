@@ -98,11 +98,24 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
             drugs_statistics['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
             drugs_statistics['Кол-во'].append(event.amount)
         drugs_statistics = pd.DataFrame(drugs_statistics)
-        if len(drugs_statistics) > 0:
+        # Period text definition
+        period_text = ''
+        if n_days != -1:
+            period_text = str(n_days)
+            temp = {
+                '1': ' день',
+                '2': ' дня',
+                '3': ' дня',
+                '7': ' дней',
+                '31': ' день'
+            }
+            period_text += temp[period_text]
+        if len(drugs_statistics) == 0:
+            await bot.send_message(user_id, f"В течение запрошенного периода ({period_text}) записей нет")
+        elif len(drugs_statistics) > 0:
             # Send an image of a table
             try:
                 fig, ax = render_mpl_table(drugs_statistics)
-
                 with io.BytesIO() as buf:
                     fig.savefig(buf, format='png')
                     buf.seek(0)
@@ -161,7 +174,21 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
                 pains_statistics['Лекарство'].append(None)
                 pains_statistics['Кол-во'].append(None)
         pains_statistics = pd.DataFrame(pains_statistics)
-        if len(pains_statistics) > 0:
+        # Period text definition
+        period_text = ''
+        if n_days != -1:
+            period_text = str(n_days)
+            temp = {
+                '1': ' день',
+                '2': ' дня',
+                '3': ' дня',
+                '7': ' дней',
+                '31': ' день'
+            }
+            period_text += temp[period_text]
+        if len(pains_statistics) == 0:
+            await bot.send_message(user_id, f"В течение запрошенного периода ({period_text}) записей нет")
+        elif len(pains_statistics) > 0:
             try:
                 fig, ax = render_mpl_table(pains_statistics[["Дата", "Часов", "Сила", "Аура", "Лекарство", "Кол-во"]])
                 with io.BytesIO() as buf:
