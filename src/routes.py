@@ -98,17 +98,23 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
             drugs_statistics['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
             drugs_statistics['Кол-во'].append(event.amount)
         drugs_statistics = pd.DataFrame(drugs_statistics)
-        fig, ax = render_mpl_table(drugs_statistics)
+        if len(drugs_statistics) > 0:
+            # Send an image of a table
+            try:
+                fig, ax = render_mpl_table(drugs_statistics)
 
-        with io.BytesIO() as buf:
-            fig.savefig(buf, format='png')
-            buf.seek(0)
-            await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.png'))
-
-        with io.BytesIO() as buf:
-            drugs_statistics.to_excel(buf)
-            buf.seek(0)
-            await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.xlsx'))
+                with io.BytesIO() as buf:
+                    fig.savefig(buf, format='png')
+                    buf.seek(0)
+                    await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.png'))
+            except IndexError:
+                await notify_me(f'User {user_id}. IndexError while get_drugs_statistics_callback'
+                                f'\nTable size is {len(drugs_statistics)}')
+            # Send Excel table
+            with io.BytesIO() as buf:
+                drugs_statistics.to_excel(buf)
+                buf.seek(0)
+                await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.xlsx'))
     except Exception as e:
         await notify_me(f'User {user_id}. Error while get_drugs_statistics_callback'
                         f'\n\n{traceback.format_exc()}')
@@ -155,16 +161,20 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
                 pains_statistics['Лекарство'].append(None)
                 pains_statistics['Кол-во'].append(None)
         pains_statistics = pd.DataFrame(pains_statistics)
-        fig, ax = render_mpl_table(pains_statistics[["Дата", "Часов", "Сила", "Аура", "Лекарство", "Кол-во"]])
-        with io.BytesIO() as buf:
-            fig.savefig(buf, format='png')
-            buf.seek(0)
-            await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.png'))
-
-        with io.BytesIO() as buf:
-            pains_statistics.to_excel(buf)
-            buf.seek(0)
-            await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.xlsx'))
+        if len(pains_statistics) > 0:
+            try:
+                fig, ax = render_mpl_table(pains_statistics[["Дата", "Часов", "Сила", "Аура", "Лекарство", "Кол-во"]])
+                with io.BytesIO() as buf:
+                    fig.savefig(buf, format='png')
+                    buf.seek(0)
+                    await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.png'))
+            except IndexError:
+                await notify_me(f'User {user_id}. IndexError while get_pain_statistics_callback'
+                                f'\nTable size is {len(pains_statistics)}')
+            with io.BytesIO() as buf:
+                pains_statistics.to_excel(buf)
+                buf.seek(0)
+                await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.xlsx'))
     except Exception as e:
         await notify_me(f'User {user_id}. Error while get_pain_statistics_callback'
                         f'\n\n{traceback.format_exc()}')
