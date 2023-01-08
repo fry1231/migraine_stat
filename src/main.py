@@ -1,6 +1,6 @@
 import logging
 from aiogram import executor
-from aiogram.utils.exceptions import BotBlocked, UserDeactivated
+from aiogram.utils.exceptions import BotBlocked, UserDeactivated, NetworkError
 import asyncio
 import aioschedule
 from src.bot import dp, bot
@@ -26,6 +26,8 @@ async def notify_users():
     """
     users = crud.get_users()
     t = datetime.today()
+    time_notified = datetime.now()
+    users_arr = []
     for user in users:
         notification_period_days = user.notify_every
         if notification_period_days == -1:  # If user did not specify it yet
@@ -36,12 +38,17 @@ async def notify_users():
             try:
                 await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
                 await notify_me(f'User {user.telegram_id} notified')
-                crud.change_last_notified(user.telegram_id)
+                users_arr.append(user.telegram_id)
             except (BotBlocked, UserDeactivated):
                 if crud.delete_user(user.telegram_id):
                     await notify_me(f'User {user.telegram_id} ({user.user_name} / {user.first_name}) deleted')
                 else:
                     await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')
+            except NetworkError:
+                await notify_me(f'User {user.telegram_id} Network Error')
+        for user_id in users_arr:
+            crud.change_last_notified(user_id, time_notified)
+        await notify_me(f'Changed last notified for users on {time_notified}')
 
 
 async def scheduler():

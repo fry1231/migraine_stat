@@ -67,10 +67,10 @@ def reschedule(telegram_id: int,
         return db_user
 
 
-def change_last_notified(telegram_id: int):
+def change_last_notified(telegram_id: int, time_notified: datetime):
     with get_session() as session:
         db_user = session.query(User).filter(User.telegram_id == telegram_id).first()
-        db_user.last_notified = datetime.now()
+        db_user.last_notified = time_notified
         return db_user
 
 
