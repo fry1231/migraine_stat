@@ -46,9 +46,9 @@ async def notify_users():
                     await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')
             except NetworkError:
                 await notify_me(f'User {user.telegram_id} Network Error')
-        for user_id in users_arr:
-            crud.change_last_notified(user_id, time_notified)
-        await notify_me(f'Changed last notified for users on {time_notified}')
+    for user_id in users_arr:
+        crud.change_last_notified(user_id, time_notified)
+    await notify_me(f'Changed last notified for users on {time_notified}')
 
 
 async def scheduler():
