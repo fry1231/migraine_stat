@@ -37,7 +37,6 @@ async def notify_users():
         if dt >= notification_period_minutes - 5:
             try:
                 await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
-                await notify_me(f'User {user.telegram_id} notified')
                 users_arr.append(user.telegram_id)
             except (BotBlocked, UserDeactivated):
                 if crud.delete_user(user.telegram_id):
@@ -48,6 +47,7 @@ async def notify_users():
                 await notify_me(f'User {user.telegram_id} Network Error')
     for user_id in users_arr:
         crud.change_last_notified(user_id, time_notified)
+    await notify_me(f'{len(users_arr)} users notified')
     await notify_me(f'Changed last notified for users on {time_notified}')
 
 

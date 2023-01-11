@@ -86,6 +86,7 @@ async def get_drugs_statistics(message: types.Message):
 async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
     try:
         user_id = callback_query.from_user.id
+        pre_message = await bot.send_message(user_id, 'Собираю данные...')
         n_days = int(callback_query.data.split('_')[-1])
         user_druguses = crud.get_user_druguses(user_id=user_id, period_days=n_days)
         drugs_statistics = {
@@ -128,6 +129,7 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
                 drugs_statistics.to_excel(buf)
                 buf.seek(0)
                 await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.xlsx'))
+        await bot.delete_message(user_id, pre_message.message_id)
     except Exception as e:
         await notify_me(f'User {user_id}. Error while get_drugs_statistics_callback'
                         f'\n\n{traceback.format_exc()}')
@@ -146,6 +148,7 @@ async def get_pain_statistics(message: types.Message):
 async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
     try:
         user_id = callback_query.from_user.id
+        pre_message = await bot.send_message(user_id, 'Собираю данные...')
         n_days = int(callback_query.data.split('_')[-1])
         user_paincases = crud.get_user_pains(user_id=user_id, period_days=n_days)
         pains_statistics = {
@@ -202,6 +205,7 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
                 pains_statistics.to_excel(buf)
                 buf.seek(0)
                 await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.xlsx'))
+        await bot.delete_message(user_id, pre_message.message_id)
     except Exception as e:
         await notify_me(f'User {user_id}. Error while get_pain_statistics_callback'
                         f'\n\n{traceback.format_exc()}')
