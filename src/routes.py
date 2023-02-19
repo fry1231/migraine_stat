@@ -20,16 +20,19 @@ async def send_welcome(message: types.Message):
     user = crud.get_user(telegram_id=user_id)
     if not user:
         first_name = message.from_user.first_name
+        last_name = message.from_user.last_name
+        if last_name is None:
+            last_name = ''
         user_name = message.from_user.username
+        if user_name is None:
+            desk = f'{first_name} {last_name}'
+        else:
+            desk = f't.me/{user_name}'
         crud.create_user(telegram_id=user_id,
                          notify_every=-1,
                          first_name=first_name,
                          user_name=user_name)
-        await notify_me(f'--notification\n'
-                        f'Created user\n'
-                        f'user_id {user_id}\n'
-                        f'first_name {first_name}\n'
-                        f'user_name {user_name}')
+        await notify_me(f'New user_id {user_id}\n{desk}')
     text = """
     Привет!
     Этот бот предназначен для ведения дневника головных болей.
@@ -245,7 +248,18 @@ async def regular_report(user_id: int, missing_days: int):
     Ask if there was pain during the days
     """
     hi_s = ["Салам алейкум", "Hi", "Hello", "Ahlan wa sahlan", "Marhaba", "Hola", "Прывитанне", "Здравейте", "Jo napot", "Chao", "Aloha", "Hallo", "Geia sou", "Гамарджоба", "Shalom", "Selamat", "Godan daginn", "Buenas dias", "Buon giorno", "Ave", "Lab dien", "Sveiki", "Sveikas", "Guten Tag", "Goddag", "Dzien dobry", "Ola", "Buna", "Здраво", "Dobry den", "Sawatdi", "Merhaba", "Привіт", "Paivaa", "Bonjour", "Namaste", "Zdravo", "Dobry den", "God dag", "Saluton", "Tervist", "Konnichi wa"]
-    text = f"{random.choice(hi_s)}! Болела ли голова за последние(ий) {missing_days} дня/дней/день?"
+    temp = {
+        '1': 'день',
+        '2': 'дня',
+        '3': 'дня',
+        '7': 'дней',
+        '31': 'день'
+    }
+    if str(missing_days) in temp:
+        suffix = temp[str(missing_days)]
+    else:
+        suffix = 'дней'
+    text = f"{random.choice(hi_s)}! Болела ли голова за последние(ий) {missing_days} {suffix}?"
     await bot.send_message(
         user_id,
         text,

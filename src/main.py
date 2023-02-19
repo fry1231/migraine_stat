@@ -10,6 +10,7 @@ from db import crud, models
 from datetime import datetime
 from db.database import SessionLocal, engine
 from src.utils import notify_me
+from typing import List
 import traceback
 
 
@@ -24,14 +25,17 @@ async def notify_users():
     """
     Ask if there was a headache during missing period, defined in notify_every attr
     """
+    t1 = datetime.now()
     users = crud.get_users()
     t = datetime.today()
     time_notified = datetime.now()
     users_arr = []
+    n_notifyable_users = 0
     for user in users:
         notification_period_days = user.notify_every
         if notification_period_days == -1:  # If user did not specify it yet
             continue
+        n_notifyable_users += 1
         notification_period_minutes = notification_period_days * 24 * 60
         dt = (t - user.last_notified).total_seconds() / 60
         if dt >= notification_period_minutes - 5:
@@ -47,8 +51,20 @@ async def notify_users():
                 await notify_me(f'User {user.telegram_id} Network Error')
     for user_id in users_arr:
         crud.change_last_notified(user_id, time_notified)
-    await notify_me(f'{len(users_arr)} users notified')
-    await notify_me(f'Changed last notified for users on {time_notified}')
+    await notify_me(
+        f'{len(users_arr)} users notified\n'
+        f'Changed last notified for users on {time_notified}'
+    )
+    # Count users with at least one added row in Pains table
+    active_users = set()
+    pains: List[models.PainCase] = crud.get_pains()
+    for pain in pains:
+        active_users.add(pain.owner_id)
+    await notify_me(
+        f'{n_notifyable_users}/{len(users)} users with notification\n'
+        f'{len(active_users)} active users with {len(pains)} rows in Pains table\n\n'
+        f'Execution time = {(datetime.now() - t1).total_seconds():.1f} seconds'
+    )
 
 
 async def scheduler():

@@ -107,6 +107,11 @@ def get_user_pains(user_id: int,
         return db_pains
 
 
+def get_pains():
+    with get_session() as session:
+        return session.query(PainCase).all()
+
+
 # Druguses ====================================
 def report_druguse(when: datetime,
                    amount: int,
