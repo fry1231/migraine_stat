@@ -1,0 +1,60 @@
+workflow:
+  rules:
+    - if: "${API_TOKEN} == null || 
+           ${RABBITMQ_USER} == null || 
+           ${RABBITMQ_PASS} == null || 
+           ${RABBITMQ_HOST} == null || 
+           ${MY_TG_ID} == null"
+  script:
+    - 'echo "Some of the env vars is null"'
+    - 'exit 1'
+
+stages:
+  - pull
+  - build
+  - copy_db
+  - test
+  - deploy
+
+pull:
+  stage: pull
+  script:
+    - 'cd /usr/migrebot'
+    - 'git pull'
+
+build:
+  stage: build
+  when: manual
+  before_script:
+    - 'export API_TOKEN=${API_TOKEN}'
+    - 'export RABBITMQ_USER=${RABBITMQ_USER}'
+    - 'export RABBITMQ_PASS=${RABBITMQ_PASS}'
+    - 'export RABBITMQ_HOST=${RABBITMQ_HOST}'
+    - 'export MY_TG_ID=${MY_TG_ID}'
+  script:
+    - 'cd /usr/migrebot'
+    - 'docker compose up -d'
+
+copy_db:
+  stage: copy_db
+  when: manual
+  rules:
+    - exists:
+        - '/usr/migrebot/db/sql_app.db'
+      when: never
+  script:
+    - 'cp /usr/migraine_stat/db/sql_app.db /usr/migrebot/db'
+
+test:
+  stage: test
+  when: manual
+  script:
+    - 'docker exec -it migrebot'
+    - 'pytest'
+
+run:
+  stage: run
+  when: manual
+  script:
+    - 'docker exec -it migrebot'
+    - 'python -m src.main'

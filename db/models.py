@@ -1,8 +1,15 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from pydantic import BaseModel
 
 from .database import Base
+
+
+class NewUser(BaseModel):
+    first_name: str = ''
+    last_name: str = None
+    user_name: str = None
 
 
 class User(Base):
@@ -53,6 +60,7 @@ class DrugUse(Base):
 
 class Drug(Base):
     __tablename__ = "drugs"
+
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     daily_max = Column(Integer)

@@ -1,50 +1,49 @@
-import pandas as pd
 import random
-from aiogram import types
 import io
-
-from tabulate import tabulate
 from src.fsm_forms import *
 import src.keyboards as kb
 from src.bot import dp, bot
-from src.utils import notify_me, render_mpl_table
+from src.utils import notify_me, write_xlsx
+from src.messages_handler import postpone_new_user_notif
+from db.models import NewUser
 import traceback
 
 
 @dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
     """
-    This handler will be called when user sends `/start` or `/help` command
+    Check if user exists. If not: greet and create new user.
+    Save notification about new user to the message queue
     """
     user_id = message.from_user.id
-    user = crud.get_user(telegram_id=user_id)
+    user = await crud.get_user(telegram_id=user_id)
     if not user:
         first_name = message.from_user.first_name
         last_name = message.from_user.last_name
-        if last_name is None:
-            last_name = ''
         user_name = message.from_user.username
-        if user_name is None:
-            desk = f'{first_name} {last_name}'
-        else:
-            desk = f't.me/{user_name}'
-        crud.create_user(telegram_id=user_id,
-                         notify_every=-1,
-                         first_name=first_name,
-                         user_name=user_name)
-        await notify_me(f'New user_id {user_id}\n{desk}')
-    text = """
-    Привет!
-    Этот бот предназначен для ведения дневника головных болей.
-    Он будет отслеживать, когда болела голова, какие медикаменты принимались, а также спросит про возможные триггеры и проявлявшиеся симптомы.
-    Список доступных комманд:
-    🔘 /reschedule - настроить периодичность опросов
-    🔘 /pain - сделать запись бо-бо
-    🔘 /druguse - сделать запись использования лекарства
-    🔘 /check_drugs - узнать статистику употребления лекарств
-    🔘 /check_pains - узнать статистику болей
-    🔘 /add_drug - добавить используемое лекарство
-    """
+        # Add user to the DB
+        user = await crud.create_user(
+            telegram_id=user_id,
+            notify_every=-1,
+            first_name=first_name,
+            user_name=user_name
+        )
+        # Send the notification to the message broker
+        await postpone_new_user_notif(
+            NewUser(
+                first_name=user.first_name,
+                last_name=last_name,
+                user_name=user.user_name
+            )
+        )
+    text = \
+        """Список доступных команд:
+🔘 /reschedule - настроить периодичность опросов
+🔘 /pain - сделать запись бо-бо
+🔘 /druguse - сделать запись приёма лекарства
+🔘 /check_pains - выгрузить статистику болей
+🔘 /check_drugs - выгрузить статистику употребления лекарств
+🔘 /add_drug - добавить используемое лекарство"""
     await message.reply(text)
 
 
@@ -57,10 +56,19 @@ async def reschedule(message: types.Message):
     user_id = message.from_user.id
     user = crud.get_user(telegram_id=user_id)
     notification_period = user.notify_every
+    period_text = str(notification_period)
+    temp = {
+        '1': ' день',
+        '2': ' дня',
+        '3': ' дня',
+        '7': ' дней',
+        '31': ' день'
+    }
+    period_text += temp[period_text]
     if notification_period == -1:
-        text_notif_period = "Текущий период пока не назначен."
+        text_notif_period = "Текущий период оповещений пока не назначен"
     else:
-        text_notif_period = f"Текущий период - {notification_period} дней."
+        text_notif_period = f"Текущая частота оповещения - 1 раз в {period_text}"
     text = f"Выбери период опроса (сообщения будут отправляться 1 раз в ...)\n" + text_notif_period
     await message.reply(text, reply_markup=kb.get_days_choose_kb('schedule'))
 
@@ -92,16 +100,16 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
         pre_message = await bot.send_message(user_id, 'Собираю данные...')
         n_days = int(callback_query.data.split('_')[-1])
         user_druguses = crud.get_user_druguses(user_id=user_id, period_days=n_days)
-        drugs_statistics = {
-            'Дата': [],
-            'Лекарство': [],
-            'Кол-во': []
-        }
+        drugs_statistics = []
+
+        # Filling data
         for event in user_druguses:
-            drugs_statistics['Лекарство'].append(event.drugname)
-            drugs_statistics['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
-            drugs_statistics['Кол-во'].append(event.amount)
-        drugs_statistics = pd.DataFrame(drugs_statistics)
+            temp_dict = {}
+            temp_dict['Лекарство'].append(event.drugname)
+            temp_dict['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
+            temp_dict['Кол-во'].append(event.amount)
+            drugs_statistics.append(temp_dict)
+
         # Period text definition
         period_text = ''
         if n_days != -1:
@@ -114,26 +122,27 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
                 '31': ' день'
             }
             period_text += temp[period_text]
+
         if len(drugs_statistics) == 0:
             await bot.send_message(user_id, f"В течение запрошенного периода ({period_text}) записей нет")
         elif len(drugs_statistics) > 0:
             # Send an image of a table
-            try:
-                fig, ax = render_mpl_table(drugs_statistics)
-                with io.BytesIO() as buf:
-                    fig.savefig(buf, format='png')
-                    buf.seek(0)
-                    await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.png'))
-            except IndexError:
-                await notify_me(f'User {user_id}. IndexError while get_drugs_statistics_callback'
-                                f'\nTable size is {len(drugs_statistics)}')
+            # try:
+            #     fig, ax = render_mpl_table(drugs_statistics)
+            #     with io.BytesIO() as buf:
+            #         fig.savefig(buf, format='png')
+            #         buf.seek(0)
+            #         await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.png'))
+            # except IndexError:
+            #     await notify_me(f'User {user_id}. IndexError while get_drugs_statistics_callback'
+            #                     f'\nTable size is {len(drugs_statistics)}')
+
             # Send Excel table
             with io.BytesIO() as buf:
-                drugs_statistics.to_excel(buf)
-                buf.seek(0)
+                write_xlsx(buf, drugs_statistics)
                 await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.xlsx'))
         await bot.delete_message(user_id, pre_message.message_id)
-    except Exception as e:
+    except Exception:
         await notify_me(f'User {user_id}. Error while get_drugs_statistics_callback'
                         f'\n\n{traceback.format_exc()}')
 
@@ -154,32 +163,25 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
         pre_message = await bot.send_message(user_id, 'Собираю данные...')
         n_days = int(callback_query.data.split('_')[-1])
         user_paincases = crud.get_user_pains(user_id=user_id, period_days=n_days)
-        pains_statistics = {
-            'Дата': [],
-            'Часов': [],
-            'Сила': [],
-            'Аура': [],
-            'Лекарство': [],
-            'Кол-во': [],
-            'Триггеры': [],
-            'Симптомы': [],
-            'Примечания': []
-        }
+        pains_statistics = []
+        # Filling data
         for event in user_paincases:
-            pains_statistics['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
-            pains_statistics['Часов'].append(event.durability)
-            pains_statistics['Сила'].append(event.intensity)
-            pains_statistics['Аура'].append(event.aura)
-            pains_statistics['Триггеры'].append(event.provocateurs)
-            pains_statistics['Симптомы'].append(event.symptoms)
-            pains_statistics['Примечания'].append(event.description)
+            temp_dict = {}
+            temp_dict['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
+            temp_dict['Часов'].append(event.durability)
+            temp_dict['Сила'].append(event.intensity)
+            temp_dict['Аура'].append(event.aura)
+            temp_dict['Триггеры'].append(event.provocateurs)
+            temp_dict['Симптомы'].append(event.symptoms)
+            temp_dict['Примечания'].append(event.description)
             if len(event.medecine_taken) == 1:
-                pains_statistics['Лекарство'].append(event.medecine_taken[0].drugname)
-                pains_statistics['Кол-во'].append(event.medecine_taken[0].amount)
+                temp_dict['Лекарство'].append(event.medecine_taken[0].drugname)
+                temp_dict['Кол-во'].append(event.medecine_taken[0].amount)
             else:
-                pains_statistics['Лекарство'].append(None)
-                pains_statistics['Кол-во'].append(None)
-        pains_statistics = pd.DataFrame(pains_statistics)
+                temp_dict['Лекарство'].append(None)
+                temp_dict['Кол-во'].append(None)
+            pains_statistics.append(temp_dict)
+
         # Period text definition
         period_text = ''
         if n_days != -1:
@@ -195,21 +197,23 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
         if len(pains_statistics) == 0:
             await bot.send_message(user_id, f"В течение запрошенного периода ({period_text}) записей нет")
         elif len(pains_statistics) > 0:
-            try:
-                fig, ax = render_mpl_table(pains_statistics[["Дата", "Часов", "Сила", "Аура", "Лекарство", "Кол-во"]])
-                with io.BytesIO() as buf:
-                    fig.savefig(buf, format='png')
-                    buf.seek(0)
-                    await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.png'))
-            except IndexError:
-                await notify_me(f'User {user_id}. IndexError while get_pain_statistics_callback'
-                                f'\nTable size is {len(pains_statistics)}')
+            # # Send image of a table
+            # try:
+            #     fig, ax = render_mpl_table(pains_statistics[["Дата", "Часов", "Сила", "Аура", "Лекарство", "Кол-во"]])
+            #     with io.BytesIO() as buf:
+            #         fig.savefig(buf, format='png')
+            #         buf.seek(0)
+            #         await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.png'))
+            # except IndexError:
+            #     await notify_me(f'User {user_id}. IndexError while get_pain_statistics_callback'
+            #                     f'\nTable size is {len(pains_statistics)}')
+
+            # Send table as xlsx
             with io.BytesIO() as buf:
-                pains_statistics.to_excel(buf)
-                buf.seek(0)
+                write_xlsx(buf, pains_statistics)
                 await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.xlsx'))
         await bot.delete_message(user_id, pre_message.message_id)
-    except Exception as e:
+    except Exception:
         await notify_me(f'User {user_id}. Error while get_pain_statistics_callback'
                         f'\n\n{traceback.format_exc()}')
 
@@ -245,9 +249,15 @@ async def get_db(message: types.Message):
 
 async def regular_report(user_id: int, missing_days: int):
     """
-    Ask if there was pain during the days
+    Notify about all new users, added during the previous day
+    Ask each user if there was pain during the days
+    If so - start report_paincase_form
     """
-    hi_s = ["Салам алейкум", "Hi", "Hello", "Ahlan wa sahlan", "Marhaba", "Hola", "Прывитанне", "Здравейте", "Jo napot", "Chao", "Aloha", "Hallo", "Geia sou", "Гамарджоба", "Shalom", "Selamat", "Godan daginn", "Buenas dias", "Buon giorno", "Ave", "Lab dien", "Sveiki", "Sveikas", "Guten Tag", "Goddag", "Dzien dobry", "Ola", "Buna", "Здраво", "Dobry den", "Sawatdi", "Merhaba", "Привіт", "Paivaa", "Bonjour", "Namaste", "Zdravo", "Dobry den", "God dag", "Saluton", "Tervist", "Konnichi wa"]
+    hi_s = ["Салам алейкум", "Hi", "Hello", "Ahlan wa sahlan", "Marhaba", "Hola", "Прывитанне", "Здравейте", "Jo napot",
+            "Chao", "Aloha", "Hallo", "Geia sou", "Гамарджоба", "Shalom", "Selamat", "Godan daginn", "Buenas dias",
+            "Buon giorno", "Ave", "Lab dien", "Sveiki", "Sveikas", "Guten Tag", "Goddag", "Dzien dobry", "Ola", "Buna",
+            "Здраво", "Dobry den", "Sawatdi", "Merhaba", "Привіт", "Paivaa", "Bonjour", "Namaste", "Zdravo",
+            "Dobry den", "God dag", "Saluton", "Tervist", "Konnichi wa"]
     temp = {
         '1': 'день',
         '2': 'дня',
@@ -259,7 +269,10 @@ async def regular_report(user_id: int, missing_days: int):
         suffix = temp[str(missing_days)]
     else:
         suffix = 'дней'
-    text = f"{random.choice(hi_s)}! Болела ли голова за последние(ий) {missing_days} {suffix}?"
+    if missing_days == 1:
+        text = f"{random.choice(hi_s)}! Болела ли сегодня голова?"
+    else:
+        text = f"{random.choice(hi_s)}! Болела ли голова за последние {missing_days} {suffix}?"
     await bot.send_message(
         user_id,
         text,
@@ -272,7 +285,7 @@ async def execute_raw(message: types.Message):
     user_id = message.from_user.id
     if user_id == 358774905:
         text = message.text.replace('/execute', '').strip()
-        results = crud.execute_raw(text)
+        results = await crud.execute_raw(text)
         output = ''
         for record in results:
             if not isinstance(record, str):

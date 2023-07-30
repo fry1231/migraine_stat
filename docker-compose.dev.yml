@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  migrebot:
+    container_name: migrebot
+#    restart: always
+    env_file:
+      - .env   # Remove for prod
+    build: ./
+    stdin_open: true
+    tty: true
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.12-alpine
+    env_file:
+      - .env   # Remove for prod
+    ports:
+      - "5672:5672"
+      - "15672:15672"

@@ -1,43 +1,66 @@
 from contextlib import contextmanager
 from datetime import datetime, date, timedelta
 from .models import User, PainCase, DrugUse, Drug
-from .database import SessionLocal, engine
+from .database import engine, test_engine
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy import and_, or_, not_
 from sqlalchemy import text as raw_query
+from typing import List
+import asyncio
+from functools import wraps
+from src.settings import IS_TESTING
 
 
-# def wrap_session(db):
-#     def wrapper(add_func):
-#         def inner(*args, **kwargs):
-#             with db.begin():
-#                 return add_func(*args, **kwargs)
-#         return inner
-#     return wrapper
+if IS_TESTING:
+    use_engine = test_engine
+else:
+    use_engine = engine
+
+SessionLocal = sessionmaker(
+    use_engine,
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=True,
+    # future=True
+)
+
+
+def to_async(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        return await asyncio.to_thread(func, *args, **kwargs)
+    return wrapper
+
 
 @contextmanager
 def get_session():
     session = SessionLocal()
     try:
         yield session
-    except:
+    except Exception:
         session.rollback()
         raise
     else:
         session.commit()
+    finally:
+        session.close()
 
 
 # Users ==================================
+@to_async
 def get_user(telegram_id: int):
     with get_session() as session:
         db_user = session.query(User).filter(User.telegram_id == telegram_id).first()
         return db_user
 
 
+@to_async
 def get_users():
     with get_session() as session:
         return session.query(User).all()
 
 
+@to_async
 def create_user(telegram_id: int,
                 notify_every: int,
                 first_name: str,
@@ -52,6 +75,7 @@ def create_user(telegram_id: int,
         return db_user
 
 
+@to_async
 def delete_user(telegram_id: int):
     with get_session() as session:
         db_user = session.query(User).filter(User.telegram_id == telegram_id).first()
@@ -59,6 +83,7 @@ def delete_user(telegram_id: int):
         return True
 
 
+@to_async
 def reschedule(telegram_id: int,
                notify_every: int):
     with get_session() as session:
@@ -67,14 +92,28 @@ def reschedule(telegram_id: int,
         return db_user
 
 
-def change_last_notified(telegram_id: int, time_notified: datetime):
+@to_async
+def change_last_notified(telegram_id: int,
+                         time_notified: datetime):
     with get_session() as session:
         db_user = session.query(User).filter(User.telegram_id == telegram_id).first()
         db_user.last_notified = time_notified
         return db_user
 
 
+@to_async
+def batch_change_last_notified(telegram_ids: List[int],
+                               time_notified: datetime):
+    with get_session() as session:
+        session.query(User).filter(
+            User.telegram_id.in_(telegram_ids)
+        ).update({
+            User.last_notified: time_notified
+        }, synchronize_session=False)
+
+
 # Paincases ====================================
+@to_async
 def report_paincase(who: int,
                     when: datetime,
                     durability: int,
@@ -96,6 +135,7 @@ def report_paincase(who: int,
         return db_pain
 
 
+@to_async
 def get_user_pains(user_id: int,
                    period_days: int = -1):
     with get_session() as session:
@@ -107,12 +147,14 @@ def get_user_pains(user_id: int,
         return db_pains
 
 
+@to_async
 def get_pains():
     with get_session() as session:
         return session.query(PainCase).all()
 
 
 # Druguses ====================================
+@to_async
 def report_druguse(when: datetime,
                    amount: int,
                    who: int,
@@ -124,6 +166,7 @@ def report_druguse(when: datetime,
         return db_druguse
 
 
+@to_async
 def get_user_druguses(user_id: int,
                       period_days: int = -1):
     with get_session() as session:
@@ -136,6 +179,7 @@ def get_user_druguses(user_id: int,
 
 
 # Drugs ====================================
+@to_async
 def add_drug(name: str,
              daily_max: int,
              is_painkiller: bool,
@@ -151,6 +195,7 @@ def add_drug(name: str,
         return db_drug
 
 
+@to_async
 def get_drugs(owner: int = None):
     with get_session() as session:
         if owner:
@@ -165,6 +210,7 @@ def get_drugs(owner: int = None):
         return db_drugs
 
 
+@to_async
 def execute_raw(command: str):
     sql = raw_query(command)
     results = engine.execute(sql)

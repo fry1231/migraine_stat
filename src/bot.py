@@ -1,9 +1,9 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from src.settings import API_TOKEN, IS_TESTING
 
-
-API_TOKEN = '5494735949:AAF9NFfm2skBPjB_Z7LN8WmHUQsV8ofciXQ'
 
 # Initialize bot and dispatcher
-bot = Bot(token=API_TOKEN)
+validate = False if IS_TESTING else True
+bot = Bot(token=API_TOKEN, validate_token=validate)
 dp = Dispatcher(bot, storage=MemoryStorage())
