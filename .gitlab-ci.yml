@@ -27,9 +27,6 @@ pull:
 build:
   stage: build
   when: manual
-  only:
-    changes:
-      - /usr/migrebot/**/*
   script:
     - cd /usr/migrebot
     - docker compose up -d --build migrebot
