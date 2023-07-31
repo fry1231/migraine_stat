@@ -27,9 +27,12 @@ pull:
 build:
   stage: build
   when: on_success
+  only:
+    changes:
+      - /usr/migrebot/**/*
   script:
     - cd /usr/migrebot
-    - docker compose up -d
+    - docker compose up -d --build migrebot
 
 copy_db:
   stage: copy_db
