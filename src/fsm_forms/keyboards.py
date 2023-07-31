@@ -3,6 +3,7 @@ from aiogram.types import ReplyKeyboardRemove, \
     InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import date, timedelta
 from db import crud
+import asyncio
 
 
 drug_amount_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -39,7 +40,7 @@ def get_date_kb():
 def get_drugs_kb_and_drugnames(owner: int = None,
                                exclude: list = None,
                                add_next: bool = False):
-    drugs = await crud.get_drugs(owner)
+    drugs = asyncio.run(crud.get_drugs(owner))
     drugs_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     drugnames = [drug.name for drug in drugs]
     if exclude:
