@@ -81,14 +81,18 @@ async def process_datetime(message: types.Message, state: FSMContext):
             data['datetime'] = assoc_dict[text]
         else:
             data['datetime'] = datetime.strptime(text, '%d.%m.%Y')
+    reply_markup = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
+    reply_markup = reply_markup[0]
     await ReportDrugUseForm.next()
-    await message.reply("Что принимали?", reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)[0])
+    await message.reply("Что принимали?", reply_markup=reply_markup)
 
 
 @dp.message_handler(lambda message: message.text.strip() == '', state=ReportDrugUseForm.drugname)
 async def process_drugname_invalid(message: types.Message):
+    reply_markup = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
+    reply_markup = reply_markup[0]
     return await message.reply("Сообщение не может быть пустым, повторите",
-                               reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)[0])
+                               reply_markup=reply_markup)
 
 
 @dp.message_handler(state=ReportDrugUseForm.drugname)

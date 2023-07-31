@@ -195,15 +195,19 @@ async def process_was_medecine_taken(message: types.Message, state: FSMContext):
         await ReportPainCaseForm.description.set()
         await message.reply("Примечания, если имеются:", reply_markup=kb.add_description_kb)
     else:
+        reply_markup = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
+        reply_markup = reply_markup[0]
         await ReportPainCaseForm.drugname.set()
         await message.reply("Название таблетки:",
-                            reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)[0])
+                            reply_markup=reply_markup)
 
 
 @dp.message_handler(lambda message: message.text.strip() == '', state=ReportPainCaseForm.drugname)
 async def process_drugname_invalid(message: types.Message):
+    reply_markup = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
+    reply_markup = reply_markup[0]
     return await message.reply("Сообщение не может быть пустым, повторите",
-                               reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)[0])
+                               reply_markup=reply_markup)
 
 
 @dp.message_handler(state=ReportPainCaseForm.drugname)
@@ -240,9 +244,11 @@ async def process_amount(message: types.Message, state: FSMContext):
         else:
             data['amount'] += f', {amount}'
     to_exclude = [el.strip() for el in data['drugname'].split(',')]
+    reply_markup = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id, exclude=to_exclude, add_next=True)
+    reply_markup = reply_markup[0]
     await ReportPainCaseForm.drugname.set()
     await message.reply('Можно добавить ещё или нажать на "Следующий вопрос"',
-                        reply_markup=kb.get_drugs_kb_and_drugnames(owner=message.from_user.id, exclude=to_exclude, add_next=True)[0])
+                        reply_markup=reply_markup)
 
 
 @dp.message_handler(state=ReportPainCaseForm.description)
