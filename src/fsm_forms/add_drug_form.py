@@ -95,11 +95,13 @@ async def process_is_temp_reducer(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['is_temp_reducer'] = True if message.text == "Да" else False
 
-    crud.add_drug(name=data['name'],
-                  daily_max=data['daily_max'],
-                  is_painkiller=data['is_painkiller'],
-                  is_temp_reducer=data['is_temp_reducer'],
-                  user_id=message.from_user.id)
+    await crud.add_drug(
+        name=data['name'],
+        daily_max=data['daily_max'],
+        is_painkiller=data['is_painkiller'],
+        is_temp_reducer=data['is_temp_reducer'],
+        user_id=message.from_user.id
+    )
     await bot.send_message(
                 message.chat.id,
                 md.text(

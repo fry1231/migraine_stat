@@ -113,12 +113,12 @@ async def process_amount(message: types.Message, state: FSMContext):
     # Update state and data
     async with state.proxy() as data:
         data['amount'] = int(message.text.strip())
-    crud.report_druguse(when=data['datetime'],
-                        amount=data['amount'],
-                        who=message.from_user.id,
-                        drugname=data['drugname'],
-                        # paincase_id=
-                        )
+    await crud.report_druguse(when=data['datetime'],
+                              amount=data['amount'],
+                              who=message.from_user.id,
+                              drugname=data['drugname'],
+                              # paincase_id=
+                              )
     await bot.send_message(message.chat.id, "Успешно добавлено!", reply_markup=types.ReplyKeyboardRemove())
     # Finish conversation
     await state.finish()

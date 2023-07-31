@@ -45,7 +45,7 @@ async def notify_users():
                 await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
                 users_id_w_notif.append(user.telegram_id)
             except (BotBlocked, UserDeactivated):
-                if crud.delete_user(user.telegram_id):
+                if await crud.delete_user(user.telegram_id):
                     await notify_me(f'User {user.telegram_id} ({user.user_name} / {user.first_name}) deleted')
                 else:
                     await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')

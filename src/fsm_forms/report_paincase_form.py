@@ -260,7 +260,7 @@ async def process_description(message: types.Message, state: FSMContext):
             data['drugname'] = None
             data['amount'] = None
 
-        crud.report_paincase(**data)
+        await crud.report_paincase(**data)
 
     await bot.send_message(message.chat.id, "Успешно добавлено!", reply_markup=types.ReplyKeyboardRemove())
     # Finish conversation

@@ -54,7 +54,7 @@ async def reschedule(message: types.Message):
     If no User instance - create one
     """
     user_id = message.from_user.id
-    user = crud.get_user(telegram_id=user_id)
+    user = await crud.get_user(telegram_id=user_id)
     notification_period = user.notify_every
     period_text = str(notification_period)
     temp = {
@@ -77,7 +77,7 @@ async def reschedule(message: types.Message):
 async def reschedule_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     n_days = int(callback_query.data.split('_')[-1])
-    crud.reschedule(telegram_id=user_id, notify_every=n_days)
+    await crud.reschedule(telegram_id=user_id, notify_every=n_days)
     if n_days == -1:
         await bot.send_message(user_id, f'Оповещение отключено')
     else:
@@ -99,7 +99,7 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
         user_id = callback_query.from_user.id
         pre_message = await bot.send_message(user_id, 'Собираю данные...')
         n_days = int(callback_query.data.split('_')[-1])
-        user_druguses = crud.get_user_druguses(user_id=user_id, period_days=n_days)
+        user_druguses = await crud.get_user_druguses(user_id=user_id, period_days=n_days)
         drugs_statistics = []
 
         # Filling data
@@ -162,7 +162,7 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
         user_id = callback_query.from_user.id
         pre_message = await bot.send_message(user_id, 'Собираю данные...')
         n_days = int(callback_query.data.split('_')[-1])
-        user_paincases = crud.get_user_pains(user_id=user_id, period_days=n_days)
+        user_paincases = await crud.get_user_pains(user_id=user_id, period_days=n_days)
         pains_statistics = []
         # Filling data
         for event in user_paincases:
@@ -222,7 +222,7 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
 async def get_db(message: types.Message):
     user_id = message.from_user.id
     if user_id == 358774905:
-        db = types.InputFile('./db/sql_app.db')
+        db = types.InputFile('db/sql_app.db')
         await bot.send_document(message.from_user.id, db)
 
 
@@ -236,7 +236,7 @@ async def get_db(message: types.Message):
 async def get_db(message: types.Message):
     user_id = message.from_user.id
     if user_id == 358774905:
-        users = crud.get_users()
+        users = await crud.get_users()
         text = ''
         for user in users:
             text += f"""ID {user.telegram_id}
