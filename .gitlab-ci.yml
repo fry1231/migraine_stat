@@ -18,7 +18,7 @@ check_vars:
 
 pull:
   stage: pull
-  when: on_success
+  when: manual
   script:
     - git config --global --add safe.directory /usr/migrebot
     - cd /usr/migrebot
@@ -26,7 +26,7 @@ pull:
 
 build:
   stage: build
-  when: on_success
+  when: manual
   only:
     changes:
       - /usr/migrebot/**/*
@@ -36,7 +36,7 @@ build:
 
 copy_db:
   stage: copy_db
-  when: on_success
+  when: manual
   script:
     - if [ ! -f "/usr/migrebot/db/sql_app.db" ]; then
         cp /usr/migraine_stat/db/sql_app.db /usr/migrebot/db;
