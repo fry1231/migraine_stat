@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from typing import List
 
 from aiogram import executor
 from aiogram.utils.exceptions import BotBlocked, UserDeactivated, NetworkError
@@ -28,7 +27,7 @@ async def notify_users():
     Ask if there was a headache during missing period, defined in notify_every attr
     Notify daily about new users
     """
-    users: List[models.User] = await crud.get_users()
+    users: list[models.User] = await crud.get_users()
     t = datetime.today()
     time_notified = datetime.now()
     users_id_w_notif = []
@@ -69,7 +68,7 @@ async def notify_users():
 
     # Count users with at least one added row in Pains table
     active_users = set()
-    pains: List[models.PainCase] = await crud.get_pains()
+    pains: list[models.PainCase] = await crud.get_pains()
     for pain in pains:
         active_users.add(pain.owner_id)
 
@@ -103,6 +102,18 @@ async def on_startup(_):
     ])
     asyncio.create_task(scheduler())
     await notify_me('Bot restarted')
+
+
+@dp.message_handler(commands=['launch_notif'])
+async def execute_raw(message: types.Message):
+    user_id = message.from_user.id
+    if user_id == 358774905:
+        await notify_me('Launching notification')
+        try:
+            await notify_users()
+        except Exception:
+            await notify_me(f'Exception while regular notification:\n{traceback.format_exc()}')
+
 
 if __name__ == '__main__':
     try:

@@ -64,10 +64,10 @@ async def reschedule(message: types.Message):
         '7': ' дней',
         '31': ' день'
     }
-    period_text += temp[period_text]
     if notification_period == -1:
         text_notif_period = "Текущий период оповещений пока не назначен"
     else:
+        period_text += temp[period_text]
         text_notif_period = f"Текущая частота оповещения - 1 раз в {period_text}"
     text = f"Выбери период опроса (сообщения будут отправляться 1 раз в ...)\n" + text_notif_period
     await message.reply(text, reply_markup=kb.get_days_choose_kb('schedule'))
