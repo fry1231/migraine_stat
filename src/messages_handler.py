@@ -58,6 +58,8 @@ async def notif_of_new_users() -> str:
         queue = await channel.declare_queue(queue_name, durable=True)
         n_messages = queue.declaration_result.message_count
         i = 0
+        if n_messages == 0:
+            return "No new users today"
         async with queue.iterator() as queue_iter:
             async for message in queue_iter:
                 i += 1

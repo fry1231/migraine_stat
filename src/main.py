@@ -1,13 +1,11 @@
 import logging
 from datetime import datetime
-
 from aiogram import executor
 from aiogram.utils.exceptions import BotBlocked, UserDeactivated, NetworkError
 import asyncio
 import aioschedule
 from src.bot import dp, bot
 from src.messages_handler import notif_of_new_users
-from src.routes import *
 from src.fsm_forms import *
 from db import crud, models
 from db.database import engine
@@ -17,13 +15,29 @@ import traceback
 from aio_pika import Message, connect
 
 
+@dp.message_handler(commands=['launch_notif'])
+async def launch_notif(message: types.Message):
+    user_id = message.from_user.id
+    logging.info(f'Launching notification request from user {user_id}')
+    await notify_me(f'Launching notification request from user {user_id}')
+    if user_id == 358774905:
+        try:
+            await notify_users()
+        except Exception:
+            await notify_me(f'Exception while regular notification:\n{traceback.format_exc()}')
+
+
+# Not to interfere with the launch_notif
+from src.routes import *
+
+
 # Schedule notification task
 async def notify_users():
     """
     Ask if there was a headache during missing period, defined in notify_every attr
     Notify daily about new users
     """
-    logging.info('Starting notification task')
+    logging.info('Started notification task')
     users: list[models.User] = await crud.get_users()
     t = datetime.today()
     time_notified = datetime.now()
@@ -98,18 +112,6 @@ async def on_startup(_):
     ])
     asyncio.create_task(scheduler())
     await notify_me('Bot restarted')
-
-
-@dp.message_handler(commands=['launch_notif'])
-async def launch_notif(message: types.Message):
-    user_id = message.from_user.id
-    logging.info(f'Launching notification request from user {user_id}')
-    await notify_me(f'Launching notification request from user {user_id}')
-    if user_id == 358774905:
-        try:
-            await notify_users()
-        except Exception:
-            await notify_me(f'Exception while regular notification:\n{traceback.format_exc()}')
 
 
 if __name__ == '__main__':
