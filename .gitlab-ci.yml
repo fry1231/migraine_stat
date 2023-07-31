@@ -6,11 +6,21 @@ workflow:
     - exit 1
 
 stages:
+  - check_vars
   - pull
   - build
   - copy_db
   - test
   - run
+
+check_vars:
+  stage: check_vars
+  script:
+    - |
+      if [ -z "$API_TOKEN" ] || [ -z "$RABBITMQ_USER" ] || [ -z "$RABBITMQ_PASS" ] || [ -z "$RABBITMQ_HOST" ] || [ -z "$MY_TG_ID" ]; then
+        echo "Error: Missing one or more required environment variables."
+        exit 1
+      fi
 
 pull:
   stage: pull
