@@ -105,7 +105,7 @@ async def on_startup(_):
 
 
 @dp.message_handler(commands=['launch_notif'])
-async def execute_raw(message: types.Message):
+async def launch_notif(message: types.Message):
     user_id = message.from_user.id
     if user_id == 358774905:
         await notify_me('Launching notification')
