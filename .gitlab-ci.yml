@@ -36,7 +36,7 @@ build_all:
   when: manual
   script:
     - cd /usr/migrebot
-    - docker compose up -d --build
+    - docker compose build
 
 copy_db:
   stage: copy_db
@@ -53,11 +53,12 @@ test:
   when: manual
   script:
     - cd /usr/migrebot
-    - docker compose exec -it migrebot sh -c 'pytest'
+    - docker compose up -d rabbitmq
+    - docker compose run migrebot pytest
 
 run:
   stage: run
   when: manual
   script:
     - cd /usr/migrebot
-    - docker compose exec -d migrebot sh -c 'python -m src.main'
+    - docker compose up -d migrebot

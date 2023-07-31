@@ -5,8 +5,8 @@ services:
     container_name: migrebot
     restart: always
     build: ./
-    stdin_open: true
-    tty: true
+    command:
+      - python -m src.main
     environment:
       - API_TOKEN=${API_TOKEN:?err}
       - RABBITMQ_USER=${RABBITMQ_USER:?err}
