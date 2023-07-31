@@ -7,6 +7,12 @@ services:
     build: ./
     stdin_open: true
     tty: true
+    environment:
+      - API_TOKEN=${API_TOKEN:?err}
+      - RABBITMQ_USER=${RABBITMQ_USER:?err}
+      - RABBITMQ_PASS=${RABBITMQ_PASS:?err}
+      - RABBITMQ_HOST=${RABBITMQ_HOST:?err}
+      - MY_TG_ID=${MY_TG_ID:?err}
     volumes:
       - ./db:/usr/migrebot/db
 
