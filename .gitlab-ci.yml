@@ -60,4 +60,4 @@ run:
   when: manual
   script:
     - cd /usr/migrebot
-    - docker compose exec migrebot sh -c 'python -m src.main'
+    - docker compose exec -d migrebot sh -c 'python -m src.main'
