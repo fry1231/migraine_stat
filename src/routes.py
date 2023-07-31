@@ -105,9 +105,9 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
         # Filling data
         for event in user_druguses:
             temp_dict = {}
-            temp_dict['Лекарство'].append(event.drugname)
-            temp_dict['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
-            temp_dict['Кол-во'].append(event.amount)
+            temp_dict['Лекарство'] = event.drugname
+            temp_dict['Дата'] = event.datetime.strftime('%d.%m.%Y')
+            temp_dict['Кол-во'] = event.amount
             drugs_statistics.append(temp_dict)
 
         # Period text definition
@@ -167,19 +167,19 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
         # Filling data
         for event in user_paincases:
             temp_dict = {}
-            temp_dict['Дата'].append(event.datetime.strftime('%d.%m.%Y'))
-            temp_dict['Часов'].append(event.durability)
-            temp_dict['Сила'].append(event.intensity)
-            temp_dict['Аура'].append(event.aura)
-            temp_dict['Триггеры'].append(event.provocateurs)
-            temp_dict['Симптомы'].append(event.symptoms)
-            temp_dict['Примечания'].append(event.description)
+            temp_dict['Дата'] = event.datetime.strftime('%d.%m.%Y')
+            temp_dict['Часов'] = event.durability
+            temp_dict['Сила'] = event.intensity
+            temp_dict['Аура'] = event.aura
+            temp_dict['Триггеры'] = event.provocateurs
+            temp_dict['Симптомы'] = event.symptoms
+            temp_dict['Примечания'] = event.description
             if len(event.medecine_taken) == 1:
-                temp_dict['Лекарство'].append(event.medecine_taken[0].drugname)
-                temp_dict['Кол-во'].append(event.medecine_taken[0].amount)
+                temp_dict['Лекарство'] = event.medecine_taken[0].drugname
+                temp_dict['Кол-во'] = event.medecine_taken[0].amount
             else:
-                temp_dict['Лекарство'].append(None)
-                temp_dict['Кол-во'].append(None)
+                temp_dict['Лекарство'] = None
+                temp_dict['Кол-во'] = None
             pains_statistics.append(temp_dict)
 
         # Period text definition
