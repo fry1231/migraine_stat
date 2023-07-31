@@ -17,16 +17,13 @@ import traceback
 from aio_pika import Message, connect
 
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-
-
 # Schedule notification task
 async def notify_users():
     """
     Ask if there was a headache during missing period, defined in notify_every attr
     Notify daily about new users
     """
+    logging.info('Starting notification task')
     users: list[models.User] = await crud.get_users()
     t = datetime.today()
     time_notified = datetime.now()
@@ -57,7 +54,6 @@ async def notify_users():
         f'{len(users_id_w_notif)} users notified\n'
         f'Will change last notified on {time_notified}'
     )
-
     try:
         await crud.batch_change_last_notified(users_id_w_notif)
     except Exception:
@@ -107,8 +103,9 @@ async def on_startup(_):
 @dp.message_handler(commands=['launch_notif'])
 async def launch_notif(message: types.Message):
     user_id = message.from_user.id
+    logging.info(f'Launching notification request from user {user_id}')
+    await notify_me(f'Launching notification request from user {user_id}')
     if user_id == 358774905:
-        await notify_me('Launching notification')
         try:
             await notify_users()
         except Exception:
@@ -119,8 +116,10 @@ if __name__ == '__main__':
     try:
         logging.basicConfig(
             level=logging.INFO,
-            format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+            format="%(asctime)s - %(levelname)s: %(message)s",
+            datefmt='%d.%m.%Y %H:%M:%S'
         )
+        logging.info('Bot started')
         executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
     except:
         asyncio.run(notify_me(traceback.format_exc()))

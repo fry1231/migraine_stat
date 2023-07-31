@@ -7,6 +7,7 @@ from src.utils import notify_me, write_xlsx
 from src.messages_handler import postpone_new_user_notif
 from db.models import NewUser
 import traceback
+import logging
 
 
 @dp.message_handler(commands=['start', 'help'])
