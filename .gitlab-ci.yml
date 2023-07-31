@@ -45,10 +45,12 @@ test:
   stage: test
   when: manual
   script:
-    - docker compose exec migrebot sh -c 'pytest'
+    - cd /usr/migrebot
+    - docker compose exec -it migrebot sh -c 'pytest'
 
 run:
   stage: run
   when: manual
   script:
-    - docker compose exec migrebot sh -c 'python -m src.main'
+    - cd /usr/migrebot
+    - docker compose exec -it migrebot sh -c 'python -m src.main'
