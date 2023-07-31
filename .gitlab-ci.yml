@@ -8,6 +8,7 @@ stages:
 
 check_vars:
   stage: check_vars
+  when: manual
   script:
     - |
       if [ -z "$API_TOKEN" ] || [ -z "$RABBITMQ_USER" ] || [ -z "$RABBITMQ_PASS" ] || [ -z "$RABBITMQ_HOST" ] || [ -z "$MY_TG_ID" ]; then
@@ -17,7 +18,7 @@ check_vars:
 
 pull:
   stage: pull
-  when: manual
+  when: on_success
   script:
     - git config --global --add safe.directory /usr/migrebot
     - cd /usr/migrebot
@@ -25,20 +26,20 @@ pull:
 
 build:
   stage: build
-  when: manual
+  when: on_success
   script:
     - cd /usr/migrebot
     - docker compose up -d
 
 copy_db:
   stage: copy_db
-  when: manual
-  rules:
-    - exists:
-        - '/usr/migrebot/db/sql_app.db'
-      when: never
+  when: on_success
   script:
-    - cp /usr/migraine_stat/db/sql_app.db /usr/migrebot/db
+    - if [ ! -f "/usr/migrebot/db/sql_app.db" ]; then
+        cp /usr/migraine_stat/db/sql_app.db /usr/migrebot/db;
+      else
+        echo "The file already exists, skipping copy.";
+      fi
 
 test:
   stage: test
