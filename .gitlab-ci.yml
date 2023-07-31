@@ -1,6 +1,6 @@
 workflow:
   rules:
-    - if: "${API_TOKEN} == null || ${RABBITMQ_USER} == null || ${RABBITMQ_PASS} == null || ${RABBITMQ_HOST} == null || ${MY_TG_ID} == null"
+    - if: ($API_TOKEN == null || $RABBITMQ_USER == null || $RABBITMQ_PASS == null || $RABBITMQ_HOST == null || $MY_TG_ID == null)
   script:
     - echo "Some of the env vars is null"
     - exit 1
