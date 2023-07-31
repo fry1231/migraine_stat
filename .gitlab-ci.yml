@@ -10,7 +10,7 @@ stages:
   - build
   - copy_db
   - test
-  - deploy
+  - run
 
 pull:
   stage: pull
