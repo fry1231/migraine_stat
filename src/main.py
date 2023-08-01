@@ -13,21 +13,6 @@ from src.routes import regular_report
 from src.utils import notify_me
 import traceback
 from aio_pika import Message, connect
-
-
-@dp.message_handler(commands=['launch_notif'])
-async def launch_notif(message: types.Message):
-    user_id = message.from_user.id
-    logging.info(f'Launching notification request from user {user_id}')
-    await notify_me(f'Launching notification request from user {user_id}')
-    if user_id == 358774905:
-        try:
-            await notify_users()
-        except Exception:
-            await notify_me(f'Exception while regular notification:\n{traceback.format_exc()}')
-
-
-# Not to interfere with the launch_notif
 from src.routes import *
 
 
@@ -37,39 +22,44 @@ async def notify_users():
     Ask if there was a headache during missing period, defined in notify_every attr
     Notify daily about new users
     """
-    logging.info('Started notification task')
-    users: list[models.User] = await crud.get_users()
+    all_users: list[models.User] = await crud.get_users()
+    deleted_users: list[models.User] = []
     t = datetime.today()
     time_notified = datetime.now()
     users_id_w_notif = []
     n_notifyable_users = 0
-    for user in users:
+    for user in all_users:
         notification_period_days = user.notify_every
-        if notification_period_days == -1:  # If user did not specify it yet
+        if notification_period_days == -1:   # If user did not specify it yet
             continue
         n_notifyable_users += 1
-        notification_period_minutes = notification_period_days * 24 * 60
-        dt = (t - user.last_notified).total_seconds() / 60
-        if dt >= notification_period_minutes - 15:
+
+        notification_period_minutes = notification_period_days * 24 * 60  # Notification period in minutes
+        dt = (t - user.last_notified).total_seconds() / 60   # How many minutes since last notification
+        if dt >= notification_period_minutes - 15:   # Notify only if 1 day passed
             try:
+                # Ask user about pains during the day(s)
                 await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
                 users_id_w_notif.append(user.telegram_id)
             except (BotBlocked, UserDeactivated):
                 if await crud.delete_user(user.telegram_id):
-                    await notify_me(f'User {user.telegram_id} ({user.user_name} / {user.first_name}) deleted')
+                    deleted_users.append(user)
                 else:
                     await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')
             except NetworkError:
                 await notify_me(f'User {user.telegram_id} Network Error')
         await asyncio.sleep(1/30)   # As Telegram does not allow more than 30 messages/sec
+
+    # Get notification text about new users during the day
     new_users_text = await notif_of_new_users()
     await notify_me(new_users_text)
     await notify_me(
         f'{len(users_id_w_notif)} users notified\n'
         f'Will change last notified on {time_notified}'
     )
+    # Change 'last_notified' for notified users
     try:
-        await crud.batch_change_last_notified(users_id_w_notif)
+        await crud.batch_change_last_notified(users_id_w_notif, time_notified)
     except Exception:
         await notify_me('Error while executing batch_change_last_notified, fallback to the old version')
         await notify_me(traceback.format_exc())
@@ -77,25 +67,38 @@ async def notify_users():
             await crud.change_last_notified(user_id, time_notified)
 
     # Count users with at least one added row in Pains table
-    active_users = set()
+    all_active_users = set()
     pains: list[models.PainCase] = await crud.get_pains()
     for pain in pains:
-        active_users.add(pain.owner_id)
+        all_active_users.add(pain.owner_id)
 
-    n_active = len(active_users.intersection(users_id_w_notif))
-    n_deleted = len(active_users - set(users_id_w_notif))
+    # Some statistics from the beginning
+    all_users_id = set([user.telegram_id for user in all_users])
+    n_active_now = len(all_active_users.intersection(all_users_id))
+    n_deleted_after_active = len(all_active_users - all_users_id)
+
+    # Who deleted?
+    text_deleted = ''
+    for user in deleted_users:
+        username = '' if user.user_name is None else 't.me/' + user.user_name
+        active = f'active' if user.telegram_id in all_active_users else ''
+        if active != '':    # How many rows in db from that user
+            n_pains = sum([1 for pain in pains if pain.owner_id == user.telegram_id])
+            active += f' ({n_pains} entries)'
+        text_deleted += f'{user.first_name} {username} {active} user deleted\n'
 
     ex_time = (datetime.now() - time_notified).total_seconds()
     await notify_me(
-        f'{n_notifyable_users}/{len(users)} users with notification\n'
-        f'{n_active} active and {n_deleted} deleted after being active users\n'
+        f'{n_notifyable_users}/{len(all_users)} users with notification\n'
+        f'{n_active_now} active and {n_deleted_after_active} overall deleted after being active users\n'
+        f'{text_deleted}'
         f'{len(pains)} rows in Pains table\n\n'
         f'Execution time = {ex_time // 60} min {ex_time % 60} sec'
     )
 
 
 async def scheduler():
-    aioschedule.every().day.at("21:00").do(notify_users)
+    aioschedule.every().day.at("19:00").do(notify_users)  # UTC tz in docker
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(60)

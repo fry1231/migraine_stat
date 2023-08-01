@@ -4,6 +4,11 @@ services:
   migrebot:
     container_name: migrebot
     restart: always
+    depends_on:
+      rabbitmq:
+        condition: service_started
+#      db:
+#        condition: service_healthy
     build: ./
     command: python -m src.main
     environment:
@@ -20,8 +25,23 @@ services:
     image: rabbitmq:3.12-alpine
     restart: always
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?err}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:?err}
+
+#  db:
+#    container_name: migrain_db
+#    image: postgres:15-alpine
+#    user: postgres
+#    restart: always
+#    volumes:
+#      - ./db/postgres_data:/var/lib/postgresql/data
+#    environment:
+#      - POSTGRES_USER=${POSTGRES_USER:?err}
+#      - POSTGRES_PASSWORD=${POSTGRES_PASS:?err}
+#      - POSTGRES_DB=db_prod
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+#      interval: 10s
+#      timeout: 10s
+#      retries: 10
+#      start_period: 30s
