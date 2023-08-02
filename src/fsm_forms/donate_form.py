@@ -66,17 +66,16 @@ async def donate_amount(message: types.Message, state: FSMContext):
     user_desc = await get_user_desc(message)
     await notify_me(f'{user_desc} donate amount {amount}')
     await bot.send_invoice(message.chat.id,
-                           # title='Жертва богу головной боли',
-                           title='Поддержка',
-                           # description='Пойдёт на оплату хостинга, ибупрофена и корма для кошки (на картинке)',
-                           description='Пойдёт на оплату хостинга и ибупрофена',
+                           title='Жертва богу головной боли',
+                           description='Пойдёт на оплату хостинга, ибупрофена и корма для кошки (на картинке)',
                            provider_token=os.getenv('PAYMENTS_TOKEN_RU'),
                            currency='rub',
                            photo_url='https://telegra.ph/file/c6460e669b3f9067966b2.jpg',
                            photo_height=512,
                            photo_width=512,
                            prices=[types.LabeledPrice(label='Donate', amount=int(amount*100))],
-                           payload=f'{user_desc}%{amount}')
+                           payload=f'{user_desc}%{amount}',
+                           reply_markup=types.ReplyKeyboardRemove())
     await state.finish()
 
 
@@ -90,4 +89,5 @@ async def got_payment(message: types.Message):
     user_desc = await get_user_desc(message)
     await notify_me(f'{user_desc} donated!')
     await bot.send_message(message.chat.id,
-                           'Ура, спасибо!')
+                           'Ура, спасибо!',
+                           reply_markup=types.ReplyKeyboardRemove())

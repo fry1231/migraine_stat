@@ -32,6 +32,7 @@ async def notify_users():
     time_notified = datetime.now()
     users_id_w_notif = []
     n_notifyable_users = 0
+    # Message to notify me about notification process
     process_message = await bot.send_message(chat_id=my_tg_id, text='Started notification task...')
     for i, user in enumerate(all_users):
         notification_period_days = user.notify_every
@@ -53,7 +54,7 @@ async def notify_users():
                     await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')
             except NetworkError:
                 await notify_me(f'User {user.telegram_id} Network Error')
-        if i % 10 == 0:
+        if i % 100 == 0:
             await bot.edit_message_text(chat_id=my_tg_id, message_id=process_message.message_id,
                                         text=f'{i} users processed')
         await asyncio.sleep(0.1)   # As Telegram does not allow more than 30 messages/sec
@@ -61,22 +62,16 @@ async def notify_users():
     # Get notification text about users joined during the day
     text = await notif_of_new_users() + '\n\n'
     text += f'{len(users_id_w_notif)} users notified\n' \
-            f'Will change last notified on {time_notified}\n\n'
+            f'Will change last notified on {time_notified:%d.%m.%Y %H:%M:%S} UTC\n\n'
     await bot.edit_message_text(chat_id=my_tg_id, message_id=process_message.message_id,
                                 text=text)
 
     # Change 'last_notified' for notified users
-    try:
-        await crud.batch_change_last_notified(users_id_w_notif, time_notified)
-    except Exception:
-        await notify_me('Error while executing batch_change_last_notified, fallback to the old version')
-        await notify_me(traceback.format_exc())
-        for user_id in users_id_w_notif:
-            await crud.change_last_notified(user_id, time_notified)
+    await crud.batch_change_last_notified(users_id_w_notif, time_notified)
 
-    # Count users with at least one added row in Pains table
-    all_active_users = set()
+    # Count users with at least one added row in Pains table - they are active_users
     pains: list[int] = await crud.get_user_ids_pains()
+    all_active_users = set(pains)
 
     # Some statistics from the beginning
     all_users_id = set([user.telegram_id for user in all_users])
@@ -93,10 +88,11 @@ async def notify_users():
             active += f' ({n_pains} entries)'
         text_deleted += f'{user.first_name} {username} {active} deleted\n'
         await asyncio.sleep(0.001)
+    text_deleted += '\n'
 
     ex_time = (datetime.now() - time_notified).total_seconds()
     text += f'{n_notifyable_users}/{len(all_users)} users with notification\n' \
-            f'{n_active_now} active and {n_deleted_after_active} overall deleted after being active users\n' \
+            f'{n_active_now} active and {n_deleted_after_active} overall deleted after being active users\n\n' \
             f'{text_deleted}' \
             f'{len(pains)} rows in Pains table\n\n' \
             f'Execution time = {ex_time // 60:.0f} min {ex_time % 60:.0f} sec'

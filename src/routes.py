@@ -5,6 +5,7 @@ import src.keyboards as kb
 from src.bot import dp, bot
 from src.utils import notify_me, write_xlsx
 from src.messages_handler import postpone_new_user_notif
+from src.settings import MY_TG_ID
 from db.models import NewUser
 import traceback
 import logging
@@ -230,7 +231,7 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
 @dp.message_handler(commands=['download_db'])
 async def get_db(message: types.Message):
     user_id = message.from_user.id
-    if user_id == 358774905:
+    if user_id == MY_TG_ID:
         db = types.InputFile('db/db_file/sql_app.db')
         await bot.send_document(message.from_user.id, db)
 
@@ -271,7 +272,7 @@ async def regular_report(user_id: int, missing_days: int):
 @dp.message_handler(commands=['execute'])
 async def execute_raw(message: types.Message):
     user_id = message.from_user.id
-    if user_id == 358774905:
+    if user_id == MY_TG_ID:
         text = message.text.replace('/execute', '').strip()
         results = await crud.execute_raw(text)
         output = ''
@@ -302,7 +303,7 @@ async def handle_other(message: types.Message):
     #                     f'{message.text}')
 
     # If I want to reply to someone
-    elif message.from_user.id == 358774905:
+    elif message.from_user.id == MY_TG_ID:
         if message.reply_to_message is not None:
             message_with_credentials: types.Message = message.reply_to_message
             splitted = message_with_credentials.text.split('\n')

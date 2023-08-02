@@ -2,18 +2,22 @@
 # import numpy as np
 # import six
 from src.bot import bot
+from src.settings import MY_TG_ID
 from xlsxwriter import Workbook
 import io
 from os import getenv
 
 
 async def notify_me(text):
-    my_tg_id = int(getenv('MY_TG_ID'))
+    """
+    Notify owner with 'text'
+    Splits the message if necessary, as telegram limits messages to 4096 letters
+    """
     if len(text) > 4096:
         for pos in range(0, len(text), 4096):
-            await bot.send_message(my_tg_id, text[pos:pos + 4096])
+            await bot.send_message(MY_TG_ID, text[pos:pos + 4096])
     else:
-        await bot.send_message(my_tg_id, text)
+        await bot.send_message(MY_TG_ID, text)
 
 
 # def render_mpl_table(data, col_width=3.0, row_height=0.625, font_size=14,

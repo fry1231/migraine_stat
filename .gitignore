@@ -2,6 +2,7 @@
 *.db
 try.py
 *.sql
+*.sqlite
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
