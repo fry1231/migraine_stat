@@ -227,12 +227,6 @@ async def get_db(message: types.Message):
         await bot.send_document(message.from_user.id, db)
 
 
-@dp.message_handler(commands=['write_polina'])
-async def write_polina(message: types.Message):
-    text = message.text.replace('/write_polina', '').strip()
-    await bot.send_message(956743055, text)
-
-
 async def regular_report(user_id: int, missing_days: int):
     """
     Notify about all new users, added during the previous day

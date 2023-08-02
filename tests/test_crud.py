@@ -14,10 +14,10 @@ from db import crud
 @pytest.fixture(scope="session", autouse=True)
 def resource():
     """
-    Force crud operations to perform on a test database "sqlite:///db/test.db"
+    Force crud operations to perform on a test database "sqlite:///db/db_file/test.db"
     Creates all necessary tables at the beginning of the testing and drops them in the end
     """
-    assert crud.use_engine.url.database == 'db/test.db'
+    assert crud.use_engine.url.database == 'db/db_file/test.db'
     Base.metadata.drop_all(test_engine)
     Base.metadata.create_all(test_engine)
     yield
