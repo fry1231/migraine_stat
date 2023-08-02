@@ -18,7 +18,7 @@ check_vars:
 
 pull:
   stage: pull
-  when: manual
+  when: on_success
   needs:
     - check_vars
   script:
@@ -28,7 +28,7 @@ pull:
 
 build:
   stage: build
-  when: manual
+  when: on_success
   needs:
     - pull
   script:
