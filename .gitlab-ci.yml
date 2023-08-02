@@ -8,16 +8,18 @@ stages:
 
 check_vars:
   stage: check_vars
+  allow_failure: false
   when: manual
   script:
     - |
-      if [ -z "$API_TOKEN" ] || [ -z "$RABBITMQ_USER" ] || [ -z "$RABBITMQ_PASS" ] || [ -z "$RABBITMQ_HOST" ] || [ -z "$MY_TG_ID" ] || [ -z "$POSTGRES_USER" ] || [ -z "$POSTGRES_PASS" ] || [ -z "$PAYMENTS_TOKEN" ]; then
+      if [ -z "$API_TOKEN" ] || [ -z "$RABBITMQ_USER" ] || [ -z "$RABBITMQ_PASS" ] || [ -z "$RABBITMQ_HOST" ] || [ -z "$MY_TG_ID" ] || [ -z "$POSTGRES_USER" ] || [ -z "$POSTGRES_PASS" ] || [ -z "$PAYMENTS_TOKEN_RU" ]; then
         echo "Error: Missing one or more required environment variables."
         exit 1
       fi
 
 pull:
   stage: pull
+  allow_failure: false
   when: manual
   script:
     - git config --global --add safe.directory /usr/migrebot
@@ -26,6 +28,7 @@ pull:
 
 build:
   stage: build
+  allow_failure: false
   when: manual
   script:
     - cd /usr/migrebot
