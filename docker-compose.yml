@@ -19,7 +19,7 @@ services:
       - MY_TG_ID=${MY_TG_ID:?err}
       - PAYMENTS_TOKEN=${PAYMENTS_TOKEN_RU:?err}
     volumes:
-      - ./db:/usr/migrebot/db
+      - migraine_db:/usr/migrebot/db
 
   rabbitmq:
     container_name: rabbitmq
@@ -29,6 +29,8 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?err}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:?err}
 
+volumes:
+  migraine_db:
 #  db:
 #    container_name: migrain_db
 #    image: postgres:15-alpine

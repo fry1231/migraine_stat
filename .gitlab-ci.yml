@@ -21,6 +21,8 @@ pull:
   stage: pull
   allow_failure: false
   when: manual
+  needs:
+    - check_vars
   script:
     - git config --global --add safe.directory /usr/migrebot
     - cd /usr/migrebot
@@ -30,6 +32,8 @@ build:
   stage: build
   allow_failure: false
   when: manual
+  needs:
+    - pull
   script:
     - cd /usr/migrebot
     - docker compose build
