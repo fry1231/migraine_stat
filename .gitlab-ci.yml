@@ -8,7 +8,6 @@ stages:
 
 check_vars:
   stage: check_vars
-  allow_failure: false
   when: manual
   script:
     - |
@@ -19,7 +18,6 @@ check_vars:
 
 pull:
   stage: pull
-  allow_failure: false
   when: manual
   needs:
     - check_vars
@@ -30,7 +28,6 @@ pull:
 
 build:
   stage: build
-  allow_failure: false
   when: manual
   needs:
     - pull
