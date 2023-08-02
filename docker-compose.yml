@@ -19,7 +19,7 @@ services:
       - MY_TG_ID=${MY_TG_ID:?err}
       - PAYMENTS_TOKEN=${PAYMENTS_TOKEN_RU:?err}
     volumes:
-      - migraine_db:/usr/migrebot/db
+      - migraine_db:/usr/migrebot/db/db_file
 
   rabbitmq:
     container_name: rabbitmq

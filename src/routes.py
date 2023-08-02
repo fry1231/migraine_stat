@@ -223,7 +223,7 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
 async def get_db(message: types.Message):
     user_id = message.from_user.id
     if user_id == 358774905:
-        db = types.InputFile('db/sql_app.db')
+        db = types.InputFile('db/db_file/sql_app.db')
         await bot.send_document(message.from_user.id, db)
 
 

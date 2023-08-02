@@ -38,16 +38,6 @@ build:
     - cd /usr/migrebot
     - docker compose build
 
-copy_db:
-  stage: copy_db
-  when: manual
-  script:
-    - if [ ! -f "/usr/migrebot/db/sql_app.db" ]; then
-        cp /usr/migraine_stat/db/sql_app.db /usr/migrebot/db;
-      else
-        echo "The file already exists, skipping copy.";
-      fi
-
 test:
   stage: test
   when: manual

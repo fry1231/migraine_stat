@@ -5,8 +5,8 @@ import logging
 from src.settings import IS_TESTING
 
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///db/sql_app.db"
-TEST_DATABASE_URL = 'sqlite:///db/test.db'
+SQLALCHEMY_DATABASE_URL = "sqlite:///db/db_file/sql_app.db"
+TEST_DATABASE_URL = 'sqlite:///db/db_file/test.db'
 # SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 
 engine = create_engine(
