@@ -90,7 +90,7 @@ async def reschedule_callback(callback_query: types.CallbackQuery):
             '7': ' дней',
             '31': ' день'
         }
-        await bot.send_message(user_id, f'Установлено оповещение раз в {n_days} {temp[period_text]}')
+        await bot.send_message(user_id, f'Установлено оповещение раз в {n_days}{temp[period_text]}')
 
 
 @dp.message_handler(commands=['check_drugs'])
