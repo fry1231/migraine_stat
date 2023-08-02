@@ -17,6 +17,7 @@ services:
       - RABBITMQ_PASS=${RABBITMQ_PASS:?err}
       - RABBITMQ_HOST=${RABBITMQ_HOST:?err}
       - MY_TG_ID=${MY_TG_ID:?err}
+      - PAYMENTS_TOKEN=${PAYMENTS_TOKEN_RU:?err}
     volumes:
       - ./db:/usr/migrebot/db
 

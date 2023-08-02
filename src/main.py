@@ -48,7 +48,7 @@ async def notify_users():
                     await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')
             except NetworkError:
                 await notify_me(f'User {user.telegram_id} Network Error')
-        await asyncio.sleep(1/30)   # As Telegram does not allow more than 30 messages/sec
+        await asyncio.sleep(0.1)   # As Telegram does not allow more than 30 messages/sec
 
     # Get notification text about new users during the day
     new_users_text = await notif_of_new_users()
@@ -68,9 +68,7 @@ async def notify_users():
 
     # Count users with at least one added row in Pains table
     all_active_users = set()
-    pains: list[models.PainCase] = await crud.get_pains()
-    for pain in pains:
-        all_active_users.add(pain.owner_id)
+    pains: list[int] = await crud.get_user_ids_pains()
 
     # Some statistics from the beginning
     all_users_id = set([user.telegram_id for user in all_users])
@@ -85,7 +83,8 @@ async def notify_users():
         if active != '':    # How many rows in db from that user
             n_pains = sum([1 for pain in pains if pain.owner_id == user.telegram_id])
             active += f' ({n_pains} entries)'
-        text_deleted += f'{user.first_name} {username} {active} user deleted\n'
+        text_deleted += f'{user.first_name} {username} {active} deleted\n'
+        await asyncio.sleep(0.001)
 
     ex_time = (datetime.now() - time_notified).total_seconds()
     await notify_me(

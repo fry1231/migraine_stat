@@ -148,7 +148,7 @@ def get_user_pains(user_id: int,
 
 
 @to_async
-def get_pains():
+def get_user_ids_pains():
     with get_session() as session:
         return session.query(PainCase).all()
 

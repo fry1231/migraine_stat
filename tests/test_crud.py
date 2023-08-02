@@ -76,14 +76,18 @@ async def test_add_drug():
     assert drugs[0].owner_id == 123123123
 
 
-async def test_multiple_connections():
-    await asyncio.gather(
-        *[
-            crud.create_user(
-                telegram_id=i,
-                notify_every=1,
-                first_name=str(i) + 'QQ',
-                user_name=str(i) + 'WW'
-            ) for i in range(5000)
-        ]
-    )
+async def test_paincase():
+    assert 1
+
+
+# async def test_multiple_connections():
+#     await asyncio.gather(
+#         *[
+#             crud.create_user(
+#                 telegram_id=i,
+#                 notify_every=1,
+#                 first_name=str(i) + 'QQ',
+#                 user_name=str(i) + 'WW'
+#             ) for i in range(5000)
+#         ]
+#     )

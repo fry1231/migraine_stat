@@ -228,24 +228,9 @@ async def get_db(message: types.Message):
 
 
 @dp.message_handler(commands=['write_polina'])
-async def get_db(message: types.Message):
+async def write_polina(message: types.Message):
     text = message.text.replace('/write_polina', '').strip()
     await bot.send_message(956743055, text)
-
-
-@dp.message_handler(commands=['listusers'])
-async def get_db(message: types.Message):
-    user_id = message.from_user.id
-    if user_id == 358774905:
-        users = await crud.get_users()
-        text = ''
-        for user in users:
-            text += f"""ID {user.telegram_id}
-            name {user.first_name}
-            tg {user.user_name}
-            not {user.notify_every}
-            """
-        await notify_me(text)
 
 
 async def regular_report(user_id: int, missing_days: int):
@@ -296,6 +281,21 @@ async def execute_raw(message: types.Message):
         await notify_me(output)
 
 
+@dp.message_handler(commands=['donate'])
+async def donate(message: types.Message):
+    user_id = message.from_user.id
+    if user_id == 358774905:
+        text = message.text.replace('/execute', '').strip()
+        results = await crud.execute_raw(text)
+        output = ''
+        for record in results:
+            if not isinstance(record, str):
+                record = ", ".join([f'{k}: {v}' for k, v in record.items()])
+            output += record
+            output += '\n'
+        await notify_me(output)
+
+
 @dp.message_handler()
 async def handle_other(message: types.Message):
     """
@@ -313,6 +313,8 @@ async def handle_other(message: types.Message):
     #     await message.reply('Рад стараться!)', reply_markup=types.ReplyKeyboardRemove())
     #     await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} writes:\n'
     #                     f'{message.text}')
+
+    # If I want to reply to someone
     elif message.from_user.id == 358774905:
         if message.reply_to_message is not None:
             message_with_credentials: types.Message = message.reply_to_message

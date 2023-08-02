@@ -3,7 +3,6 @@ from aiogram.types import ReplyKeyboardRemove, \
     InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import date, timedelta
 from db import crud
-import asyncio
 
 
 drug_amount_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -11,6 +10,13 @@ drug_amount_kb.row('50', '100')
 drug_amount_kb.row('200', '400', '800')
 drug_amount_kb.row('1000', '1200', '2000')
 drug_amount_kb.add('Cancel')
+
+
+donate_amount_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+donate_amount_kb.row('100', '300')
+donate_amount_kb.row('500', '1000')
+donate_amount_kb.add('Cancel')
+
 
 yes_no_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 yes_no_kb.row('Да', 'Нет')
