@@ -281,21 +281,6 @@ async def execute_raw(message: types.Message):
         await notify_me(output)
 
 
-@dp.message_handler(commands=['donate'])
-async def donate(message: types.Message):
-    user_id = message.from_user.id
-    if user_id == 358774905:
-        text = message.text.replace('/execute', '').strip()
-        results = await crud.execute_raw(text)
-        output = ''
-        for record in results:
-            if not isinstance(record, str):
-                record = ", ".join([f'{k}: {v}' for k, v in record.items()])
-            output += record
-            output += '\n'
-        await notify_me(output)
-
-
 @dp.message_handler()
 async def handle_other(message: types.Message):
     """

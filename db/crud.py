@@ -150,7 +150,7 @@ def get_user_pains(user_id: int,
 @to_async
 def get_user_ids_pains():
     with get_session() as session:
-        return session.query(PainCase).all()
+        return session.query(PainCase.owner_id).all()
 
 
 # Druguses ====================================

@@ -14,6 +14,10 @@ from src.utils import notify_me
 import traceback
 from aio_pika import Message, connect
 from src.routes import *
+import os
+
+
+my_tg_id = int(os.getenv('MY_TG_ID'))
 
 
 # Schedule notification task
@@ -28,7 +32,8 @@ async def notify_users():
     time_notified = datetime.now()
     users_id_w_notif = []
     n_notifyable_users = 0
-    for user in all_users:
+    process_message = await bot.send_message(chat_id=my_tg_id, text='Started notification task...')
+    for i, user in enumerate(all_users):
         notification_period_days = user.notify_every
         if notification_period_days == -1:   # If user did not specify it yet
             continue
@@ -48,15 +53,18 @@ async def notify_users():
                     await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')
             except NetworkError:
                 await notify_me(f'User {user.telegram_id} Network Error')
+        if i % 10 == 0:
+            await bot.edit_message_text(chat_id=my_tg_id, message_id=process_message.message_id,
+                                        text=f'{i} users processed')
         await asyncio.sleep(0.1)   # As Telegram does not allow more than 30 messages/sec
 
-    # Get notification text about new users during the day
-    new_users_text = await notif_of_new_users()
-    await notify_me(new_users_text)
-    await notify_me(
-        f'{len(users_id_w_notif)} users notified\n'
-        f'Will change last notified on {time_notified}'
-    )
+    # Get notification text about users joined during the day
+    text = await notif_of_new_users() + '\n\n'
+    text += f'{len(users_id_w_notif)} users notified\n' \
+            f'Will change last notified on {time_notified}\n\n'
+    await bot.edit_message_text(chat_id=my_tg_id, message_id=process_message.message_id,
+                                text=text)
+
     # Change 'last_notified' for notified users
     try:
         await crud.batch_change_last_notified(users_id_w_notif, time_notified)
@@ -81,19 +89,19 @@ async def notify_users():
         username = '' if user.user_name is None else 't.me/' + user.user_name
         active = f'active' if user.telegram_id in all_active_users else ''
         if active != '':    # How many rows in db from that user
-            n_pains = sum([1 for pain in pains if pain.owner_id == user.telegram_id])
+            n_pains = pains.count(user.telegram_id)
             active += f' ({n_pains} entries)'
         text_deleted += f'{user.first_name} {username} {active} deleted\n'
         await asyncio.sleep(0.001)
 
     ex_time = (datetime.now() - time_notified).total_seconds()
-    await notify_me(
-        f'{n_notifyable_users}/{len(all_users)} users with notification\n'
-        f'{n_active_now} active and {n_deleted_after_active} overall deleted after being active users\n'
-        f'{text_deleted}'
-        f'{len(pains)} rows in Pains table\n\n'
-        f'Execution time = {ex_time // 60} min {ex_time % 60} sec'
-    )
+    text += f'{n_notifyable_users}/{len(all_users)} users with notification\n' \
+            f'{n_active_now} active and {n_deleted_after_active} overall deleted after being active users\n' \
+            f'{text_deleted}' \
+            f'{len(pains)} rows in Pains table\n\n' \
+            f'Execution time = {ex_time // 60:.0f} min {ex_time % 60:.0f} sec'
+    await bot.edit_message_text(chat_id=my_tg_id, message_id=process_message.message_id,
+                                text=text)
 
 
 async def scheduler():
