@@ -211,6 +211,7 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
                         temp_dict['Лекарство'] = sub_event.drugname
                         temp_dict['Кол-во'] = sub_event.amount
                         temp_dict['Примечания'] = None
+                        pains_statistics.append(temp_dict)
 
         # Period text definition
         period_text = ''
