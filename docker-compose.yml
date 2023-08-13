@@ -16,6 +16,8 @@ services:
       - RABBITMQ_USER=${RABBITMQ_USER:?err}
       - RABBITMQ_PASS=${RABBITMQ_PASS:?err}
       - RABBITMQ_HOST=${RABBITMQ_HOST:?err}
+      - POSTGRES_USER=${POSTGRES_USER:?err}
+      - POSTGRES_PASSWORD=${POSTGRES_PASS:?err}
       - MY_TG_ID=${MY_TG_ID:?err}
       - PAYMENTS_TOKEN_RU=${PAYMENTS_TOKEN_RU:?err}
 
