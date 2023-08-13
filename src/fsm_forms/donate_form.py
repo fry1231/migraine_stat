@@ -51,7 +51,8 @@ async def donate_entry(message: types.Message):
     await Donation.amount.set()
     await message.reply("Спасибо, что хотите меня поддержать!\n"
                         "Напишите, пожалуйста, на какую сумму?\n"
-                        "(можно выбрать или написать вручную)",
+                        "Можно выбрать или написать вручную\n"
+                        "(Минимум для платёжной системы - 60 рублей)",
                         reply_markup=kb.donate_amount_kb)
 
 
@@ -59,6 +60,13 @@ async def donate_entry(message: types.Message):
 @dp.message_handler(lambda message: not message.text.strip().replace(',', '.').isdigit(), state=Donation.amount)
 async def check_amount(message: types.Message):
     return await message.reply("В сообщении должно быть число:", reply_markup=kb.donate_amount_kb)
+
+
+@dp.message_handler(lambda message: message.text.strip().replace(',', '.').isdigit() and
+                                    float(message.text.strip().replace(',', '.')) < 60, state=Donation.amount)
+async def check_amount2(message: types.Message):
+    return await message.reply("К сожалению, платёжная система не даёт выставлять счета меньше 60 рублей :(",
+                               reply_markup=kb.donate_amount_kb)
 
 
 @dp.message_handler(state=Donation.amount)

@@ -1,5 +1,4 @@
 import logging
-import datetime
 from aiogram import executor
 from aiogram.utils.exceptions import BotBlocked, UserDeactivated, NetworkError
 import asyncio
@@ -15,6 +14,7 @@ import traceback
 from aio_pika import Message, connect
 from src.routes import *
 import os
+import datetime
 
 
 my_tg_id = int(os.getenv('MY_TG_ID'))

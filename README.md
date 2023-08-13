@@ -78,7 +78,7 @@ For now, bot support only text for such messages.
 Here are some of the planned features and improvements for the bot:
 
    - Support for multiple languages
-   - Switching to Postgres, Aiogram 3
+   - Switching to ~~Postgres~~, Aiogram 3
    - Advanced analytic reports based on user data
    - Enhancing data visualization with graphs and charts for better insights
    - Notification of medication overuse

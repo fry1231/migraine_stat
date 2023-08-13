@@ -353,3 +353,4 @@ async def handle_other(message: types.Message):
                             f'writes:\n{message.text}\n\n'
                             f'user_id={message.from_user.id}\n'
                             f'message_id={message.message_id}')
+            await notify_me(traceback.format_exc())
