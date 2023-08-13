@@ -3,6 +3,8 @@
 try.py
 *.sql
 *.sqlite
+transfer.py
+result.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -138,4 +140,3 @@ dmypy.json
 .idea/misc.xml
 .idea/modules.xml
 .idea/vcs.xml
-/db/alembic/versions/

@@ -11,7 +11,7 @@ from datetime import date, datetime, timedelta
 
 
 class ReportDrugUseForm(StatesGroup):
-    datetime = State()
+    date = State()
     drugname = State()
     amount = State()
     # owner_id
@@ -53,23 +53,23 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(commands=['druguse'])
-async def add_drug_entry(message: types.Message):
+async def du_add_drug_entry(message: types.Message):
     """Conversation entrypoint"""
     # Set state
-    await ReportDrugUseForm.datetime.set()
+    await ReportDrugUseForm.date.set()
     await message.reply("Дата приёма (в формате dd.mm.yyyy):", reply_markup=kb.get_date_kb())
 
 
-@dp.message_handler(lambda message: not is_date_valid(message.text), state=ReportDrugUseForm.datetime)
-async def process_datetime_invalid(message: types.Message):
+@dp.message_handler(lambda message: not is_date_valid(message.text), state=ReportDrugUseForm.date)
+async def du_process_datetime_invalid(message: types.Message):
     """
-    If datetime is invalid
+    If date is invalid
     """
     return await message.reply("Неверный формат даты. Попробуй ещё раз.", reply_markup=kb.get_date_kb())
 
 
-@dp.message_handler(state=ReportDrugUseForm.datetime)
-async def process_datetime(message: types.Message, state: FSMContext):
+@dp.message_handler(state=ReportDrugUseForm.date)
+async def du_process_datetime(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         text = message.text.strip()
         assoc_dict = {
@@ -78,51 +78,47 @@ async def process_datetime(message: types.Message, state: FSMContext):
             'Позавчера': date.today() - timedelta(days=2),
         }
         if text in ['Сегодня', 'Вчера', 'Позавчера']:
-            data['datetime'] = assoc_dict[text]
+            data['date'] = assoc_dict[text]
         else:
-            data['datetime'] = datetime.strptime(text, '%d.%m.%Y')
-    reply_markup = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
-    reply_markup = reply_markup[0]
+            data['date'] = datetime.strptime(text, '%d.%m.%Y')
+    reply_markup, _ = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
     await ReportDrugUseForm.next()
     await message.reply("Что принимали?", reply_markup=reply_markup)
 
 
 @dp.message_handler(lambda message: message.text.strip() == '', state=ReportDrugUseForm.drugname)
-async def process_drugname_invalid(message: types.Message):
-    reply_markup = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
-    reply_markup = reply_markup[0]
+async def du_process_drugname_invalid(message: types.Message):
+    reply_markup, _ = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
     return await message.reply("Сообщение не может быть пустым, повторите",
                                reply_markup=reply_markup)
 
 
 @dp.message_handler(state=ReportDrugUseForm.drugname)
-async def process_drugname(message: types.Message, state: FSMContext):
+async def du_process_drugname(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['drugname'] = message.text.strip()
     await ReportDrugUseForm.next()
     await message.reply("Количество принятого?", reply_markup=kb.drug_amount_kb)
 
 
-# Check daily_max. Gotta be digit
-@dp.message_handler(lambda message: not message.text.isdigit(), state=ReportDrugUseForm.amount)
-async def process_amount_invalid(message: types.Message):
-    """
-    If amount is invalid
-    """
-    return await message.reply("Количество должно быть числом, повторите ввод:", reply_markup=kb.drug_amount_kb)
+# Check daily_max. Should be digit
+# @dp.message_handler(lambda message: not message.text.isdigit(), state=ReportDrugUseForm.amount)
+# async def process_amount_invalid(message: types.Message):
+#     """
+#     If amount is invalid
+#     """
+#     return await message.reply("Количество должно быть числом, повторите ввод:", reply_markup=kb.drug_amount_kb)
 
 
-@dp.message_handler(lambda message: message.text.isdigit(), state=ReportDrugUseForm.amount)
-async def process_amount(message: types.Message, state: FSMContext):
+@dp.message_handler(state=ReportDrugUseForm.amount)
+async def du_process_amount(message: types.Message, state: FSMContext):
     # Update state and data
     async with state.proxy() as data:
-        data['amount'] = int(message.text.strip())
-    await crud.report_druguse(when=data['datetime'],
+        data['amount'] = message.text.strip()
+    await crud.report_druguse(when=data['date'],
                               amount=data['amount'],
-                              who=message.from_user.id,
-                              drugname=data['drugname'],
-                              # paincase_id=
-                              )
+                              owner_id=message.from_user.id,
+                              drugname=data['drugname'])
     await bot.send_message(message.chat.id, "Успешно добавлено!", reply_markup=types.ReplyKeyboardRemove())
     # Finish conversation
     await state.finish()

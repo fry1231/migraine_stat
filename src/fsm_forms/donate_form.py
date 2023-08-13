@@ -9,6 +9,7 @@ from src.bot import dp, bot
 from src.fsm_forms import keyboards as kb
 from db import crud
 from src.utils import notify_me
+from src.settings import PAYMENTS_TOKEN_RU
 import os
 
 
@@ -68,14 +69,13 @@ async def donate_amount(message: types.Message, state: FSMContext):
     await bot.send_invoice(message.chat.id,
                            title='Жертва богу головной боли',
                            description='Пойдёт на оплату хостинга, ибупрофена и корма для кошки (на картинке)',
-                           provider_token=os.getenv('PAYMENTS_TOKEN_RU'),
+                           provider_token=PAYMENTS_TOKEN_RU,
                            currency='rub',
                            photo_url='https://telegra.ph/file/c6460e669b3f9067966b2.jpg',
                            photo_height=512,
                            photo_width=512,
                            prices=[types.LabeledPrice(label='Donate', amount=int(amount*100))],
-                           payload=f'{user_desc}%{amount}',
-                           reply_markup=types.ReplyKeyboardRemove())
+                           payload=f'{user_desc}%{amount}')
     await state.finish()
 
 
@@ -87,7 +87,7 @@ async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery)
 @dp.message_handler(content_types=ContentTypes.SUCCESSFUL_PAYMENT)
 async def got_payment(message: types.Message):
     user_desc = await get_user_desc(message)
-    await notify_me(f'{user_desc} donated!')
+    await notify_me(f'{user_desc} donated')
     await bot.send_message(message.chat.id,
                            'Ура, спасибо!',
                            reply_markup=types.ReplyKeyboardRemove())

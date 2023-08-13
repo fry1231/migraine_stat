@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+import datetime
 from aiogram import executor
 from aiogram.utils.exceptions import BotBlocked, UserDeactivated, NetworkError
 import asyncio
@@ -28,8 +28,8 @@ async def notify_users():
     """
     all_users: list[models.User] = await crud.get_users()
     deleted_users: list[models.User] = []
-    t = datetime.today()
-    time_notified = datetime.now()
+    t = datetime.datetime.today()
+    time_notified = datetime.datetime.now()
     users_id_w_notif = []
     n_notifyable_users = 0
     # Message to notify me about notification process
@@ -42,7 +42,7 @@ async def notify_users():
 
         notification_period_minutes = notification_period_days * 24 * 60  # Notification period in minutes
         dt = (t - user.last_notified).total_seconds() / 60   # How many minutes since last notification
-        if dt >= notification_period_minutes - 15:   # Notify only if 1 day passed
+        if dt >= notification_period_minutes - 65:   # Check if at least 1 day passed (safety interval 65 mins incl.)
             try:
                 # Ask user about pains during the day(s)
                 await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
@@ -54,7 +54,7 @@ async def notify_users():
                     await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')
             except NetworkError:
                 await notify_me(f'User {user.telegram_id} Network Error')
-        if i % 100 == 0:
+        if i % 500 == 0:
             await bot.edit_message_text(chat_id=my_tg_id, message_id=process_message.message_id,
                                         text=f'{i} users processed')
         await asyncio.sleep(0.1)   # As Telegram does not allow more than 30 messages/sec
@@ -90,7 +90,7 @@ async def notify_users():
         await asyncio.sleep(0.001)
     text_deleted += '\n'
 
-    ex_time = (datetime.now() - time_notified).total_seconds()
+    ex_time = (datetime.datetime.now() - time_notified).total_seconds()
     text += f'{n_notifyable_users}/{len(all_users)} users with notification\n' \
             f'{n_active_now} active and {n_deleted_after_active} overall deleted after being active users\n\n' \
             f'{text_deleted}' \
@@ -100,8 +100,14 @@ async def notify_users():
                                 text=text)
 
 
+async def db_healthcheck():
+    if not await crud.healthcheck():
+        await notify_me('!Database connection error!')
+
+
 async def scheduler():
     aioschedule.every().day.at("19:00").do(notify_users)  # UTC tz in docker
+    aioschedule.every(10).minutes.do(db_healthcheck)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(60)

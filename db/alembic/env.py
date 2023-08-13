@@ -4,10 +4,15 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+from src.settings import POSTGRES_PASS, POSTGRES_USER
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+config.set_main_option('sqlalchemy.url',
+                       f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASS}@migraine_db:5432/db_prod")
+# config.set_main_option('sqlalchemy.url',
+#                        "sqlite:///db/test.db")
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

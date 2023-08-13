@@ -8,39 +8,54 @@ services:
       rabbitmq:
         condition: service_started
       db:
-        condition: service_healthy
+        condition: service_started
     env_file:
       - .env   # Remove for prod
     build: ./
-    command: python -m src.main
-    volumes:
-      - migraine_db:/migrebot/db/db_file
+    stdin_open: true
+    tty: true
 
   rabbitmq:
     container_name: rabbitmq
+    hostname: rabbitmq-host
     image: rabbitmq:3.12-alpine
     env_file:
       - .env   # Remove for prod
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?err}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:?err}
 
+  db:
+    container_name: migraine_db
+    image: postgres:15-alpine
+    restart: always
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:?err}
+      - POSTGRES_PASSWORD=${POSTGRES_PASS:?err}
+      - POSTGRES_DB=db_prod
+
+  pgadmin:
+    container_name: pgadmin4_container
+    depends_on:
+      db:
+        condition: service_started
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${POSTGRES_USER:?err}@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=${POSTGRES_PASS:?err}
+    ports:
+      - "5434:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
 volumes:
-  migraine_db:
-#  db:
-#    container_name: migrain_db
-#    image: postgres:15-alpine
-#    user: postgres
-#    restart: always
-#    volumes:
-#      - ./db/postgres_data:/var/lib/postgresql/data
-#    environment:
-#      - POSTGRES_USER=${POSTGRES_USER:?err}
-#      - POSTGRES_PASSWORD=${POSTGRES_PASS:?err}
-#      - POSTGRES_DB=db_prod
-#    healthcheck:
-#      test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
-#      interval: 10s
-#      timeout: 10s
-#      retries: 10
-#      start_period: 30s
+  postgres-data:
+  pgadmin-data:
+  rabbitmq-data:

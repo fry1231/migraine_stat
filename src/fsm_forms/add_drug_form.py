@@ -53,7 +53,7 @@ async def process_name(message: types.Message, state: FSMContext):
                         reply_markup=kb.drug_amount_kb)
 
 
-# Check daily_max. Gotta be digit
+# Check daily_max. Should be digit
 @dp.message_handler(lambda message: not message.text.isdigit(), state=AddDrugForm.daily_max)
 async def process_daily_max_invalid(message: types.Message):
     """

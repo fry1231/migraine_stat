@@ -41,7 +41,7 @@ test:
   script:
     - cd /usr/migrebot
     - docker compose up -d rabbitmq
-    - docker compose run migrebot pytest
+    - docker compose run migrebot pytest --verbose
 
 run:
   stage: run

@@ -1,13 +1,17 @@
 import random
 import io
+
+import aiogram.utils.exceptions
+
 from src.fsm_forms import *
 import src.keyboards as kb
 from src.bot import dp, bot
 from src.utils import notify_me, write_xlsx
 from src.messages_handler import postpone_new_user_notif
 from src.settings import MY_TG_ID
-from db.models import NewUser
+from db.models import NewUser, PainCase, DrugUse
 import traceback
+import asyncio
 import logging
 
 
@@ -23,12 +27,13 @@ async def send_welcome(message: types.Message):
         first_name = message.from_user.first_name
         last_name = message.from_user.last_name
         user_name = message.from_user.username
+        locale = message.from_user.locale
         # Add user to the DB
         user = await crud.create_user(
             telegram_id=user_id,
-            notify_every=-1,
             first_name=first_name,
-            user_name=user_name
+            user_name=user_name,
+            language=locale.language
         )
         # Send the notification to the message broker
         await postpone_new_user_notif(
@@ -105,18 +110,18 @@ async def get_drugs_statistics(message: types.Message):
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('druguse'))
 async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    pre_message = await bot.send_message(user_id, 'Собираю данные...')
     try:
-        user_id = callback_query.from_user.id
-        pre_message = await bot.send_message(user_id, 'Собираю данные...')
         n_days = int(callback_query.data.split('_')[-1])
-        user_druguses = await crud.get_user_druguses(user_id=user_id, period_days=n_days)
+        user_druguses: list[DrugUse] = await crud.get_user_druguses(user_id=user_id, period_days=n_days)
         drugs_statistics = []
 
         # Filling data
         for event in user_druguses:
             temp_dict = {}
             temp_dict['Лекарство'] = event.drugname
-            temp_dict['Дата'] = event.datetime.strftime('%d.%m.%Y')
+            temp_dict['Дата'] = event.date.strftime('%d.%m.%Y')
             temp_dict['Кол-во'] = event.amount
             drugs_statistics.append(temp_dict)
 
@@ -151,10 +156,13 @@ async def get_drugs_statistics_callback(callback_query: types.CallbackQuery):
             with io.BytesIO() as buf:
                 write_xlsx(buf, drugs_statistics)
                 await bot.send_document(user_id, types.InputFile(buf, 'drugs_statistics.xlsx'))
-        await bot.delete_message(user_id, pre_message.message_id)
+    except asyncio.TimeoutError:
+        await bot.send_message(user_id, "В данный момент сервер загружен, повторите, пожалуйста, через пару минут")
     except Exception:
         await notify_me(f'User {user_id}. Error while get_drugs_statistics_callback'
                         f'\n\n{traceback.format_exc()}')
+    finally:
+        await bot.delete_message(user_id, pre_message.message_id)
 
 
 @dp.message_handler(commands=['check_pains'])
@@ -168,29 +176,41 @@ async def get_pain_statistics(message: types.Message):
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('paincase'))
 async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    pre_message = await bot.send_message(user_id, 'Собираю данные...')
     try:
-        user_id = callback_query.from_user.id
-        pre_message = await bot.send_message(user_id, 'Собираю данные...')
         n_days = int(callback_query.data.split('_')[-1])
-        user_paincases = await crud.get_user_pains(user_id=user_id, period_days=n_days)
+        user_paincases: list[PainCase] = await crud.get_user_pains(user_id=user_id, period_days=n_days)
         pains_statistics = []
         # Filling data
         for event in user_paincases:
             temp_dict = {}
-            temp_dict['Дата'] = event.datetime.strftime('%d.%m.%Y')
+            temp_dict['Дата'] = event.date.strftime('%d.%m.%Y')
             temp_dict['Часов'] = event.durability
             temp_dict['Сила'] = event.intensity
             temp_dict['Аура'] = event.aura
             temp_dict['Триггеры'] = event.provocateurs
             temp_dict['Симптомы'] = event.symptoms
-            temp_dict['Примечания'] = event.description
-            if len(event.medecine_taken) == 1:
-                temp_dict['Лекарство'] = event.medecine_taken[0].drugname
-                temp_dict['Кол-во'] = event.medecine_taken[0].amount
-            else:
+            if len(event.medecine_taken) == 0:
                 temp_dict['Лекарство'] = None
                 temp_dict['Кол-во'] = None
-            pains_statistics.append(temp_dict)
+                temp_dict['Примечания'] = event.description
+                pains_statistics.append(temp_dict)
+            else:
+                sub_event: DrugUse
+                for i, sub_event in enumerate(event.medecine_taken):
+                    # if only one druguse - fill the fields in the same row
+                    if i == 0:
+                        temp_dict['Лекарство'] = sub_event.drugname
+                        temp_dict['Кол-во'] = sub_event.amount
+                        temp_dict['Примечания'] = event.description
+                        pains_statistics.append(temp_dict)
+                    # if >1: second row would be empty, except for the druguse info
+                    else:
+                        temp_dict = {k: None for k in ['Дата', 'Часов', 'Сила', 'Аура', 'Триггеры', 'Симптомы']}
+                        temp_dict['Лекарство'] = sub_event.drugname
+                        temp_dict['Кол-во'] = sub_event.amount
+                        temp_dict['Примечания'] = None
 
         # Period text definition
         period_text = ''
@@ -222,10 +242,13 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
             with io.BytesIO() as buf:
                 write_xlsx(buf, pains_statistics)
                 await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.xlsx'))
-        await bot.delete_message(user_id, pre_message.message_id)
+    except asyncio.TimeoutError:
+        await bot.send_message(user_id, "В данный момент сервер загружен, повторите, пожалуйста, через пару минут")
     except Exception:
         await notify_me(f'User {user_id}. Error while get_pain_statistics_callback'
                         f'\n\n{traceback.format_exc()}')
+    finally:
+        await bot.delete_message(user_id, pre_message.message_id)
 
 
 @dp.message_handler(commands=['download_db'])
@@ -297,10 +320,6 @@ async def handle_other(message: types.Message):
                       "Распрекрасно", "Прелестно", "Любо-дорого", "Похвально", "Обворожительно", "Балдёж", "Кайф",
                       "Неплохо", "Превосходно"]
         await message.reply(f'{random.choice(nice_words)}!', reply_markup=types.ReplyKeyboardRemove())
-    # elif message.text.lower().strip().startswith('спасибо'):
-    #     await message.reply('Рад стараться!)', reply_markup=types.ReplyKeyboardRemove())
-    #     await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} writes:\n'
-    #                     f'{message.text}')
 
     # If I want to reply to someone
     elif message.from_user.id == MY_TG_ID:
@@ -320,8 +339,16 @@ async def handle_other(message: types.Message):
                                    reply_to_message_id=reply_message_id)
             await notify_me('Message sent')
     else:
-        await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} '
-                        f'writes:\n'
-                        f'{message.text}\n\n'
-                        f'user_id={message.from_user.id}\n'
-                        f'message_id={message.message_id}')
+        try:
+            await message.forward(MY_TG_ID)
+            text = f'User {message.from_user.username} / {message.from_user.first_name} ' \
+                   f'user_id={message.from_user.id}\n' \
+                   f'message_id={message.message_id}'
+            await bot.send_message(chat_id=MY_TG_ID,
+                                   text=text,
+                                   reply_to_message_id=message.message_id)
+        except aiogram.utils.exceptions.TelegramAPIError:
+            await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} '
+                            f'writes:\n{message.text}\n\n'
+                            f'user_id={message.from_user.id}\n'
+                            f'message_id={message.message_id}')

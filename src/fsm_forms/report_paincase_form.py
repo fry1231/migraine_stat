@@ -11,7 +11,7 @@ from datetime import date, datetime, timedelta
 
 
 class ReportPainCaseForm(StatesGroup):
-    datetime = State()
+    date = State()
     durability = State()
     intensity = State()
     aura = State()
@@ -66,19 +66,19 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 async def add_paincase_entry(message: types.Message):
     """Conversation entrypoint"""
     # Set state
-    await ReportPainCaseForm.datetime.set()
+    await ReportPainCaseForm.date.set()
     await message.reply("Когда? (в формате dd.mm.yyyy)", reply_markup=kb.get_date_kb())
 
 
-@dp.message_handler(lambda message: not is_date_valid(message.text), state=ReportPainCaseForm.datetime)
+@dp.message_handler(lambda message: not is_date_valid(message.text), state=ReportPainCaseForm.date)
 async def process_datetime_invalid(message: types.Message):
     """
-    If datetime is invalid
+    If date is invalid
     """
     return await message.reply("Неверный формат даты. Попробуй ещё раз.", reply_markup=kb.get_date_kb())
 
 
-@dp.message_handler(state=ReportPainCaseForm.datetime)
+@dp.message_handler(state=ReportPainCaseForm.date)
 async def process_datetime(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         text = message.text.strip()
@@ -88,9 +88,9 @@ async def process_datetime(message: types.Message, state: FSMContext):
             'Позавчера': date.today() - timedelta(days=2),
         }
         if text in ['Сегодня', 'Вчера', 'Позавчера']:
-            data['datetime'] = assoc_dict[text]
+            data['date'] = assoc_dict[text]
         else:
-            data['datetime'] = datetime.strptime(text, '%d.%m.%Y')
+            data['date'] = datetime.strptime(text, '%d.%m.%Y')
     await ReportPainCaseForm.durability.set()
     await message.reply("Продолжительность в часах (можно написать):", reply_markup=kb.durability_hours_kb)
 
@@ -204,8 +204,7 @@ async def process_was_medecine_taken(message: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda message: message.text.strip() == '', state=ReportPainCaseForm.drugname)
 async def process_drugname_invalid(message: types.Message):
-    reply_markup = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
-    reply_markup = reply_markup[0]
+    reply_markup, _ = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
     return await message.reply("Сообщение не может быть пустым, повторите",
                                reply_markup=reply_markup)
 
@@ -219,33 +218,32 @@ async def process_drugname(message: types.Message, state: FSMContext):
             await message.reply("Примечания, если имеются:", reply_markup=kb.add_description_kb)
         else:
             if 'drugname' not in data:
-                data['drugname'] = message.text.strip()
+                data['drugname'] = [text]
             else:
-                data['drugname'] += f', {text}'
+                data['drugname'].append(text)
             await ReportPainCaseForm.amount.set()
             await message.reply("Количество принятого в мг? (можно написать)", reply_markup=kb.drug_amount_kb)
 
 
-@dp.message_handler(lambda message: not message.text.isdigit(), state=ReportPainCaseForm.amount)
-async def process_amount_invalid(message: types.Message):
-    """
-    If amount is invalid
-    """
-    return await message.reply("Количество должно быть числом, повторите ввод:", reply_markup=kb.drug_amount_kb)
+# @dp.message_handler(lambda message: not message.text.isdigit(), state=ReportPainCaseForm.amount)
+# async def process_amount_invalid(message: types.Message):
+#     """
+#     If amount is invalid
+#     """
+#     return await message.reply("Количество должно быть числом, повторите ввод:", reply_markup=kb.drug_amount_kb)
 
 
-@dp.message_handler(lambda message: message.text.isdigit(), state=ReportPainCaseForm.amount)
+@dp.message_handler(state=ReportPainCaseForm.amount)
 async def process_amount(message: types.Message, state: FSMContext):
     # Update state and data
-    amount = int(message.text.strip())
+    amount = message.text.strip()
     async with state.proxy() as data:
         if 'amount' not in data:
-            data['amount'] = str(amount)
+            data['amount'] = [amount]
         else:
-            data['amount'] += f', {amount}'
+            data['amount'].append(amount)
     to_exclude = [el.strip() for el in data['drugname'].split(',')]
-    reply_markup = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id, exclude=to_exclude, add_next=True)
-    reply_markup = reply_markup[0]
+    reply_markup, _ = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id, exclude=to_exclude, add_next=True)
     await ReportPainCaseForm.drugname.set()
     await message.reply('Можно добавить ещё или нажать на "Следующий вопрос"',
                         reply_markup=reply_markup)
@@ -259,12 +257,7 @@ async def process_description(message: types.Message, state: FSMContext):
             data['description'] = None
         else:
             data['description'] = text
-        data['who'] = message.from_user.id
-        data['when'] = data['datetime']
-
-        if 'drugname' not in data:
-            data['drugname'] = None
-            data['amount'] = None
+        data['owner_id'] = message.from_user.id
 
         await crud.report_paincase(**data)
 
