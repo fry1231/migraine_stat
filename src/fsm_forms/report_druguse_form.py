@@ -115,7 +115,7 @@ async def du_process_amount(message: types.Message, state: FSMContext):
     # Update state and data
     async with state.proxy() as data:
         data['amount'] = message.text.strip()
-    await crud.report_druguse(when=data['date'],
+    await crud.report_druguse(date=data['date'],
                               amount=data['amount'],
                               owner_id=message.from_user.id,
                               drugname=data['drugname'])

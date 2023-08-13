@@ -242,7 +242,7 @@ async def process_amount(message: types.Message, state: FSMContext):
             data['amount'] = [amount]
         else:
             data['amount'].append(amount)
-    to_exclude = [el.strip() for el in data['drugname'].split(',')]
+    to_exclude = [el.strip() for el in data['drugname']]
     reply_markup, _ = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id, exclude=to_exclude, add_next=True)
     await ReportPainCaseForm.drugname.set()
     await message.reply('Можно добавить ещё или нажать на "Следующий вопрос"',
