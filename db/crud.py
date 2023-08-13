@@ -178,9 +178,10 @@ def get_user_pains(user_id: int,
             date_from = datetime.date.today() - datetime.timedelta(days=period_days)
             db_pains = session.query(PainCase).filter(PainCase.owner_id == user_id)\
                                               .filter(PainCase.date >= date_from)\
+                                              .order_by(PainCase.date.desc())\
                                               .all()
         else:
-            db_pains = session.query(PainCase).filter(PainCase.owner_id == user_id).all()
+            db_pains = session.query(PainCase).filter(PainCase.owner_id == user_id).order_by(PainCase.date.desc()).all()
         return db_pains
 
 
@@ -212,9 +213,10 @@ def get_user_druguses(user_id: int,
             date_from = datetime.date.today() - datetime.timedelta(days=period_days)
             db_druguses = session.query(DrugUse).filter(DrugUse.owner_id == user_id)\
                                                 .filter(DrugUse.date >= date_from)\
+                                                .order_by(DrugUse.date.desc())\
                                                 .all()
         else:
-            db_druguses = session.query(DrugUse).filter(DrugUse.owner_id == user_id).all()
+            db_druguses = session.query(DrugUse).filter(DrugUse.owner_id == user_id).order_by(DrugUse.date.desc()).all()
         return db_druguses
 
 
