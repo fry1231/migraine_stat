@@ -341,13 +341,13 @@ async def handle_other(message: types.Message):
             await notify_me('Message sent')
     else:
         try:
-            await message.forward(MY_TG_ID)
             text = f'User {message.from_user.username} / {message.from_user.first_name} ' \
                    f'user_id={message.from_user.id}\n' \
                    f'message_id={message.message_id}'
             await bot.send_message(chat_id=MY_TG_ID,
                                    text=text,
                                    reply_to_message_id=message.message_id)
+            await message.forward(MY_TG_ID)
         except (aiogram.utils.exceptions.TelegramAPIError, aiogram.utils.exceptions.BadRequest):
             await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} '
                             f'writes:\n{message.text}\n\n'
