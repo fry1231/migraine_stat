@@ -348,9 +348,9 @@ async def handle_other(message: types.Message):
             await bot.send_message(chat_id=MY_TG_ID,
                                    text=text,
                                    reply_to_message_id=message.message_id)
-        except aiogram.utils.exceptions.TelegramAPIError:
+        except (aiogram.utils.exceptions.TelegramAPIError, aiogram.utils.exceptions.BadRequest):
             await notify_me(f'User {message.from_user.username} / {message.from_user.first_name} '
                             f'writes:\n{message.text}\n\n'
                             f'user_id={message.from_user.id}\n'
                             f'message_id={message.message_id}')
-            await notify_me(traceback.format_exc())
+
