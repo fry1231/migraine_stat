@@ -23,7 +23,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    hostname: rabbitmq-host
+    hostname: ${RABBITMQ_HOST:?err}
     image: rabbitmq:3.12-alpine
     restart: always
     volumes:
