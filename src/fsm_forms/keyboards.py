@@ -32,7 +32,8 @@ def durability_kb(numbers: list = None):
         for i in range(1, 11):
             kb.insert(str(i))
     else:
-        kb.insert(str)
+        for num in numbers:
+            kb.insert(str(num))
     kb.add('Cancel')
     return kb
 
