@@ -93,17 +93,17 @@ async def process_datetime(message: types.Message, state: FSMContext):
             data['date'] = datetime.strptime(text, '%d.%m.%Y')
     await ReportPainCaseForm.durability.set()
     await message.reply("Продолжительность в часах (можно написать):",
-                        reply_markup=kb.durability_kb(['Весь день', 2, 4, 6, 12]))
+                        reply_markup=kb.durability_kb(['Весь день', 2, 4, 6, 12, 16]))
 
 
-@dp.message_handler(lambda message: not message.text.isdigit() or message.text != 'Весь день',
+@dp.message_handler(lambda message: not message.text.isdigit() and message.text != 'Весь день',
                     state=ReportPainCaseForm.durability)
 async def process_durability_invalid(message: types.Message):
     """
     If amount is invalid
     """
     return await message.reply("Продолжительность должна быть числом, повторите ввод:",
-                               reply_markup=kb.durability_kb(['Весь день', 2, 4, 6, 12]))
+                               reply_markup=kb.durability_kb(['Весь день', 2, 4, 6, 12, 16]))
 
 
 @dp.message_handler(lambda message: message.text.isdigit() or message.text == 'Весь день',
