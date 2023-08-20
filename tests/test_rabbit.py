@@ -15,7 +15,7 @@ def resource():
 
 async def test_send_messages():
     new_users = [NewUser(first_name=str(i)+'QQ',
-                         last_name=str(i)+'WW',
+                         last_name=str(i)+'кириллические буковки и $|^|EЦ3Haku!',
                          user_name=str(i)+'EE')
                  for i in range(5)]
     for user in new_users:

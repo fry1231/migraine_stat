@@ -5,8 +5,8 @@ services:
     container_name: migrebot
 #    restart: always
     depends_on:
-      rabbitmq:
-        condition: service_started
+#      rabbitmq:
+#        condition: service_started
       db:
         condition: service_started
     env_file:
@@ -14,18 +14,20 @@ services:
     build: ./
     stdin_open: true
     tty: true
-
-  rabbitmq:
-    container_name: rabbitmq
-    hostname: rabbitmq-host
-    image: rabbitmq:3.12-alpine
-    env_file:
-      - .env   # Remove for prod
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?err}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:?err}
+      - persistent-data:/usr/persistent_data
+
+#  rabbitmq:
+#    container_name: rabbitmq
+#    hostname: rabbitmq-host
+#    image: rabbitmq:3.12-alpine
+#    env_file:
+#      - .env   # Remove for prod
+#    volumes:
+#      - rabbitmq-data:/var/lib/rabbitmq
+#    environment:
+#      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?err}
+#      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:?err}
 
   db:
     container_name: migraine_db
@@ -40,22 +42,23 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASS:?err}
       - POSTGRES_DB=db_prod
 
-  pgadmin:
-    container_name: pgadmin4_container
-    depends_on:
-      db:
-        condition: service_started
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${POSTGRES_USER:?err}@gmail.com
-      - PGADMIN_DEFAULT_PASSWORD=${POSTGRES_PASS:?err}
-    ports:
-      - "5434:80"
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
+#  pgadmin:
+#    container_name: pgadmin4_container
+#    depends_on:
+#      db:
+#        condition: service_started
+#    image: dpage/pgadmin4
+#    restart: always
+#    environment:
+#      - PGADMIN_DEFAULT_EMAIL=${POSTGRES_USER:?err}@gmail.com
+#      - PGADMIN_DEFAULT_PASSWORD=${POSTGRES_PASS:?err}
+#    ports:
+#      - "5434:80"
+#    volumes:
+#      - pgadmin-data:/var/lib/pgadmin
 
 volumes:
   postgres-data:
-  pgadmin-data:
-  rabbitmq-data:
+  persistent-data:
+#  pgadmin-data:
+#  rabbitmq-data:

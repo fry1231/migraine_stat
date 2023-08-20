@@ -92,24 +92,31 @@ async def process_datetime(message: types.Message, state: FSMContext):
         else:
             data['date'] = datetime.strptime(text, '%d.%m.%Y')
     await ReportPainCaseForm.durability.set()
-    await message.reply("Продолжительность в часах (можно написать):", reply_markup=kb.durability_hours_kb)
+    await message.reply("Продолжительность в часах (можно написать):",
+                        reply_markup=kb.durability_kb(['Весь день', 2, 4, 6, 12]))
 
 
-@dp.message_handler(lambda message: not message.text.isdigit(), state=ReportPainCaseForm.durability)
+@dp.message_handler(lambda message: not message.text.isdigit() or message.text != 'Весь день',
+                    state=ReportPainCaseForm.durability)
 async def process_durability_invalid(message: types.Message):
     """
     If amount is invalid
     """
-    return await message.reply("Продолжительность должна быть числом, повторите ввод:", reply_markup=kb.durability_hours_kb)
+    return await message.reply("Продолжительность должна быть числом, повторите ввод:",
+                               reply_markup=kb.durability_kb(['Весь день', 2, 4, 6, 12]))
 
 
-@dp.message_handler(lambda message: message.text.isdigit(), state=ReportPainCaseForm.durability)
+@dp.message_handler(lambda message: message.text.isdigit() or message.text == 'Весь день',
+                    state=ReportPainCaseForm.durability)
 async def process_durability(message: types.Message, state: FSMContext):
     # Update state and data
     async with state.proxy() as data:
-        data['durability'] = int(message.text.strip())
+        if message.text.strip() == 'Весь день':
+            data['durability'] = 24
+        else:
+            data['durability'] = int(message.text.strip())
     await ReportPainCaseForm.intensity.set()
-    await message.reply("Интенсивность от 1 до 10:", reply_markup=kb.durability_hours_kb)
+    await message.reply("Интенсивность от 1 до 10:", reply_markup=kb.durability_kb())
 
 
 @dp.message_handler(lambda message: not message.text.isdigit(), state=ReportPainCaseForm.intensity)
@@ -117,7 +124,7 @@ async def process_intensity_invalid(message: types.Message):
     """
     If amount is invalid
     """
-    return await message.reply("Интенсивность должна быть числом, повторите ввод:", reply_markup=kb.durability_hours_kb)
+    return await message.reply("Интенсивность должна быть числом, повторите ввод:", reply_markup=kb.durability_kb())
 
 
 @dp.message_handler(lambda message: message.text.isdigit(), state=ReportPainCaseForm.intensity)

@@ -37,8 +37,21 @@ class User(Base):
     drugs = relationship("Drug", cascade="all, delete-orphan")
 
 
-@declarative_mixin
-class _PainCase:
+# @declarative_mixin
+# class _PainCase:
+#     id = Column(Integer, primary_key=True, index=True)
+#     date = Column(Date)
+#     durability = Column(SmallInteger)
+#     intensity = Column(SmallInteger)
+#     aura = Column(Boolean)
+#     provocateurs = Column(String)
+#     symptoms = Column(String)
+#     description = Column(String)
+
+
+class PainCase(Base):
+    __tablename__ = "pains"
+
     id = Column(Integer, primary_key=True, index=True)
     date = Column(Date)
     durability = Column(SmallInteger)
@@ -48,25 +61,28 @@ class _PainCase:
     symptoms = Column(String)
     description = Column(String)
 
-
-class PainCase(_PainCase, Base):
-    __tablename__ = "pains"
-    owner_id = Column(BigInteger, ForeignKey("users.telegram_id"))
+    owner_id = Column(BigInteger, ForeignKey("users.telegram_id", ondelete='CASCADE'))
     medecine_taken = relationship("DrugUse", lazy='joined', cascade="all, delete-orphan")
 
 
-@declarative_mixin
-class _DrugUse:
+# @declarative_mixin
+# class _DrugUse:
+#     id = Column(Integer, primary_key=True, index=True)
+#     date = Column(Date)
+#     amount = Column(String)
+#     drugname = Column(String)
+
+
+class DrugUse(Base):
+    __tablename__ = "druguses"
+
     id = Column(Integer, primary_key=True, index=True)
     date = Column(Date)
     amount = Column(String)
     drugname = Column(String)
 
-
-class DrugUse(_DrugUse, Base):
-    __tablename__ = "druguses"
-    owner_id = Column(BigInteger, ForeignKey("users.telegram_id"))
-    paincase_id = Column(Integer, ForeignKey("pains.id"))
+    owner_id = Column(BigInteger, ForeignKey("users.telegram_id", ondelete='CASCADE'))
+    paincase_id = Column(Integer, ForeignKey("pains.id", ondelete='CASCADE'))
 
 
 class Drug(Base):
@@ -78,12 +94,21 @@ class Drug(Base):
     is_painkiller = Column(Boolean)
     is_temp_reducer = Column(Boolean)
 
-    owner_id = Column(BigInteger, ForeignKey("users.telegram_id"))
+    owner_id = Column(BigInteger, ForeignKey("users.telegram_id", ondelete='CASCADE'))
 
 
 # Tables with information from deleted users, for statistics and reports
-class SavedPainCase(_PainCase, Base):
+class SavedPainCase(Base):
     __tablename__ = "saved_pains"
+
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(Date)
+    durability = Column(SmallInteger)
+    intensity = Column(SmallInteger)
+    aura = Column(Boolean)
+    provocateurs = Column(String)
+    symptoms = Column(String)
+    description = Column(String)
 
     owner_id = Column(BigInteger)
     medecine_taken = relationship("SavedDrugUse", lazy='joined', cascade='all, delete-orphan')
@@ -107,11 +132,16 @@ class SavedPainCase(_PainCase, Base):
         )
 
 
-class SavedDrugUse(_DrugUse, Base):
+class SavedDrugUse(Base):
     __tablename__ = "saved_druguses"
 
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(Date)
+    amount = Column(String)
+    drugname = Column(String)
+
     owner_id = Column(BigInteger)
-    paincase_id = Column(Integer, ForeignKey("saved_pains.id"))
+    paincase_id = Column(Integer, ForeignKey("saved_pains.id", ondelete='CASCADE'))
 
     @staticmethod
     def copy_from(druguse: DrugUse):

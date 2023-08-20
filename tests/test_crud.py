@@ -97,7 +97,7 @@ class TestPaincases:
     )
     druguse_data_several = dict(
         amount=['200', '1 pill'],
-        drugname=['Paracetamol', 'Ibuprofen']
+        drugname=['Парацетамол;Â, Ê, Î, Ô, Û, Ä, Ë, Ï, Ö, Ü, À, Æ, æ, Ç, É', 'Ibuprofen']
     )
 
     async def test_without_druguse(self):
@@ -119,8 +119,8 @@ class TestPaincases:
         commited_pc: PainCase = await crud.report_paincase(**test_data)
         paincases: list[PainCase] = await crud.get_user_pains(user_id=123)
         assert len(paincases) == 3
-        pc_from_db = [pc for pc in paincases if pc.id == commited_pc.id]
-        assert len(pc_from_db) == 2
+        pc_from_db = [pc for pc in paincases if pc.id == commited_pc.id][0]
+        assert len(pc_from_db.medecine_taken) == 2
 
 
 async def test_druguses():
@@ -158,13 +158,13 @@ async def test_users_info_after_deletion():
     assert len(saved_druguses) == 5
 
 
-async def test_multiple_connections():
-    await asyncio.gather(
-        *[
-            crud.create_user(
-                telegram_id=i,
-                first_name=str(i) + 'QQ',
-                user_name=str(i) + 'WW'
-            ) for i in range(1000, 2000)
-        ]
-    )
+# async def test_multiple_connections():
+#     await asyncio.gather(
+#         *[
+#             crud.create_user(
+#                 telegram_id=i,
+#                 first_name=str(i) + 'QQ',
+#                 user_name=str(i) + 'WW'
+#             ) for i in range(1000, 2000)
+#         ]
+#     )

@@ -20,17 +20,19 @@ services:
       - POSTGRES_PASS=${POSTGRES_PASS:?err}
       - MY_TG_ID=${MY_TG_ID:?err}
       - PAYMENTS_TOKEN_RU=${PAYMENTS_TOKEN_RU:?err}
-
-  rabbitmq:
-    container_name: rabbitmq
-    hostname: ${RABBITMQ_HOST:?err}
-    image: rabbitmq:3.12-alpine
-    restart: always
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?err}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:?err}
+      - persistent-data:/usr/persistent_data
+
+#  rabbitmq:
+#    container_name: rabbitmq
+#    hostname: ${RABBITMQ_HOST:?err}
+#    image: rabbitmq:3.12-alpine
+#    restart: always
+#    volumes:
+#      - rabbitmq-data:/var/lib/rabbitmq
+#    environment:
+#      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?err}
+#      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:?err}
 
   db:
     container_name: migraine_db
@@ -45,22 +47,23 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASS:?err}
       - POSTGRES_DB=db_prod
 
-  pgadmin:
-    container_name: pgadmin4_container
-    depends_on:
-      db:
-        condition: service_started
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${POSTGRES_USER:?err}@gmail.com
-      - PGADMIN_DEFAULT_PASSWORD=${POSTGRES_PASS:?err}
-    ports:
-      - "5434:80"
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
+#  pgadmin:
+#    container_name: pgadmin4_container
+#    depends_on:
+#      db:
+#        condition: service_started
+#    image: dpage/pgadmin4
+#    restart: always
+#    environment:
+#      - PGADMIN_DEFAULT_EMAIL=${POSTGRES_USER:?err}@gmail.com
+#      - PGADMIN_DEFAULT_PASSWORD=${POSTGRES_PASS:?err}
+#    ports:
+#      - "5434:80"
+#    volumes:
+#      - pgadmin-data:/var/lib/pgadmin
 
 volumes:
   postgres-data:
-  pgadmin-data:
-  rabbitmq-data:
+  persistent-data:
+#  pgadmin-data:
+#  rabbitmq-data:
