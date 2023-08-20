@@ -55,14 +55,14 @@ async def get_drugs_kb_and_drugnames(owner: int = None,
                                      add_next: bool = False):
     drugs = await crud.get_drugs(owner)
     drugs_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    if add_next:
-        drugs_kb.row('Следующий вопрос')
-    else:
-        drugs_kb.add('Cancel')
     drugnames = [drug.name for drug in drugs]
     if exclude:
         drugnames = [drugname for drugname in drugnames if drugname not in exclude]
     _ = [drugs_kb.insert(name) for name in drugnames]
+    if add_next:
+        drugs_kb.row('Следующий вопрос')
+    else:
+        drugs_kb.add('Cancel')
     return drugs_kb, drugnames
 
 
@@ -83,11 +83,11 @@ def get_provocateurs_kb(exclude: list = None):
         'Гормоны'
     ]
     provocateurs_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    provocateurs_kb.row('Следующий вопрос')
+
     if exclude:
         prov_list = [el for el in prov_list if el not in exclude]
     _ = [provocateurs_kb.insert(el) for el in prov_list]
-    provocateurs_kb.row('Cancel')
+    provocateurs_kb.row('Следующий вопрос')
     return provocateurs_kb
 
 
