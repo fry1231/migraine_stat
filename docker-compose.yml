@@ -5,8 +5,8 @@ services:
     container_name: migrebot
     restart: always
     depends_on:
-      rabbitmq:
-        condition: service_started
+#      rabbitmq:
+#        condition: service_started
       db:
         condition: service_started
     build: ./
