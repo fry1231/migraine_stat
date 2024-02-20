@@ -23,7 +23,8 @@ async def add_drug(name: str,
 
 async def delete_drug(drug_id: int) -> None:
     async with get_session() as session:
-        db_drug = await session.query(Drug).filter(Drug.id == drug_id).first()
+        result = await session.scalars(select(Drug).where(Drug.id == drug_id))
+        db_drug = result.first()
         await session.delete(db_drug)
 
 
