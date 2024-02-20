@@ -4,10 +4,13 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
-from src.bot import dp, bot
+
+from db import crud
+from src.bot import dp, bot, _
 from src.fsm_forms import keyboards as kb
 from db import crud
 from datetime import date, datetime, timedelta
+import pytz
 
 
 class ReportDrugUseForm(StatesGroup):
@@ -18,78 +21,36 @@ class ReportDrugUseForm(StatesGroup):
     # paincase_id
 
 
-def is_date_valid(text):
-    text = text.strip()
-    if text not in ['Сегодня', 'Вчера', 'Позавчера']:
-        try:
-            datetime.strptime(text, '%d.%m.%Y')
-        except ValueError:
-            return False
-    return True
-
-
-# def is_drugname_valid(text):
-#     text = text.strip()
-#     _, valid_drugnames = kb.get_drugs_kb_and_drugnames()
-#     if text not in valid_drugnames:
-#         return False
-#     return True
-
-
-@dp.message_handler(state='*', commands='cancel')
-@dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
-async def cancel_handler(message: types.Message, state: FSMContext):
-    """
-    Allow user to cancel any action
-    """
-    current_state = await state.get_state()
-    if current_state is None:
-        return
-
-    # Cancel state and inform user about it
-    await state.finish()
-    # And remove keyboard (just in case)
-    await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
-
-
-@dp.message_handler(commands=['druguse'])
-async def du_add_drug_entry(message: types.Message):
+@dp.message_handler(commands=['druguse'], state='*')
+async def du_add_drug_entry(message: types.Message, state: FSMContext = None):
     """Conversation entrypoint"""
-    # Set state
+    if state and await state.get_state():
+        await state.finish()
+    user_id = message.from_user.id
+    user = await crud.get_user(telegram_id=user_id)
+    tz = user.timezone
+    date_today = datetime.now(pytz.timezone(tz)).date()
     await ReportDrugUseForm.date.set()
-    await message.reply("Дата приёма (в формате dd.mm.yyyy):", reply_markup=kb.get_date_kb())
+    # NOTE Date of a medication intake
+    await message.reply(_("Дата приёма?"), reply_markup=kb.get_date_kb(date_today, 'druguse'))
 
 
-@dp.message_handler(lambda message: not is_date_valid(message.text), state=ReportDrugUseForm.date)
-async def du_process_datetime_invalid(message: types.Message):
-    """
-    If date is invalid
-    """
-    return await message.reply("Неверный формат даты. Попробуй ещё раз.", reply_markup=kb.get_date_kb())
-
-
-@dp.message_handler(state=ReportDrugUseForm.date)
-async def du_process_datetime(message: types.Message, state: FSMContext):
+@dp.callback_query_handler(lambda c: c.data, state=ReportDrugUseForm.date)
+async def du_process_datetime(callback_query: types.CallbackQuery, state: FSMContext):
+    ddate = callback_query.data.split('_')[-1]
     async with state.proxy() as data:
-        text = message.text.strip()
-        assoc_dict = {
-            'Сегодня': date.today(),
-            'Вчера': date.today() - timedelta(days=1),
-            'Позавчера': date.today() - timedelta(days=2),
-        }
-        if text in ['Сегодня', 'Вчера', 'Позавчера']:
-            data['date'] = assoc_dict[text]
-        else:
-            data['date'] = datetime.strptime(text, '%d.%m.%Y')
-    reply_markup, _ = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
+        data['date'] = ddate
+    reply_markup, __ = await kb.get_drugs_kb_and_drugnames(owner=callback_query.from_user.id)
     await ReportDrugUseForm.next()
-    await message.reply("Что принимали?", reply_markup=reply_markup)
+    text = f'<b>{ddate}</b>\n' + _("Что принимали? (можно написать)")
+    await bot.send_message(callback_query.from_user.id, text, reply_markup=reply_markup)
+    await callback_query.message.delete()
 
 
 @dp.message_handler(lambda message: message.text.strip() == '', state=ReportDrugUseForm.drugname)
 async def du_process_drugname_invalid(message: types.Message):
-    reply_markup, _ = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
-    return await message.reply("Сообщение не может быть пустым, повторите",
+    reply_markup, __ = await kb.get_drugs_kb_and_drugnames(owner=message.from_user.id)
+    return await message.reply(_("Сообщение не может быть пустым, повторите"),
                                reply_markup=reply_markup)
 
 
@@ -98,16 +59,7 @@ async def du_process_drugname(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['drugname'] = message.text.strip()
     await ReportDrugUseForm.next()
-    await message.reply("Количество принятого?", reply_markup=kb.drug_amount_kb)
-
-
-# Check daily_max. Should be digit
-# @dp.message_handler(lambda message: not message.text.isdigit(), state=ReportDrugUseForm.amount)
-# async def process_amount_invalid(message: types.Message):
-#     """
-#     If amount is invalid
-#     """
-#     return await message.reply("Количество должно быть числом, повторите ввод:", reply_markup=kb.drug_amount_kb)
+    await message.reply(_("Количество принятого? (можно написать)"), reply_markup=kb.drug_amount_kb)
 
 
 @dp.message_handler(state=ReportDrugUseForm.amount)
@@ -116,9 +68,11 @@ async def du_process_amount(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['amount'] = message.text.strip()
     await crud.report_druguse(date=data['date'],
-                              amount=data['amount'],
-                              owner_id=message.from_user.id,
-                              drugname=data['drugname'])
-    await bot.send_message(message.chat.id, "Успешно добавлено!", reply_markup=types.ReplyKeyboardRemove())
+                                          amount=data['amount'],
+                                          owner_id=message.from_user.id,
+                                          drugname=data['drugname'])
+    text = _("Успешно добавлено!")
+    text += f"\n\n{data['date']} {data['drugname']} {data['amount']}"
+    await bot.send_message(message.chat.id, text, reply_markup=types.ReplyKeyboardRemove())
     # Finish conversation
     await state.finish()

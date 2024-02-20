@@ -1,139 +1,102 @@
-import logging
 from aiogram import executor
 from aiogram.utils.exceptions import BotBlocked, UserDeactivated, NetworkError
-import asyncio
 import aioschedule
-from src.bot import dp, bot
-from src.messages_handler import notif_of_new_users
-from src.fsm_forms import *
-from db import crud, models
-from db.database import engine
-from src.routes import regular_report
-from src.utils import notify_me
-import traceback
-from aio_pika import Message, connect
+
+from src.bot import _
 from src.routes import *
-import os
+from db import crud
+from db.models import User
+from db.redis_models import PydanticUser
+from db.redis_crud import update_everyday_report, get_current_report
+from src.misc.utils import notify_me
+from src.misc.db_backup import do_backup
+from src.misc.service_reports import everyday_report
+from src.config import logger
 import datetime
 
 
-my_tg_id = int(os.getenv('MY_TG_ID'))
-
-
 # Schedule notification task
-async def notify_users():
+async def notify_users_hourly():
     """
-    Ask if there was a headache during missing period, defined in notify_every attr
-    Notify daily about new users
+    Ask if there was a headache during missing period, defined in notify_every attribute
     """
-    all_users: list[models.User] = await crud.get_users()
-    deleted_users: list[models.User] = []
+    utc_hour = datetime.datetime.utcnow().hour
+    user_list: list[User] = await crud.users_by_notif_hour(utc_hour)
+    deleted_users: list[PydanticUser] = []
     t = datetime.datetime.today()
     time_notified = datetime.datetime.now()
-    users_id_w_notif = []
-    n_notifyable_users = 0
+    notified_users_ids = []
     # Message to notify me about notification process
-    process_message = await bot.send_message(chat_id=my_tg_id, text='Started notification task...')
-    for i, user in enumerate(all_users):
+    for i, user in enumerate(user_list):
         notification_period_days = user.notify_every
         if notification_period_days == -1:   # If user did not specify it yet
             continue
-        n_notifyable_users += 1
 
         notification_period_minutes = notification_period_days * 24 * 60  # Notification period in minutes
         dt = (t - user.last_notified).total_seconds() / 60   # How many minutes since last notification
-        if dt >= notification_period_minutes - 65:   # Check if at least 1 day passed (safety interval 65 mins incl.)
+        if dt >= notification_period_minutes - 65:   # Check if notif. period has passed (safety interval 65 mins incl.)
             try:
                 # Ask user about pains during the day(s)
                 await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
-                users_id_w_notif.append(user.telegram_id)
+                notified_users_ids.append(user.telegram_id)
             except (BotBlocked, UserDeactivated):
                 if await crud.delete_user(user.telegram_id):
-                    deleted_users.append(user)
+                    deleted_users.append(PydanticUser(
+                        telegram_id=user.telegram_id,
+                        first_name=user.first_name,
+                        last_name=user.last_name,
+                        user_name=user.user_name
+                    ))
                 else:
                     await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')
             except NetworkError:
                 await notify_me(f'User {user.telegram_id} Network Error')
-        if i % 500 == 0:
-            await bot.edit_message_text(chat_id=my_tg_id, message_id=process_message.message_id,
-                                        text=f'{i} users processed')
         await asyncio.sleep(0.1)   # As Telegram does not allow more than 30 messages/sec
 
-    # Get notification text about users joined during the day
-    text = await notif_of_new_users() + '\n\n'
-    text += f'{len(users_id_w_notif)} users notified\n' \
-            f'Will change last notified on {time_notified:%d.%m.%Y %H:%M:%S} UTC\n\n'
-    await bot.edit_message_text(chat_id=my_tg_id, message_id=process_message.message_id,
-                                text=text)
-
     # Change 'last_notified' for notified users
-    await crud.batch_change_last_notified(users_id_w_notif, time_notified)
-
-    # Count users with at least one added row in Pains table - they are active_users
-    pains: list[int] = await crud.get_user_ids_pains()
-    all_active_users = set(pains)
-
-    # Some statistics from the beginning
-    all_users_id = set([user.telegram_id for user in all_users])
-    n_active_now = len(all_active_users.intersection(all_users_id))
-    n_deleted_after_active = len(all_active_users - all_users_id)
-
-    # Who deleted?
-    text_deleted = ''
-    for user in deleted_users:
-        username = '' if user.user_name is None else 't.me/' + user.user_name
-        active = f'active' if user.telegram_id in all_active_users else ''
-        if active != '':    # How many rows in db from that user
-            n_pains = pains.count(user.telegram_id)
-            active += f' ({n_pains} entries)'
-        text_deleted += f'{user.first_name} {username} {active} deleted\n'
-        await asyncio.sleep(0.001)
-    text_deleted += '\n'
-
-    ex_time = (datetime.datetime.now() - time_notified).total_seconds()
-    text += f'{n_notifyable_users}/{len(all_users)} users with notification\n' \
-            f'{n_active_now} active and {n_deleted_after_active} overall deleted after being active users\n\n' \
-            f'{text_deleted}' \
-            f'{len(pains)} rows in Pains table\n\n' \
-            f'Execution time = {ex_time // 60:.0f} min {ex_time % 60:.0f} sec'
-    await bot.edit_message_text(chat_id=my_tg_id, message_id=process_message.message_id,
-                                text=text)
+    if notified_users_ids:
+        await crud.batch_change_last_notified(notified_users_ids, time_notified)
+        logger.info(f'{len(notified_users_ids)} users notified')
 
 
 async def db_healthcheck():
     if not await crud.healthcheck():
-        await notify_me('!Database connection error!')
+        logger.error(err := '!Database connection error!')
+        await notify_me(err)
 
 
 async def scheduler():
-    aioschedule.every().day.at("19:00").do(notify_users)  # UTC tz in docker
+    aioschedule.every().hour.at(":00").do(notify_users_hourly)
+    aioschedule.every().day.at("21:30").do(everyday_report)
     aioschedule.every(10).minutes.do(db_healthcheck)
+    aioschedule.every().day.at("03:00").do(do_backup)
     while True:
         await aioschedule.run_pending()
-        await asyncio.sleep(60)
+        await asyncio.sleep(10)
 
 
-async def on_startup(_):
-    await bot.set_my_commands([
-        types.bot_command.BotCommand('reschedule', 'периодичность опросов'),
-        types.bot_command.BotCommand('pain', 'запись бо-бо'),
-        types.bot_command.BotCommand('druguse', 'приём лекарства'),
-        types.bot_command.BotCommand('check_pains', 'статистика болей'),
-        types.bot_command.BotCommand('check_drugs', 'статистика лекарств'),
-        types.bot_command.BotCommand('add_drug', 'добавить лекарство'),
-    ])
+async def on_startup(__):
+    for locale in ['en', 'uk', 'fr', 'es', 'ru']:
+        language_code = None if locale == 'ru' else locale
+        await bot.set_my_commands([
+            types.bot_command.BotCommand('pain', _('запись бо-бо', locale=locale)),
+            types.bot_command.BotCommand('druguse', _('приём лекарства', locale=locale)),
+            types.bot_command.BotCommand('pressure', _('запись давления', locale=locale)),
+            types.bot_command.BotCommand('medications', _('список лекарств', locale=locale)),
+            types.bot_command.BotCommand('calendar', _('изменить записи', locale=locale)),
+            types.bot_command.BotCommand('statistics', _('статистика', locale=locale)),
+            types.bot_command.BotCommand('settings', _('настройки', locale=locale)),
+        ], language_code=language_code)
+
     asyncio.create_task(scheduler())
     await notify_me('Bot restarted')
+    logger.info('Bot started')
 
 
 if __name__ == '__main__':
     try:
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s - %(levelname)s: %(message)s",
-            datefmt='%d.%m.%Y %H:%M:%S'
-        )
-        logging.info('Bot started')
+        logger.info('Starting bot...')
         executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
     except:
         asyncio.run(notify_me(traceback.format_exc()))
+        logger.error(traceback.format_exc())

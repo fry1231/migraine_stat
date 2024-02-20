@@ -1,0 +1,38 @@
+Inside src folder:
+
+
+### Create
+1.
+pybabel extract --input-dirs=. --add-comments=NOTE -o locales/messages.pot
+2.
+pybabel init -i locales/messages.pot -d locales -D messages -l en
+pybabel init -i locales/messages.pot -d locales -D messages -l fr
+pybabel init -i locales/messages.pot -d locales -D messages -l es
+pybabel init -i locales/messages.pot -d locales -D messages -l uk
+3.
+translate each from the dirs above
+4.
+pybabel compile -d locales -D messages
+
+
+cd /mnt/d/projects/migraine_stat/src
+### Update:
+1.
+pybabel extract --input-dirs=. --add-comments=NOTE -o locales/messages.pot
+2.
+pybabel update -d locales -D messages -i locales/messages.pot
+3.
+translate
+4.
+pybabel compile -d locales -D messages
+
+
+
+Using excel for translation:
+### po2xls extraction
+po2xls -o messages.xlsx en/LC_MESSAGES/messages.po fr/LC_MESSAGES/messages.po es/LC_MESSAGES/messages.po uk/LC_MESSAGES/messages.po
+### xls2po
+xls2po en messages.xlsx en/LC_MESSAGES/messages.po
+xls2po fr messages.xlsx fr/LC_MESSAGES/messages.po
+xls2po es messages.xlsx es/LC_MESSAGES/messages.po
+xls2po uk messages.xlsx uk/LC_MESSAGES/messages.po

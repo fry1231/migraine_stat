@@ -1,33 +1,49 @@
 import asyncio
-
 import pytest
 import datetime
 import os
-from sqlalchemy_utils import create_database, database_exists
+from sqlalchemy import select
+import time
 
 os.environ["IS_TESTING"] = '1'
 
-from db.models import User, Drug, DrugUse, PainCase, SavedDrugUse, SavedPainCase
+from db.models import User, Drug, DrugUse, PainCase, SavedUser, SavedDrugUse, SavedPainCase
 from db.models import Base
-from db.database import test_engine
+from db.database import test_engine, database_exists, create_database
 from db import crud
+from src.config import logger
 
 
-@pytest.fixture(scope="session", autouse=True)
-def resource():
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest.fixture(scope="module", autouse=True)
+async def resource():
     """
     Force crud operations to perform on a test database "sqlite:///db/db_file/test.db"
     Creates all necessary tables at the beginning of the testing and drops them in the end
     """
-    if not database_exists(test_engine.url):
-        create_database(test_engine.url)
+    if not await database_exists(test_engine.url):
+        await create_database(test_engine.url)
     assert 'db_test' in crud.use_engine.url.database, f'URL database is not db_test ' \
                                                       f'({crud.use_engine.url.database})'
-    Base.metadata.drop_all(test_engine)
-    Base.metadata.create_all(test_engine)
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    # ------
     yield
+    # ------
     os.environ["IS_TESTING"] = '0'
-    Base.metadata.drop_all(test_engine)
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+
+async def test_db_connection():
+    assert await crud.healthcheck() is True
 
 
 async def test_create_user():
@@ -43,6 +59,17 @@ async def test_create_user():
     assert user is not None
     assert user.first_name == added_user.first_name
     assert user.notify_every == -1
+
+
+async def test_change_user_props():
+    # Change user's properties
+    await crud.change_user_props(
+        telegram_id=123,
+        notify_every=2
+    )
+    # Check if the user's properties were changed
+    user: User = await crud.get_user(telegram_id=123)
+    assert user.notify_every == 2
 
 
 async def test_batch_change_last_notified():
@@ -150,21 +177,68 @@ async def test_users_info_after_deletion():
     assert len(user_drugs) == 0
     assert len(user_druguses) == 0
 
-    with crud.get_session() as session:
-        saved_druguses: list[SavedDrugUse] = session.query(SavedDrugUse).all()
-        saved_paincases: list[SavedPainCase] = session.query(SavedPainCase).all()
+    async with crud.get_session() as session:
+        result = await session.scalars(select(SavedUser))
+        saved_users: list[SavedUser] = result.unique().all()
+        result = await session.scalars(select(SavedDrugUse))
+        saved_druguses: list[SavedDrugUse] = result.all()
+        result = await session.scalars(select(SavedPainCase))
+        saved_paincases: list[SavedPainCase] = result.unique().all()
 
+    assert len(saved_users) == 1
+    assert len(saved_paincases) == 3
+    assert len(saved_druguses) == 5
+
+    # Del 2nd user
+    await crud.delete_user(telegram_id=456)
+    users = await crud.get_users()
+    assert len(users) == 0
+
+    async with crud.get_session() as session:
+        result = await session.scalars(select(SavedUser))
+        saved_users: list[SavedUser] = result.unique().all()
+        result = await session.scalars(select(SavedDrugUse))
+        saved_druguses: list[SavedDrugUse] = result.all()
+        result = await session.scalars(select(SavedPainCase))
+        saved_paincases: list[SavedPainCase] = result.unique().all()
+
+    assert len(saved_users) == 2
     assert len(saved_paincases) == 3
     assert len(saved_druguses) == 5
 
 
-# async def test_multiple_connections():
-#     await asyncio.gather(
-#         *[
-#             crud.create_user(
-#                 telegram_id=i,
-#                 first_name=str(i) + 'QQ',
-#                 user_name=str(i) + 'WW'
-#             ) for i in range(1000, 2000)
-#         ]
-#     )
+async def test_multiple_connections():
+    t0 = time.time()
+    await asyncio.gather(
+        *[
+            crud.create_user(
+                telegram_id=i,
+                first_name=str(i) + 'QQ',
+                user_name=str(i) + 'WW'
+            ) for i in range(1000, 2000)
+        ]
+    )
+    consumed_time = time.time() - t0
+    users = await crud.get_users()
+    assert len(users) == 1000
+
+    logger.info(f'1000 users created in {consumed_time:.2f} sec ({consumed_time / 1000:.4f} sec per user)')
+
+
+async def test_delete_item():
+    data = dict(
+        date=datetime.date(2020, 1, 1),
+        amount='100',
+        drugname='ColaZero',
+        owner_id=1000
+    )
+    await crud.report_druguse(**data)
+    druguses: list[DrugUse] = await crud.get_user_druguses(user_id=1000)
+    assert len(druguses) == 1
+    await crud.delete_item(druguses[0])
+    druguses: list[DrugUse] = await crud.get_user_druguses(user_id=1000)
+    assert len(druguses) == 0
+
+
+async def test_active_super_active():
+    pass

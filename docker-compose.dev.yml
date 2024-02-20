@@ -5,17 +5,29 @@ services:
     container_name: migrebot
 #    restart: always
     depends_on:
-#      rabbitmq:
-#        condition: service_started
+      redis:
+        condition: service_started
       db:
         condition: service_started
-    env_file:
-      - .env   # Remove for prod
     build: ./
+    command: python -m src.main
+    environment:
+      - API_TOKEN=${API_TOKEN:?err}
+      - POSTGRES_USER=${POSTGRES_USER:?err}
+      - POSTGRES_PASS=${POSTGRES_PASS:?err}
+      - MY_TG_ID=${MY_TG_ID}
+      - PAYMENTS_TOKEN_RU=${PAYMENTS_TOKEN_RU:?err}
     stdin_open: true
     tty: true
     volumes:
       - persistent-data:/usr/persistent_data
+
+  redis:
+    container_name: redis
+    image: redis:7.0.7
+    restart: always
+    expose:
+      - 6379
 
 #  rabbitmq:
 #    container_name: rabbitmq

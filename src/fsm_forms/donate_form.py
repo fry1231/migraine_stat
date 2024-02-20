@@ -1,16 +1,14 @@
-from aiogram import Bot, Dispatcher, types
+from aiogram import types
 from aiogram.types.message import ContentTypes
-import aiogram.utils.markdown as md
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.types import ParseMode
+
+from db import crud
 from src.bot import dp, bot
 from src.fsm_forms import keyboards as kb
 from db import crud
-from src.utils import notify_me
-from src.settings import PAYMENTS_TOKEN_RU
-import os
+from src.misc.utils import notify_me
+from src.config import PAYMENTS_TOKEN_RU
 
 
 class Donation(StatesGroup):
@@ -26,25 +24,11 @@ async def get_user_desc(message: types.Message):
     return f'{user.telegram_id} {user.first_name}{username} '
 
 
-@dp.message_handler(state='*', commands='cancel')
-@dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
-async def cancel_handler(message: types.Message, state: FSMContext):
-    """
-    Allow user to cancel any action
-    """
-    current_state = await state.get_state()
-    if current_state is None:
-        return
-
-    # Cancel state and inform user about it
-    await state.finish()
-    # And remove keyboard (just in case)
-    await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
-
-
-@dp.message_handler(commands=['donate'])
-async def donate_entry(message: types.Message):
+@dp.message_handler(commands=['donate'], state='*')
+async def donate_entry(message: types.Message, state: FSMContext = None):
     """Conversation entrypoint"""
+    if state and await state.get_state():
+        await state.finish()
     # Set state
     user_desc = await get_user_desc(message)
     await notify_me(f'{user_desc} entered DonateForm')
