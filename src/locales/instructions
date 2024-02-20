@@ -28,8 +28,9 @@ pybabel compile -d locales -D messages
 
 
 
-Using excel for translation:
-### po2xls extraction
+Using excel for translation
+Inside locales folder:
+### po2xls extraction (careful, often skips \n)
 po2xls -o messages.xlsx en/LC_MESSAGES/messages.po fr/LC_MESSAGES/messages.po es/LC_MESSAGES/messages.po uk/LC_MESSAGES/messages.po
 ### xls2po
 xls2po en messages.xlsx en/LC_MESSAGES/messages.po

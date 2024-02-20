@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2024-02-19 22:16+0100\n"
-"PO-Revision-Date: 2024-02-19 22:26+0100\n"
+"PO-Revision-Date: 2024-02-20 23:46+0100\n"
 "Last-Translator: \n"
 "Language-Team: en <LL@li.org>\n"
 "Language: en\n"
@@ -851,7 +851,7 @@ msgstr ""
 "🔘 /medications - add or remove the medications you are using\n"
 "🔘 /calendar - change records in the calendar\n"
 "🔘 /statistics - download your pain or medication statistics\n"
-"🔘 /settings - customize the language and time of alerts\""
+"🔘 /settings - customize the language and time of alerts"
 
 #. NOTE 1
 #. NOTE 31
