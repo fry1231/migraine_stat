@@ -11,7 +11,7 @@ check_vars:
   when: manual
   script:
     - |
-      if [ -z "$API_TOKEN" ] || [ -z "$RABBITMQ_USER" ] || [ -z "$RABBITMQ_PASS" ] || [ -z "$RABBITMQ_HOST" ] || [ -z "$MY_TG_ID" ] || [ -z "$POSTGRES_USER" ] || [ -z "$POSTGRES_PASS" ] || [ -z "$PAYMENTS_TOKEN_RU" ]; then
+      if [ -z "$API_TOKEN" ] || [ -z "$MY_TG_ID" ] || [ -z "$POSTGRES_USER" ] || [ -z "$POSTGRES_PASS" ] || [ -z "$PAYMENTS_TOKEN_RU" ] || [ -z "IN_PRODUCTION" ]; then
         echo "Error: Missing one or more required environment variables."
         exit 1
       fi
