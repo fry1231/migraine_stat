@@ -210,9 +210,19 @@ async def change_timezone_geolocation_callback(message: types.Message):
                      f' lon: {message.location.longitude})')
     elif len(tz_list) == 1:
         new_tz = tz_list[0]
+        if new_tz == 'Europe/Kyiv':
+            new_tz = 'Europe/Kiev'
         old_tz = user.timezone
         old_utc_time = user.utc_notify_at
-        new_utc_time = change_timezone_get_utc(old_utc_time, old_tz, new_tz)
+        try:
+            new_utc_time = change_timezone_get_utc(old_utc_time, old_tz, new_tz)
+        except pytz.exceptions.UnknownTimeZoneError:
+            await message.reply(_('Не удалось определить часовой пояс по геолокации, попробуйте другой способ'),
+                                reply_markup=kb_change_timezone())
+            logger.error(f'Could not get timezone from geolocation for user {user_id} '
+                         f'(lat: {message.location.latitude},'
+                         f' lon: {message.location.longitude})')
+            return
         await sql.change_user_props(telegram_id=user_id, timezone=new_tz, utc_notify_at=new_utc_time)
         logger.info(f'User {user_id} changed timezone to {new_tz} by geolocation')
         await change_settings(message)
@@ -236,7 +246,7 @@ async def change_timezone_manual_callback(callback_query: types.CallbackQuery):
     old_utc_time = user.utc_notify_at
     new_utc_time = change_timezone_get_utc(old_utc_time, old_tz, new_tz)
     await sql.change_user_props(telegram_id=user_id, timezone=new_tz, utc_notify_at=new_utc_time)
-    logger.info(f'User {user_id} changed timezone to {new_tz} by geolocation')
+    logger.info(f'User {user_id} changed timezone to {new_tz} manually')
     await change_settings(callback_query)
 
 
