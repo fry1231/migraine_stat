@@ -40,7 +40,7 @@ test:
   when: manual
   script:
     - cd /usr/migrebot
-    - docker compose up -d rabbitmq
+    - docker compose up -d redis
     - docker compose run migrebot pytest --verbose
 
 run:
