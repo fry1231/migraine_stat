@@ -47,7 +47,7 @@ async def set_bot_commands():
             if not result:
                 logger.error(f'Error while setting bot commands for {locale}')
     except RetryAfter:
-        logger.error('RetryAfter error while setting bot name')
+        logger.error('RetryAfter error while setting bot commands')
 
 
 async def set_bot_description():
@@ -80,15 +80,18 @@ async def set_bot_description():
 
             async def set_long_description_after(delay_seconds: int, desc: str, language_code: str):
                 await asyncio.sleep(delay_seconds)
-                result = await bot.request(
-                    'setMyDescription',
-                    data={
-                        'description': desc,
-                        'language_code': language_code
-                    },
-                )
-                if not result:
-                    logger.error(f'Error while setting bot description for {language_code}')
+                try:
+                    result = await bot.request(
+                        'setMyDescription',
+                        data={
+                            'description': desc,
+                            'language_code': language_code
+                        },
+                    )
+                    if not result:
+                        logger.error(f'Error while setting bot description for {language_code}')
+                except RetryAfter:
+                    logger.error('RetryAfter error while setting bot description after')
 
             desc = {
                 'ru': 'Этот бот предназначен для ведения дневника головных болей.\n'
@@ -130,4 +133,4 @@ async def set_bot_description():
                 if not result:
                     logger.error(f'Error while setting bot description for {locale}')
     except RetryAfter:
-        logger.error('RetryAfter error while setting bot name')
+        logger.error('RetryAfter error while setting bot description')

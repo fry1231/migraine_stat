@@ -4,7 +4,7 @@ from sqlalchemy import select, func, and_, delete, update
 
 from db.sql import get_session
 from db.redis.crud import update_everyday_report
-from db.models import User, PainCase, DrugUse, Pressure, SavedPainCase, SavedDrugUse, SavedUser, SavedPressure
+from db.models import User, PainCase, DrugUse, Pressure, SavedPainCase, SavedDrugUse, SavedUser, SavedPressure, Drug
 from db.redis.models import PydanticUser
 
 
@@ -169,6 +169,10 @@ async def delete_user(telegram_id: int) -> bool:
         result = await session.scalars(select(Pressure).where(Pressure.owner_id == telegram_id))
         pressures: list[Pressure] = result.all()
 
+        # Drugs
+        result = await session.scalars(select(Drug).where(Drug.owner_id == telegram_id))
+        drugs: list[Drug] = result.all()
+
         # Save them to "Saved..." tables
         to_add: list[SavedPainCase | SavedDrugUse | SavedUser] = []
         to_add += [SavedUser.copy_from(db_user)]
@@ -184,7 +188,11 @@ async def delete_user(telegram_id: int) -> bool:
                     first_name=db_user.first_name,
                     last_name=None,
                     user_name=db_user.user_name,
-                    language=db_user.language
+                    language=db_user.language,
+                    n_paincases=len(user_pains),
+                    n_druguses=len(associated_druguses) + len(nonassoc_druguses),
+                    n_pressures=len(pressures),
+                    n_medications=len(drugs)
                 )]
         )
         # Cascade delete user and associated objects from the main tables

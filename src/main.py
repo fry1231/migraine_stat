@@ -22,7 +22,8 @@ async def notify_users_hourly():
     """
     utc_hour = datetime.datetime.utcnow().hour
     user_list: list[User] = await sql.users_by_notif_hour(utc_hour)
-    deleted_users: list[PydanticUser] = []
+    if user_list:
+        logger.info(f'Notifying {len(user_list)} users')
     t = datetime.datetime.today()
     time_notified = datetime.datetime.now()
     notified_users_ids = []
@@ -40,14 +41,8 @@ async def notify_users_hourly():
                 await regular_report(user_instance=user, missing_days=notification_period_days)
                 notified_users_ids.append(user.telegram_id)
             except (BotBlocked, UserDeactivated):
-                if await sql.delete_user(user.telegram_id):
-                    deleted_users.append(PydanticUser(
-                        telegram_id=user.telegram_id,
-                        first_name=user.first_name,
-                        last_name=user.last_name,
-                        user_name=user.user_name
-                    ))
-                else:
+                result = await sql.delete_user(user.telegram_id)
+                if not result:
                     await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')
             except NetworkError:
                 await notify_me(f'User {user.telegram_id} Network Error')

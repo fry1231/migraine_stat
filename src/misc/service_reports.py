@@ -29,13 +29,12 @@ async def everyday_report(reset_old_one: bool = True) -> None:
 
     # Who deleted?
     text_deleted = 'Deleted users:\n'
+    user: PydanticUser
     for i, user in enumerate(deleted_users):
         username = '' if user.user_name is None else 't.me/' + user.user_name
-        active = f'active' if user.telegram_id in active_users_ids else ''
-        if active != '':  # How many rows in db from that user
-            user_pains = await sql.get_user_pains(user.telegram_id)
-            n_pains = len(user_pains)
-            active += f' ({n_pains} entries)'
+        active = ''
+        if any([user.n_paincases, user.n_druguses, user.n_pressures, user.n_medications]):
+            active += f' ({user.n_paincases} pain, {user.n_druguses} druguses, {user.n_pressures} pressures, {user.n_medications} meds)'
         text_deleted += f'{i+1}. {user.first_name} {username} {active} deleted\n'
     text_deleted += '\n'
 
@@ -86,13 +85,11 @@ async def notif_of_new_users() -> str:
     current_report = await redis_crud.get_current_report()
     users_list: list[PydanticUser] = current_report.new_users
 
-    # Emptying report for the next day users
-    await redis_crud.init_everyday_report()
-
     # Construct notification text
     text = f'{len(users_list)} new users'
     if len(users_list) != 0:
         text += ':'
+    user: PydanticUser
     for i, user in enumerate(users_list):
         telegram_id = user.telegram_id
         first_name = user.first_name

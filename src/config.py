@@ -45,6 +45,7 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+logging.getLogger('schedule').setLevel(logging.ERROR)
 
 if IN_PRODUCTION:
     logger.setLevel(logging.INFO)
