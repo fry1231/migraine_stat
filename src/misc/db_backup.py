@@ -31,6 +31,7 @@ async def do_backup() -> bool:
     logger.info('Starting backup')
     time_now = datetime.datetime.now(tz=datetime.timezone.utc).strftime('%Y-%m-%d_%H:%M:%S%z')
     filepath = PERSISTENT_DATA_DIR / f'{time_now}.migraine_backup'
+    filepath = filepath.as_posix()
     # assert ' ' not in filepath, 'Spaces in filepath are not allowed'
     cmd = f'pg_dump --data-only --dbname=postgresql://{POSTGRES_USER}:{POSTGRES_PASS}@migraine_db:5432/db_prod' \
           f' | gzip -c > {filepath}'
