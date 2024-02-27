@@ -6,6 +6,7 @@ from db.models import Drug
 from db import sql
 from src.bot import dp, _
 import src.misc.keyboards as kb
+from src.config import logger
 
 
 ## Medications
@@ -71,4 +72,5 @@ async def delete_medication_menu(callback_query: types.Message | types.CallbackQ
 async def delete_medication(callback_query: types.CallbackQuery):
     drug_id = int(callback_query.data.split('_')[-1])
     await sql.delete_drug(drug_id)
+    logger.info(f'User {callback_query.from_user.id} deleted medication {drug_id}')
     await medications_entry(callback_query)

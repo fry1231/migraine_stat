@@ -136,6 +136,7 @@ async def delete_entry(callback_query: types.CallbackQuery, state: FSMContext = 
         await callback_query.answer(_('Запись не найдена'))
         return
     await sql.delete_item(obj)
+    logger.info(f'User {callback_query.from_user.id} deleted {entity} {entry_id}')
     if isinstance(obj, Pressure):
         callback = f'calendar_{obj.datetime:%d.%m.%Y}'
     elif isinstance(obj, PainCase) or isinstance(obj, DrugUse):

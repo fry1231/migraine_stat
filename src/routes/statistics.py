@@ -144,6 +144,7 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
                 write_xlsx(buf, pains_statistics)
                 await pre_message.edit_text(_('Готово! Высылаю файл с данными...'))
                 await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.xlsx'))
+                logger.info(f'User {user_id}. Sent PAIN statistics for {n_days} days')
                 await bot.delete_message(user_id, pre_message.message_id)
     except asyncio.TimeoutError:
         await pre_message.edit_text(_('В данный момент сервер загружен, повторите, пожалуйста, через пару минут'))
@@ -196,6 +197,7 @@ async def get_medication_statistics_callback(callback_query: types.CallbackQuery
                 write_xlsx(buf, medications_statistics)
                 await pre_message.edit_text(_('Готово! Высылаю файл с данными...'))
                 await bot.send_document(user_id, types.InputFile(buf, 'medications_statistics.xlsx'))
+                logger.info(f'User {user_id}. Sent MEDICATION statistics for {n_days} days')
                 await bot.delete_message(user_id, pre_message.message_id)
     except asyncio.TimeoutError:
         await pre_message.edit_text(_('В данный момент сервер загружен, повторите, пожалуйста, через пару минут')
@@ -254,6 +256,7 @@ async def get_pressure_statistics_callback(callback_query: types.CallbackQuery):
                 write_xlsx(buf, pressure_stats)
                 await pre_message.edit_text(_('Готово! Высылаю файл с данными...'))
                 await bot.send_document(user_id, types.InputFile(buf, 'pressure_statistics.xlsx'))
+                logger.info(f'User {user_id}. Sent PRESSURE statistics for {n_days} days')
                 await bot.delete_message(user_id, pre_message.message_id)
     except asyncio.TimeoutError:
         await pre_message.edit_text(_('В данный момент сервер загружен, повторите, пожалуйста, через пару минут')

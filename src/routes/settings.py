@@ -153,6 +153,7 @@ async def change_lang_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     language = callback_query.data.split('_')[-1]
     await sql.change_user_props(telegram_id=user_id, language=language)
+    logger.info(f'User {user_id} changed language to {language}')
     await change_user_language(user_id, language)
     await change_settings(callback_query)
 
@@ -213,6 +214,7 @@ async def change_timezone_geolocation_callback(message: types.Message):
         old_utc_time = user.utc_notify_at
         new_utc_time = change_timezone_get_utc(old_utc_time, old_tz, new_tz)
         await sql.change_user_props(telegram_id=user_id, timezone=new_tz, utc_notify_at=new_utc_time)
+        logger.info(f'User {user_id} changed timezone to {new_tz} by geolocation')
         await change_settings(message)
     elif len(tz_list) > 1:
         keyboard = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -226,7 +228,7 @@ async def change_timezone_geolocation_callback(message: types.Message):
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('ch_tz_to_'))
-async def change_timezone_geolocation_callback(callback_query: types.CallbackQuery):
+async def change_timezone_manual_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     new_tz = callback_query.data.split('_', maxsplit=4)[-1]
     user: User = await sql.get_user(telegram_id=user_id)
@@ -234,6 +236,7 @@ async def change_timezone_geolocation_callback(callback_query: types.CallbackQue
     old_utc_time = user.utc_notify_at
     new_utc_time = change_timezone_get_utc(old_utc_time, old_tz, new_tz)
     await sql.change_user_props(telegram_id=user_id, timezone=new_tz, utc_notify_at=new_utc_time)
+    logger.info(f'User {user_id} changed timezone to {new_tz} by geolocation')
     await change_settings(callback_query)
 
 
@@ -392,6 +395,7 @@ async def change_notif_hour_callback(callback_query: types.CallbackQuery):
     local_notify_at: datetime.time = datetime.time(hour, 0)
     utc_notify_at = local_to_utc(local_notify_at, user.timezone)
     await sql.change_user_props(telegram_id=user_id, utc_notify_at=utc_notify_at)
+    logger.info(f'User {user_id} changed notification time to {utc_notify_at} UTC')
     await change_settings(callback_query)
 
 
@@ -433,4 +437,5 @@ async def reschedule_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     n_days = int(callback_query.data.split('_')[-1])
     await sql.change_user_props(telegram_id=user_id, notify_every=n_days)
+    logger.info(f'User {user_id} changed notification frequency to {n_days} days')
     await change_settings(callback_query)
