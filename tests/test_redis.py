@@ -20,6 +20,7 @@ def event_loop():
 @pytest.fixture(scope="module", autouse=True)
 async def resource():
     assert redis_conn
+    await redis_conn.flushdb()
     yield
     os.environ["IS_TESTING"] = '0'
     await redis_conn.flushdb()
@@ -37,4 +38,4 @@ async def test_send_messages():
 
 async def test_notification_new_users():
     text = await notif_of_new_users()
-    assert "5 new users:\n(123123123121)" in text and '4QQ' in text
+    assert "5 new users:\n1. (123123123121)" in text and '4QQ' in text

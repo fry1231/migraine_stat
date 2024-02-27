@@ -182,7 +182,7 @@ async def delete_user(telegram_id: int) -> bool:
                 PydanticUser(
                     telegram_id=db_user.telegram_id,
                     first_name=db_user.first_name,
-                    last_name=db_user.last_name,
+                    last_name=None,
                     user_name=db_user.user_name,
                     language=db_user.language
                 )]
