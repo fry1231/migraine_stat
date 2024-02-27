@@ -1,14 +1,11 @@
 import random
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from db import crud
-from db import crud
-from db.redis_crud import update_everyday_report
-import src.misc.keyboards as kb
+from db import sql
+from db.models import User
 from src.bot import dp, bot, _
-from src.config import logger, IN_PRODUCTION
-from db.redis_models import PydanticUser
 
 
 @dp.message_handler(commands=['start', 'help'], state='*')
@@ -24,7 +21,7 @@ async def send_welcome(message: types.Message, state: FSMContext = None):
     if message.from_user.is_bot:
         return
     # Get current user, if not exists - add to the DB
-    user = await crud.get_user(telegram_id=user_id)
+    user = await sql.get_user(telegram_id=user_id)
     if not user:
         # User info
         first_name = message.from_user.first_name
@@ -34,13 +31,12 @@ async def send_welcome(message: types.Message, state: FSMContext = None):
         if language not in ['ru', 'uk', 'en', 'fr', 'es']:
             language = 'en'
         # Add user to the DB
-        user = await crud.create_user(
+        await sql.create_user(
             telegram_id=user_id,
             first_name=first_name,
             user_name=user_name,
             language=language
         )
-        logger.info(f'New user: {user.__dict__}')
     text = \
         _("""Привет! Я бот для ведения дневника головных болей, приёма лекарств и давления.
     Список доступных команд:
@@ -54,7 +50,7 @@ async def send_welcome(message: types.Message, state: FSMContext = None):
     await message.reply(text)
 
 
-async def regular_report(user_id: int, missing_days: int):
+async def regular_report(user_instance: User, missing_days: int):
     """
     Ask each user if there was pain during the days
     If so - start report_paincase_form
@@ -64,44 +60,54 @@ async def regular_report(user_id: int, missing_days: int):
             "Buon giorno", "Ave", "Lab dien", "Sveiki", "Sveikas", "Guten Tag", "Goddag", "Dzien dobry", "Ola", "Buna",
             "Здраво", "Dobry den", "Sawatdi", "Merhaba", "Привіт", "Paivaa", "Bonjour", "Namaste", "Zdravo",
             "Dobry den", "God dag", "Saluton", "Tervist", "Konnichi wa"]
+    language = user_instance.language
     temp = {
         # NOTE 1
-        '1': _('день'),
+        '1': _('день', locale=language),
         # NOTE 2
-        '2': _('дня'),
+        '2': _('дня', locale=language),
         # NOTE 3
-        '3': _('дня'),
+        '3': _('дня', locale=language),
         # NOTE 7
-        '7': _('дней'),
+        '7': _('дней', locale=language),
         # NOTE 31
-        '31': _('день')
+        '31': _('день', locale=language)
     }
     if str(missing_days) in temp:
         suffix = temp[str(missing_days)]
     else:
         suffix = 'дней'
     if missing_days == 1:
-        text = _("{greetings}! Болела ли сегодня голова?").format(greetings=random.choice(hi_s))
+        text = _("{greetings}! Болела ли сегодня голова?", locale=language).format(
+            greetings=random.choice(hi_s)
+        )
     else:
-        text = _("{greetings}! Болела ли голова за последние {missing_days} {suffix}?").format(
+        text = _("{greetings}! "
+                 "Болела ли голова за последние {missing_days} {suffix}?", locale=language).format(
             greetings=random.choice(hi_s),
             missing_days=missing_days,
             suffix=suffix
         )
+    keyboard = InlineKeyboardMarkup()
+    keyboard.insert(InlineKeyboardButton(_('Да :(', locale=language), callback_data='pain'))
+    keyboard.insert(
+        InlineKeyboardButton(_('Нет, всё хорошо! / Уже добавлено', locale=language), callback_data='nopain'))
     await bot.send_message(
-        user_id,
+        user_instance.telegram_id,
         text,
-        reply_markup=kb.yes_no_missing()
+        reply_markup=keyboard
     )
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data == 'nopain', state='*')
 async def process_no_pain(callback_query: types.CallbackQuery, state: FSMContext):
+    if state and await state.get_state():
+        await state.finish()
     # NOTE Give some nice words to user if the user did not have a headache. Separate by comma + space
     nice_words_str = _("Прекрасно, Восхитительно, Чудесно, Великолепно, Круто, Здорово, Дивно, Чотко, Благодать, "
                        "Потрясающе, Изумительно, Роскошно, Отменно, Бесподобно, Шикарно, Распрекрасно, Прелестно, "
                        "Любо-дорого, Похвально, Обворожительно, Балдёж, Кайф, Неплохо, Превосходно")
     nice_words = nice_words_str.split(', ')
-    await callback_query.message.edit_text(f'{random.choice(nice_words)}!')
+    await callback_query.message.reply(f'{random.choice(nice_words)}!', reply_markup=types.ReplyKeyboardRemove())
 
 # For c.data == 'pain' handler in fsm_forms/report_paincase_form.py

@@ -1,10 +1,11 @@
 from aiogram import types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, \
     ReplyKeyboardRemove
-from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher.filters.state import StatesGroup
+from src.fsm_forms._custom import CustomState as State
 from aiogram.dispatcher import FSMContext
 
-from db import crud
+from db import sql
 from src.bot import bot, dp, _
 
 
@@ -132,10 +133,10 @@ async def process_pulse_ones(callback_query: types.CallbackQuery, state: FSMCont
             data['pulse'] = None
         else:
             data['pulse'] = int(callback_query.data.replace('ones', ''))
-        await crud.report_pressure(systolic=data['systolic'],
-                                                diastolic=data['diastolic'],
-                                                pulse=data['pulse'],
-                                                owner_id=callback_query.from_user.id)
+        await sql.report_pressure(systolic=data['systolic'],
+                                  diastolic=data['diastolic'],
+                                  pulse=data['pulse'],
+                                  owner_id=callback_query.from_user.id)
     await state.finish()
     text = f"{data['systolic']}/{data['diastolic']} {data['pulse']}\n" + _("Успешно добавлено!")
     await callback_query.message.edit_text(text)

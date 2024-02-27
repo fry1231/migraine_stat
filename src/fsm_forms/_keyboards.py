@@ -1,7 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import date, timedelta
 
-from db import crud
+from db import sql
 from src.bot import _
 
 
@@ -83,7 +83,7 @@ def get_date_kb(date_today: date, callback_prefix: str):
 async def get_drugs_kb_and_drugnames(owner: int = None,
                                      exclude: list = None,
                                      add_next: bool = False):
-    drugs = await crud.get_drugs(owner)
+    drugs = await sql.get_drugs(owner)
     drugs_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     drugnames = [drug.name for drug in drugs]
     if exclude:

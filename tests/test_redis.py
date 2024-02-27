@@ -4,8 +4,8 @@ os.environ["IS_TESTING"] = '1'
 
 import pytest
 import asyncio
-from db.redis_models import PydanticUser
-from db.redis_crud import update_everyday_report
+from db.redis.models import PydanticUser
+from db.redis.crud import update_everyday_report
 from src.misc.service_reports import notif_of_new_users
 from src.config import redis_conn
 

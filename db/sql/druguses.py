@@ -2,9 +2,9 @@ import calendar
 import datetime
 from sqlalchemy import select, and_, func
 
-from db.crud import get_session
+from db.sql import get_session
 from db.models import DrugUse
-from db.redis_crud import update_everyday_report
+from db.redis.crud import update_everyday_report
 
 
 async def report_druguse(date: datetime.date | str,

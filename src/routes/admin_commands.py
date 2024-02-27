@@ -6,6 +6,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.exceptions import BotBlocked, UserDeactivated, NetworkError
 import orjson
 import yadisk
+import traceback
+import os
 
 from src.bot import dp, bot
 from src.config import PERSISTENT_DATA_DIR, logger
@@ -13,9 +15,8 @@ from src.misc.utils import notify_me
 from db.models import User
 from src.misc.filters import IsAdmin
 from src.misc.db_backup import do_backup
-from db import crud
-from db.redis_models import PydanticUser
-from db.redis_crud import update_everyday_report
+from src.misc.service_reports import everyday_report
+from db import sql
 
 
 @dp.message_handler(IsAdmin(), commands=['token'], state='*')
@@ -118,13 +119,13 @@ async def announcements_entry(message_or_query: types.Message | types.CallbackQu
         await query.message.edit_text(announcement_text, reply_markup=keyboard)
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data == 'make_announcement', state='*')
-async def make_announcement(query_or_message: types.CallbackQuery | types.Message, state: FSMContext):
+@dp.callback_query_handler(lambda c: c.data and c.data == 'make_announcement')
+async def make_announcement(query_or_message: types.CallbackQuery | types.Message):
     prep_ann = get_prepared_announcement()
     prep_langs = list(prep_ann.keys())
     n_users_by_lang = {}
     for lang in ['ru', 'en', 'fr', 'es', 'uk']:
-        n_users_by_lang[lang] = len(await crud.get_users_where(language=lang))
+        n_users_by_lang[lang] = len(await sql.get_users_where(language=lang))
     text = 'Choose language for the announcement\n'
     for lang, n_users in n_users_by_lang.items():
         text += f'{lang}: {n_users} users'
@@ -187,8 +188,8 @@ async def set_text(message: types.Message, state: FSMContext):
 #     | - send to super active (active in the last 30 days)
 #       | - send confirmation (if some translation unavailable - send en to fr & es, ru to uk, or ru to all)
 
-@dp.callback_query_handler(lambda c: c.data and c.data == 'send_announcement', state='*')
-async def send_announcement(query: types.CallbackQuery, state: FSMContext):
+@dp.callback_query_handler(lambda c: c.data and c.data == 'send_announcement')
+async def send_announcement(query: types.CallbackQuery):
     prep_ann = get_prepared_announcement()
     if len(prep_ann) == 0:
         await query.message.edit_text('No announcement to send', reply_markup=InlineKeyboardMarkup().add(
@@ -201,9 +202,9 @@ async def send_announcement(query: types.CallbackQuery, state: FSMContext):
                                       reply_markup=InlineKeyboardMarkup().add(
                                           InlineKeyboardButton('back', callback_data='announcements')))
         return
-    n_all = await crud.get_users(return_count=True)
-    n_active = await crud.get_users(active=True, return_count=True)
-    n_superactive = await crud.get_users(super_active=True, return_count=True)
+    n_all = await sql.get_users(return_count=True)
+    n_active = await sql.get_users(active=True, return_count=True)
+    n_superactive = await sql.get_users(super_active=True, return_count=True)
     keyboard = InlineKeyboardMarkup()
     keyboard.add(InlineKeyboardButton(f'Send to all ({n_all})', callback_data='send_all'))
     keyboard.add(InlineKeyboardButton(f'Send to active ({n_active})', callback_data='send_active'))
@@ -212,36 +213,36 @@ async def send_announcement(query: types.CallbackQuery, state: FSMContext):
     await query.message.edit_text(get_prepared_announcement_text() + '\n\nChoose groups to send', reply_markup=keyboard)
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('send_') and 'confirmation' not in c.data, state='*')
-async def send_announcement_to_group(query: types.CallbackQuery, state: FSMContext):
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('send_') and 'confirmation' not in c.data)
+async def send_announcement_to_group(query: types.CallbackQuery):
     group = query.data.split('_')[-1]
     n_users: int
     if group == 'all':
-        n_users = await crud.get_users(return_count=True)
+        n_users = await sql.get_users(return_count=True)
     elif group == 'active':
-        n_users = await crud.get_users(active=True, return_count=True)
+        n_users = await sql.get_users(active=True, return_count=True)
     elif group == 'superactive':
-        n_users = await crud.get_users(super_active=True, return_count=True)
+        n_users = await sql.get_users(super_active=True, return_count=True)
     await query.message.edit_text(f'Send to {group} ({n_users} users)?', reply_markup=InlineKeyboardMarkup().add(
         InlineKeyboardButton('Yes', callback_data='send_confirmation_' + group),
         InlineKeyboardButton('No', callback_data='announcements')))
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('send_confirmation_'), state='*')
-async def send_announcement_confirmation(query: types.CallbackQuery, state: FSMContext):
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('send_confirmation_'))
+async def send_announcement_confirmation(query: types.CallbackQuery):
     group = query.data.split('_')[-1]
     prep_ann = get_prepared_announcement()
     users: list[User]
     if group == 'all':
-        users = await crud.get_users()
+        users = await sql.get_users()
     elif group == 'active':
-        users = await crud.get_users(active=True)
+        users = await sql.get_users(active=True)
     elif group == 'superactive':
-        users = await crud.get_users(super_active=True)
+        users = await sql.get_users(super_active=True)
     await query.message.edit_text(f'Sending to {group} ({len(users)} users)...')
     # sending
     n_sent = 0
-    for user in users:
+    for i, user in enumerate(users):
         lang = user.language
         if lang not in prep_ann:
             if lang in ['fr', 'es']:
@@ -252,11 +253,13 @@ async def send_announcement_confirmation(query: types.CallbackQuery, state: FSMC
             await bot.send_message(user.telegram_id, prep_ann[lang])
             n_sent += 1
         except (BotBlocked, UserDeactivated):
-            await crud.delete_user(user.telegram_id)
+            await sql.delete_user(user.telegram_id)
         except NetworkError:
             await logger.error(err := f'User {user.telegram_id} Network Error')
             await notify_me(err)
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(1)
+        if i % 100 == 0:
+            await query.message.edit_text(f'Sending to {group} {i}/{len(users)} users...')
     await query.message.edit_text(f'Sent to {n_sent} users successfully')
 
 
@@ -264,8 +267,8 @@ async def send_announcement_confirmation(query: types.CallbackQuery, state: FSMC
 #   | - back
 #   | - delete confirmation
 
-@dp.callback_query_handler(lambda c: c.data and c.data == 'delete_announcement', state='*')
-async def delete_announcement(query: types.CallbackQuery, state: FSMContext):
+@dp.callback_query_handler(lambda c: c.data and c.data == 'delete_announcement')
+async def delete_announcement(query: types.CallbackQuery):
     prep_ann = get_prepared_announcement()
     if len(prep_ann) == 0:
         await query.message.edit_text('No announcement to delete', reply_markup=InlineKeyboardMarkup().add(
@@ -278,10 +281,48 @@ async def delete_announcement(query: types.CallbackQuery, state: FSMContext):
     await query.message.edit_text(get_prepared_announcement_text() + '\n\nDelete announcement?', reply_markup=keyboard)
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data == 'delete_confirmation', state='*')
-async def delete_announcement_confirmation(query: types.CallbackQuery, state: FSMContext):
+@dp.callback_query_handler(lambda c: c.data and c.data == 'delete_confirmation')
+async def delete_announcement_confirmation(query: types.CallbackQuery):
     with open(PERSISTENT_DATA_DIR / 'announcement.txt', 'w') as f:
         f.write('{}')
     await query.message.edit_text('Announcement deleted', reply_markup=InlineKeyboardMarkup().add(
         InlineKeyboardButton('back', callback_data='announcements')
     ))
+
+
+@dp.message_handler(IsAdmin(), commands=['report'], state='*')
+async def report(message: types.Message):
+    await everyday_report(reset_old_one=False)
+
+
+# /write %user_id% text
+@dp.message_handler(IsAdmin(), commands=['write'], state='*')
+async def write(message: types.Message):
+    """
+    Write a message to a user, identified by user_id
+    """
+    text = message.text.replace('/write', '').strip()
+    user_id, text = text.split(' ', maxsplit=1)[0], text.split(' ', maxsplit=1)[1]
+    try:
+        user_id = int(user_id)
+        user: User = await sql.get_user(telegram_id=user_id)
+        if user:
+            await bot.send_message(user.telegram_id, text)
+            await message.reply(f'Message sent to {user_id} ({user.first_name} t.me/{user.user_name})')
+        else:
+            await message.reply(f'User {user_id} not found')
+    except Exception:
+        await message.reply(f'Error while sending message to {user_id}:\n{traceback.format_exc()}')
+
+
+@dp.message_handler(IsAdmin(), commands=['maintenance_on'], state='*')
+async def maintenance_on(message: types.Message):
+    os.environ['MAINTENANCE'] = '1'
+    await message.reply(f'Maintenance mode is {os.getenv("MAINTENANCE")}')
+
+
+@dp.message_handler(IsAdmin(), commands=['maintenance_off'], state='*')
+async def maintenance_off(message: types.Message):
+    os.environ['MAINTENANCE'] = '0'
+    await message.reply(f'Maintenance mode is {os.getenv("MAINTENANCE")}')
+

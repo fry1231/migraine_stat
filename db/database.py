@@ -11,7 +11,7 @@ TEST_DATABASE_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASS}@migra
 
 engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
-    echo=not IN_PRODUCTION
+    # echo=not IN_PRODUCTION
 )
 
 test_engine = create_async_engine(

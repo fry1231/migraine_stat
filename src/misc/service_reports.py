@@ -1,11 +1,13 @@
 from src.bot import bot
 from src.config import MY_TG_ID
+from src.fsm_forms import available_fsm_states
 from db.models import PainCase, DrugUse, Pressure, Drug
-from db.redis_models import PydanticUser, EverydayReport
-from db import redis_crud, crud
+from db.redis.models import PydanticUser, EverydayReport
+import db.redis.crud as redis_crud
+import db.sql as sql
 
 
-async def everyday_report() -> None:
+async def everyday_report(reset_old_one: bool = True) -> None:
     report: EverydayReport = await redis_crud.get_current_report()
     deleted_users: list[PydanticUser] = report.deleted_users
 
@@ -14,15 +16,15 @@ async def everyday_report() -> None:
     new_users_text += f'{report.n_notified_users} users notified\n'
 
     # Count users with at least one added row in Pains table - they are active_users
-    active_users = await crud.get_users(active=True)
+    active_users = await sql.get_users(active=True)
     active_users_ids = [user.telegram_id for user in active_users]
 
     # Users who have something recorded within the last 31 days - superactive users
-    n_superactive_users = await crud.get_users(super_active=True, return_count=True)
+    n_superactive_users = await sql.get_users(super_active=True, return_count=True)
 
     # Users who have regular notification
-    not_notifiable_users = await crud.get_users_where(notify_every=-1)
-    n_users = await crud.get_users(return_count=True)
+    not_notifiable_users = await sql.get_users_where(notify_every=-1)
+    n_users = await sql.get_users(return_count=True)
     n_notifiable_users = n_users - len(not_notifiable_users)
 
     # Who deleted?
@@ -31,17 +33,17 @@ async def everyday_report() -> None:
         username = '' if user.user_name is None else 't.me/' + user.user_name
         active = f'active' if user.telegram_id in active_users_ids else ''
         if active != '':  # How many rows in db from that user
-            user_pains = await crud.get_user_pains(user.telegram_id)
+            user_pains = await sql.get_user_pains(user.telegram_id)
             n_pains = len(user_pains)
             active += f' ({n_pains} entries)'
         text_deleted += f'{i+1}. {user.first_name} {username} {active} deleted\n'
     text_deleted += '\n'
 
     # number of rows in Pain, DrugUse, Pressure, Drug tables
-    n_pains = await crud.get_all_(PainCase, return_count=True)
-    n_druguses = await crud.get_all_(DrugUse, return_count=True)
-    n_pressures = await crud.get_all_(Pressure, return_count=True)
-    n_medications = await crud.get_all_(Drug, return_count=True)
+    n_pains = await sql.get_all_(PainCase, return_count=True)
+    n_druguses = await sql.get_all_(DrugUse, return_count=True)
+    n_pressures = await sql.get_all_(Pressure, return_count=True)
+    n_medications = await sql.get_all_(Drug, return_count=True)
 
     stats = f'Pains: {report.n_pains} / {n_pains}\n' \
             f'DrugUses: {report.n_druguses} / {n_druguses}\n' \
@@ -53,6 +55,9 @@ async def everyday_report() -> None:
            f'{text_deleted}' \
            f'{stats}'
     await bot.send_message(chat_id=MY_TG_ID, text=text)
+    if reset_old_one:
+        await redis_crud.init_everyday_report()
+        await redis_crud.init_states(available_fsm_states)
 
 
 async def notif_of_new_users() -> str:

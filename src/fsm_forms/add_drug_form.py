@@ -1,11 +1,12 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher.filters.state import StatesGroup
+from src.fsm_forms._custom import CustomState as State
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from src.bot import dp
-from src.fsm_forms import keyboards as kb
-from db import crud
+from src.fsm_forms import _keyboards as kb
+from db import sql
 from src.bot import _
 
 
@@ -82,7 +83,7 @@ async def process_is_painkiller(callback_query: types.CallbackQuery, state: FSMC
 async def process_is_temp_reducer(callback_query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data['is_temp_reducer'] = True if callback_query.data.split('_')[-1] == 'yes' else False
-    await crud.add_drug(
+    await sql.add_drug(
         name=data['name'],
         daily_max=data['daily_max'],
         is_painkiller=data['is_painkiller'],

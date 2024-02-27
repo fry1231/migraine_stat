@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from db.models import User
 
 
 class PydanticUser(BaseModel):
@@ -30,3 +29,21 @@ class EverydayReport(BaseModel):
     n_druguses: int
     n_pressures: int
     n_medications: int
+
+
+class StateUpdate(BaseModel):
+    """
+    State update, sent to 'channel:states' to reflect the changes
+    """
+    user_id: int
+    user_state: str
+    action: str    # 'set' or 'unset' or 'refresh'
+    incr_value: int
+
+
+class LogUpdate(BaseModel):
+    """
+    Log update, sent to 'channel:logs' to reflect the changes
+    """
+    log_record: str
+    log_incr_value: int

@@ -21,6 +21,8 @@ services:
     tty: true
     volumes:
       - persistent-data:/usr/persistent_data
+    networks:
+      - migrebot-network
 
   redis:
     container_name: redis
@@ -28,6 +30,8 @@ services:
     restart: always
     expose:
       - 6379
+    networks:
+      - migrebot-network
 
 #  rabbitmq:
 #    container_name: rabbitmq
@@ -53,6 +57,8 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:?err}
       - POSTGRES_PASSWORD=${POSTGRES_PASS:?err}
       - POSTGRES_DB=db_prod
+    networks:
+      - migrebot-network
 
 #  pgadmin:
 #    container_name: pgadmin4_container
@@ -74,3 +80,6 @@ volumes:
   persistent-data:
 #  pgadmin-data:
 #  rabbitmq-data:
+
+networks:
+  migrebot-network:

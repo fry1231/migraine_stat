@@ -1,12 +1,12 @@
 from aiogram import types
 from aiogram.types.message import ContentTypes
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher.filters.state import StatesGroup
+from src.fsm_forms._custom import CustomState as State
 
-from db import crud
 from src.bot import dp, bot
-from src.fsm_forms import keyboards as kb
-from db import crud
+from src.fsm_forms import _keyboards as kb
+from db import sql
 from src.misc.utils import notify_me
 from src.config import PAYMENTS_TOKEN_RU
 
@@ -17,7 +17,7 @@ class Donation(StatesGroup):
 
 async def get_user_desc(message: types.Message):
     user_id = message.from_user.id
-    user = await crud.get_user(telegram_id=user_id)
+    user = await sql.get_user(telegram_id=user_id)
     username = ''
     if user.user_name is not None:
         username = ' t.me/' + user.user_name

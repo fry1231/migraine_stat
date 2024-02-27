@@ -2,16 +2,16 @@ from aiogram import Bot, Dispatcher, types
 import aiogram.utils.markdown as md
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
-from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher.filters.state import StatesGroup
+from src.fsm_forms._custom import CustomState as State
 from aiogram.types import ParseMode
 import random
 import pytz
 
-from db import crud
 from src.bot import dp, bot, _
-from src.fsm_forms import keyboards as kb
+from src.fsm_forms import _keyboards as kb
 from src.config import logger
-from db import crud
+from db import sql
 from datetime import date, datetime, timedelta
 
 
@@ -43,7 +43,7 @@ async def add_paincase_entry(message_or_query: types.Message | types.CallbackQue
     wtf_words = _('Ну вот.|Ёмаё!|Тфу!|Ого, надеюсь, не слишком сильно!|Тысяча чертей!').split('|')
     wtf_words += ['😱', '😔', '😢', '😞', '😦']
     user_id = message_or_query.from_user.id
-    user = await crud.get_user(telegram_id=user_id)
+    user = await sql.get_user(telegram_id=user_id)
     tz = user.timezone
     date_today = datetime.now(pytz.timezone(tz)).date()
     # if user.notify_every == 1:   # If everyday notification, skip the date question??
@@ -241,7 +241,7 @@ async def process_description(message: types.Message, state: FSMContext):
             data['description'] = text
         data['owner_id'] = message.from_user.id
 
-        await crud.report_paincase(**data)
+        await sql.report_paincase(**data)
     text = _("Успешно добавлено!")
     text += _('\nГолова болела <b>{pain_date}</b>\n'
               'В течение <b>{durability} ч.</b>\n'

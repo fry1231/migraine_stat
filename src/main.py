@@ -1,16 +1,16 @@
 from aiogram import executor
-from aiogram.utils.exceptions import BotBlocked, UserDeactivated, NetworkError
 import aioschedule
 
-from src.bot import _
 from src.routes import *
-from db import crud
+from db import sql
 from db.models import User
-from db.redis_models import PydanticUser
-from db.redis_crud import update_everyday_report, get_current_report
+from db.redis.models import PydanticUser
+from db.redis.crud import init_states
+from src.fsm_forms import available_fsm_states
 from src.misc.utils import notify_me
 from src.misc.db_backup import do_backup
 from src.misc.service_reports import everyday_report
+from src.misc.init_bot_description import set_bot_name, set_bot_description, set_bot_commands
 from src.config import logger
 import datetime
 
@@ -21,7 +21,7 @@ async def notify_users_hourly():
     Ask if there was a headache during missing period, defined in notify_every attribute
     """
     utc_hour = datetime.datetime.utcnow().hour
-    user_list: list[User] = await crud.users_by_notif_hour(utc_hour)
+    user_list: list[User] = await sql.users_by_notif_hour(utc_hour)
     deleted_users: list[PydanticUser] = []
     t = datetime.datetime.today()
     time_notified = datetime.datetime.now()
@@ -37,10 +37,10 @@ async def notify_users_hourly():
         if dt >= notification_period_minutes - 65:   # Check if notif. period has passed (safety interval 65 mins incl.)
             try:
                 # Ask user about pains during the day(s)
-                await regular_report(user_id=user.telegram_id, missing_days=notification_period_days)
+                await regular_report(user_instance=user, missing_days=notification_period_days)
                 notified_users_ids.append(user.telegram_id)
             except (BotBlocked, UserDeactivated):
-                if await crud.delete_user(user.telegram_id):
+                if await sql.delete_user(user.telegram_id):
                     deleted_users.append(PydanticUser(
                         telegram_id=user.telegram_id,
                         first_name=user.first_name,
@@ -55,17 +55,20 @@ async def notify_users_hourly():
 
     # Change 'last_notified' for notified users
     if notified_users_ids:
-        await crud.batch_change_last_notified(notified_users_ids, time_notified)
+        await sql.batch_change_last_notified(notified_users_ids, time_notified)
         logger.info(f'{len(notified_users_ids)} users notified')
 
 
 async def db_healthcheck():
-    if not await crud.healthcheck():
+    if not await sql.healthcheck():
         logger.error(err := '!Database connection error!')
         await notify_me(err)
 
 
 async def scheduler():
+    """
+    TZ in docker = UTC
+    """
     aioschedule.every().hour.at(":00").do(notify_users_hourly)
     aioschedule.every().day.at("21:30").do(everyday_report)
     aioschedule.every(10).minutes.do(db_healthcheck)
@@ -76,18 +79,10 @@ async def scheduler():
 
 
 async def on_startup(__):
-    for locale in ['en', 'uk', 'fr', 'es', 'ru']:
-        language_code = None if locale == 'ru' else locale
-        await bot.set_my_commands([
-            types.bot_command.BotCommand('pain', _('запись бо-бо', locale=locale)),
-            types.bot_command.BotCommand('druguse', _('приём лекарства', locale=locale)),
-            types.bot_command.BotCommand('pressure', _('запись давления', locale=locale)),
-            types.bot_command.BotCommand('medications', _('список лекарств', locale=locale)),
-            types.bot_command.BotCommand('calendar', _('изменить записи', locale=locale)),
-            types.bot_command.BotCommand('statistics', _('статистика', locale=locale)),
-            types.bot_command.BotCommand('settings', _('настройки', locale=locale)),
-        ], language_code=language_code)
-
+    await init_states(available_fsm_states)
+    # await set_bot_name()
+    await set_bot_description()
+    await set_bot_commands()
     asyncio.create_task(scheduler())
     await notify_me('Bot restarted')
     logger.info('Bot started')

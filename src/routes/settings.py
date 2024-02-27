@@ -7,8 +7,7 @@ from tzfpy import get_tzs
 import datetime
 import orjson
 
-from db import crud
-from db import crud
+from db import sql
 from db.models import User
 from src.bot import dp, _, i18n
 from src.config import logger
@@ -19,13 +18,13 @@ import src.misc.keyboards as kb
 
 # tz_dict = {
 #     'Europe': {
-#         'Ukraine': {
+#         'Russia': {
 #             'timezones': [
-#                 'Europe/Kiev',
-#                 'Europe/Uzhgorod',
+#                 'Europe/Moscow',
+#                 'Europe/Kaliningrad',
 #                 .....
 #                 ],
-#             'code': 'UA'
+#             'code': 'RU'
 #         },
 #     },
 # }
@@ -45,8 +44,18 @@ for continent_ in tz_dict:
 #   | - back
 #   | - ru uk en fr es
 
-### timezone (current = Europe/Paris)
-#   | - back
+### Timezone (current = Europe/Paris)
+#  | - back
+#  | - share geolocation
+#    | - share geolocation 📍
+#      | - choose from several or confirmation
+#  | - choose from list
+#    | - list of continents
+#      | - list of countries
+#        | - list of timezones
+#  | - enter manually
+#    | - entering manually
+#      | - list of timezones
 
 ### notification time (current = 14:00)
 #   | - back
@@ -78,7 +87,7 @@ async def change_settings(message_or_query: types.Message | types.CallbackQuery,
     keyboard.row(InlineKeyboardButton(_('Время оповещений'), callback_data='change_notif_time'))
     keyboard.row(InlineKeyboardButton(_('Частота оповещений'), callback_data='change_notif_freq'))
 
-    user: User = await crud.get_user(telegram_id=message_or_query.from_user.id)
+    user: User = await sql.get_user(telegram_id=message_or_query.from_user.id)
     language: str = user.language
     tz_str = user.timezone
     tz = pytz.timezone(tz_str)
@@ -143,7 +152,7 @@ async def change_lang(callback_query: types.CallbackQuery):
 async def change_lang_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     language = callback_query.data.split('_')[-1]
-    await crud.change_user_props(telegram_id=user_id, language=language)
+    await sql.change_user_props(telegram_id=user_id, language=language)
     await change_user_language(user_id, language)
     await change_settings(callback_query)
 
@@ -188,10 +197,10 @@ async def change_timezone_geolocation(callback_query: types.CallbackQuery):
 @dp.message_handler(content_types=['location'])
 async def change_timezone_geolocation_callback(message: types.Message):
     user_id = message.from_user.id
-    user: User = await crud.get_user(telegram_id=user_id)
+    user: User = await sql.get_user(telegram_id=user_id)
     tz_list: list[str] = get_tzs(message.location.longitude, message.location.latitude)
-    await crud.change_user_props(telegram_id=user_id,
-                                          latitude=message.location.latitude, longitude=message.location.longitude)
+    await sql.change_user_props(telegram_id=user_id,
+                                latitude=message.location.latitude, longitude=message.location.longitude)
     if len(tz_list) == 0:
         await message.reply(_('Не удалось определить часовой пояс по геолокации, попробуйте другой способ'),
                             reply_markup=kb_change_timezone())
@@ -203,7 +212,7 @@ async def change_timezone_geolocation_callback(message: types.Message):
         old_tz = user.timezone
         old_utc_time = user.utc_notify_at
         new_utc_time = change_timezone_get_utc(old_utc_time, old_tz, new_tz)
-        await crud.change_user_props(telegram_id=user_id, timezone=new_tz, utc_notify_at=new_utc_time)
+        await sql.change_user_props(telegram_id=user_id, timezone=new_tz, utc_notify_at=new_utc_time)
         await change_settings(message)
     elif len(tz_list) > 1:
         keyboard = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -220,11 +229,11 @@ async def change_timezone_geolocation_callback(message: types.Message):
 async def change_timezone_geolocation_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     new_tz = callback_query.data.split('_', maxsplit=4)[-1]
-    user: User = await crud.get_user(telegram_id=user_id)
+    user: User = await sql.get_user(telegram_id=user_id)
     old_tz = user.timezone
     old_utc_time = user.utc_notify_at
     new_utc_time = change_timezone_get_utc(old_utc_time, old_tz, new_tz)
-    await crud.change_user_props(telegram_id=user_id, timezone=new_tz, utc_notify_at=new_utc_time)
+    await sql.change_user_props(telegram_id=user_id, timezone=new_tz, utc_notify_at=new_utc_time)
     await change_settings(callback_query)
 
 
@@ -335,7 +344,7 @@ async def change_notif_time(callback_query: types.CallbackQuery):
     keyboard.row(InlineKeyboardButton(_('после полудня'), callback_data='change_notif_time_pm'))
 
     user_id = callback_query.from_user.id
-    user: User = await crud.get_user(telegram_id=user_id)
+    user: User = await sql.get_user(telegram_id=user_id)
     utc_notify_at: datetime.time = user.utc_notify_at
     tz = pytz.timezone(user.timezone)
     local_notify_at: str = datetime.datetime.combine(datetime.date.today(), utc_notify_at)\
@@ -379,10 +388,10 @@ async def change_notif_hour_callback(callback_query: types.CallbackQuery):
     """
     hour = int(callback_query.data.split('_')[-1])
     user_id = callback_query.from_user.id
-    user: User = await crud.get_user(telegram_id=user_id)
+    user: User = await sql.get_user(telegram_id=user_id)
     local_notify_at: datetime.time = datetime.time(hour, 0)
     utc_notify_at = local_to_utc(local_notify_at, user.timezone)
-    await crud.change_user_props(telegram_id=user_id, utc_notify_at=utc_notify_at)
+    await sql.change_user_props(telegram_id=user_id, utc_notify_at=utc_notify_at)
     await change_settings(callback_query)
 
 
@@ -399,7 +408,7 @@ async def reschedule(callback_query: types.CallbackQuery):
     Change notify_every attr in User instance
     """
     user_id = callback_query.from_user.id
-    user: User = await crud.get_user(telegram_id=user_id)
+    user: User = await sql.get_user(telegram_id=user_id)
     notification_period = user.notify_every
     period_text = str(notification_period)
     temp = {
@@ -423,5 +432,5 @@ async def reschedule(callback_query: types.CallbackQuery):
 async def reschedule_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     n_days = int(callback_query.data.split('_')[-1])
-    await crud.change_user_props(telegram_id=user_id, notify_every=n_days)
+    await sql.change_user_props(telegram_id=user_id, notify_every=n_days)
     await change_settings(callback_query)

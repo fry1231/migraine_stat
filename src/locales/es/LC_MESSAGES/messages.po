@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-02-19 22:16+0100\n"
-"PO-Revision-Date: 2024-02-20 23:46+0100\n"
+"POT-Creation-Date: 2024-02-27 02:53+0100\n"
+"PO-Revision-Date: 2024-02-27 02:55+0100\n"
 "Last-Translator: \n"
 "Language-Team: es <LL@li.org>\n"
 "Language: es\n"
@@ -15,43 +15,123 @@ msgstr ""
 "Generated-By: Babel 2.8.0\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: main.py:82
-msgid "запись бо-бо"
-msgstr "dolor de cabeza"
+#: fsm_forms/_keyboards.py:23 fsm_forms/_keyboards.py:30
+#: fsm_forms/add_drug_form.py:100 fsm_forms/add_drug_form.py:101
+#: fsm_forms/report_paincase_form.py:122 fsm_forms/report_paincase_form.py:130
+#: fsm_forms/report_paincase_form.py:177
+msgid "Да"
+msgstr "Sí"
 
-#: main.py:83
-msgid "приём лекарства"
-msgstr "ingesta de medicamentos"
+#: fsm_forms/_keyboards.py:23 fsm_forms/_keyboards.py:31
+#: fsm_forms/add_drug_form.py:100 fsm_forms/add_drug_form.py:101
+#: fsm_forms/report_paincase_form.py:122 fsm_forms/report_paincase_form.py:177
+#: fsm_forms/report_paincase_form.py:184
+msgid "Нет"
+msgstr "No"
 
-#: main.py:84
-msgid "запись давления"
-msgstr "registro de presión arterial"
+#: fsm_forms/_keyboards.py:32 fsm_forms/_keyboards.py:79
+#: fsm_forms/_keyboards.py:96 fsm_forms/add_drug_form.py:34
+#: fsm_forms/pressure_form.py:53 routes/common.py:25
+msgid "Отмена"
+msgstr "Cancelar"
 
-#: main.py:85
-msgid "список лекарств"
-msgstr "lista de medicamentos"
+#: fsm_forms/_keyboards.py:38 fsm_forms/report_paincase_form.py:238
+msgid "Не имеются"
+msgstr "Sin comentarios"
 
-#: main.py:86
-msgid "изменить записи"
-msgstr "modificar registros"
+#: fsm_forms/_keyboards.py:67
+msgid "Сегодня"
+msgstr "Hoy"
 
-#: main.py:87
-msgid "статистика"
-msgstr "estadísticas"
+#: fsm_forms/_keyboards.py:69
+msgid "Вчера"
+msgstr "Ayer"
 
-#: main.py:88
-msgid "настройки"
-msgstr "ajustes"
+#: fsm_forms/_keyboards.py:77
+msgid "Выбрать другую дату"
+msgstr "Elige otra fecha"
+
+#: fsm_forms/_keyboards.py:94 fsm_forms/_keyboards.py:123
+#: fsm_forms/_keyboards.py:140 fsm_forms/report_paincase_form.py:139
+#: fsm_forms/report_paincase_form.py:160 fsm_forms/report_paincase_form.py:206
+msgid "Следующий вопрос"
+msgstr "Próxima pregunta"
+
+#: fsm_forms/_keyboards.py:102
+msgid "Стресс"
+msgstr "Estrés"
+
+#: fsm_forms/_keyboards.py:103
+msgid "Разрешение стресса"
+msgstr "Resolución del estrés"
+
+#: fsm_forms/_keyboards.py:104
+msgid "Пропуск приёма пищи"
+msgstr "Saltarse una comida"
+
+#: fsm_forms/_keyboards.py:105
+msgid "Недостаточный сон"
+msgstr "Sueño insuficiente"
+
+#: fsm_forms/_keyboards.py:106
+msgid "Избыточный сон"
+msgstr "Sueño excesivo"
+
+#: fsm_forms/_keyboards.py:107
+msgid "Алкоголь"
+msgstr "Alcohol"
+
+#: fsm_forms/_keyboards.py:108
+msgid "Яркий свет"
+msgstr "Luz brillante"
+
+#: fsm_forms/_keyboards.py:109
+msgid "Шоколад"
+msgstr "Chocolate"
+
+#: fsm_forms/_keyboards.py:110
+msgid "Сыр"
+msgstr "Queso"
+
+#: fsm_forms/_keyboards.py:111
+msgid "Кофе"
+msgstr "Café"
+
+#: fsm_forms/_keyboards.py:112
+msgid "Сильные запахи"
+msgstr "Olores fuertes"
+
+#: fsm_forms/_keyboards.py:113
+msgid "Погода"
+msgstr "Clima"
+
+#: fsm_forms/_keyboards.py:114
+msgid "Гормоны"
+msgstr "Hormonas"
+
+#: fsm_forms/_keyboards.py:129
+msgid "Тошнота"
+msgstr "Náuseas"
+
+#: fsm_forms/_keyboards.py:130
+msgid "Рвота"
+msgstr "Vómitos"
+
+#: fsm_forms/_keyboards.py:131
+msgid "Боль в шее"
+msgstr "Dolor de cuello"
+
+#: fsm_forms/_keyboards.py:132
+msgid "Светочувствительность"
+msgstr "Sensibilidad a la luz"
+
+#: fsm_forms/_keyboards.py:133
+msgid "Чувствительность к звукам"
+msgstr "Sensibilidad a los sonidos"
 
 #: fsm_forms/add_drug_form.py:25
 msgid "Введите название медикамента:"
 msgstr "Ingrese el nombre del medicamento:"
-
-#: fsm_forms/add_drug_form.py:34 fsm_forms/keyboards.py:34
-#: fsm_forms/keyboards.py:81 fsm_forms/keyboards.py:98
-#: fsm_forms/pressure_form.py:53 routes/common.py:17
-msgid "Отмена"
-msgstr "Cancelar"
 
 #: fsm_forms/add_drug_form.py:46
 msgid ""
@@ -84,117 +164,9 @@ msgstr ""
 "Analgésico: {is_painkiller} \n"
 "Antipirético: {is_temp_reducer}"
 
-#: fsm_forms/add_drug_form.py:100 fsm_forms/add_drug_form.py:101
-#: fsm_forms/keyboards.py:25 fsm_forms/keyboards.py:32
-#: fsm_forms/report_paincase_form.py:123 fsm_forms/report_paincase_form.py:131
-#: fsm_forms/report_paincase_form.py:178
-msgid "Да"
-msgstr "Sí"
-
-#: fsm_forms/add_drug_form.py:100 fsm_forms/add_drug_form.py:101
-#: fsm_forms/keyboards.py:25 fsm_forms/keyboards.py:33
-#: fsm_forms/report_paincase_form.py:123 fsm_forms/report_paincase_form.py:178
-#: fsm_forms/report_paincase_form.py:185
-msgid "Нет"
-msgstr "No"
-
 #: fsm_forms/add_drug_form.py:104
 msgid "Отлично!"
 msgstr "¡Maravilloso!"
-
-#: fsm_forms/keyboards.py:40 fsm_forms/report_paincase_form.py:239
-msgid "Не имеются"
-msgstr "Sin comentarios"
-
-#: fsm_forms/keyboards.py:69
-msgid "Сегодня"
-msgstr "Hoy"
-
-#: fsm_forms/keyboards.py:71
-msgid "Вчера"
-msgstr "Ayer"
-
-#: fsm_forms/keyboards.py:79
-msgid "Выбрать другую дату"
-msgstr "Elige otra fecha"
-
-#: fsm_forms/keyboards.py:96 fsm_forms/keyboards.py:125 fsm_forms/keyboards.py:142
-#: fsm_forms/report_paincase_form.py:140 fsm_forms/report_paincase_form.py:161
-#: fsm_forms/report_paincase_form.py:207
-msgid "Следующий вопрос"
-msgstr "Próxima pregunta"
-
-#: fsm_forms/keyboards.py:104
-msgid "Стресс"
-msgstr "Estrés"
-
-#: fsm_forms/keyboards.py:105
-msgid "Разрешение стресса"
-msgstr "Resolución del estrés"
-
-#: fsm_forms/keyboards.py:106
-msgid "Пропуск приёма пищи"
-msgstr "Saltarse una comida"
-
-#: fsm_forms/keyboards.py:107
-msgid "Недостаточный сон"
-msgstr "Sueño insuficiente"
-
-#: fsm_forms/keyboards.py:108
-msgid "Избыточный сон"
-msgstr "Sueño excesivo"
-
-#: fsm_forms/keyboards.py:109
-msgid "Алкоголь"
-msgstr "Alcohol"
-
-#: fsm_forms/keyboards.py:110
-msgid "Яркий свет"
-msgstr "Luz brillante"
-
-#: fsm_forms/keyboards.py:111
-msgid "Шоколад"
-msgstr "Chocolate"
-
-#: fsm_forms/keyboards.py:112
-msgid "Сыр"
-msgstr "Queso"
-
-#: fsm_forms/keyboards.py:113
-msgid "Кофе"
-msgstr "Café"
-
-#: fsm_forms/keyboards.py:114
-msgid "Сильные запахи"
-msgstr "Olores fuertes"
-
-#: fsm_forms/keyboards.py:115
-msgid "Погода"
-msgstr "Clima"
-
-#: fsm_forms/keyboards.py:116
-msgid "Гормоны"
-msgstr "Hormonas"
-
-#: fsm_forms/keyboards.py:131
-msgid "Тошнота"
-msgstr "Náuseas"
-
-#: fsm_forms/keyboards.py:132
-msgid "Рвота"
-msgstr "Vómitos"
-
-#: fsm_forms/keyboards.py:133
-msgid "Боль в шее"
-msgstr "Dolor de cuello"
-
-#: fsm_forms/keyboards.py:134
-msgid "Светочувствительность"
-msgstr "Sensibilidad a la luz"
-
-#: fsm_forms/keyboards.py:135
-msgid "Чувствительность к звукам"
-msgstr "Sensibilidad a los sonidos"
 
 #: fsm_forms/pressure_form.py:52
 msgid "Не знаю"
@@ -205,7 +177,7 @@ msgid ""
 "Бот запишет ваши показатели давления и пульса на текущий момент. \n"
 "Выберите систолическое давление (верхнее значение)"
 msgstr ""
-"El bot registrará su presión arterial y frecuencia cardíaca actuales. "
+"El bot registrará su presión arterial y frecuencia cardíaca actuales.\n"
 "Seleccione su presión arterial sistólica (valor superior)"
 
 #: fsm_forms/pressure_form.py:91
@@ -216,101 +188,101 @@ msgstr "Presión diastólica (valor inferior):"
 msgid "Ваш пульс?"
 msgstr "¿Qué pulso tienes?"
 
-#: fsm_forms/pressure_form.py:141 fsm_forms/report_druguse_form.py:75
-#: fsm_forms/report_paincase_form.py:246
+#: fsm_forms/pressure_form.py:141 fsm_forms/report_druguse_form.py:69
+#: fsm_forms/report_paincase_form.py:245
 msgid "Успешно добавлено!"
 msgstr "¡Añadido con éxito!"
 
 #. NOTE Date of a medication intake
-#: fsm_forms/report_druguse_form.py:36
+#: fsm_forms/report_druguse_form.py:30
 msgid "Дата приёма?"
 msgstr "¿La fecha de tomar?"
 
-#: fsm_forms/report_druguse_form.py:46
+#: fsm_forms/report_druguse_form.py:40
 msgid "Что принимали? (можно написать)"
 msgstr "¿Qué medicación ha estado tomando? (puedes escribir)"
 
-#: fsm_forms/report_druguse_form.py:54 fsm_forms/report_paincase_form.py:199
+#: fsm_forms/report_druguse_form.py:48 fsm_forms/report_paincase_form.py:198
 msgid "Сообщение не может быть пустым, повторите"
 msgstr "El mensaje no puede estar en blanco, inténtalo de nuevo"
 
-#: fsm_forms/report_druguse_form.py:63
+#: fsm_forms/report_druguse_form.py:57
 msgid "Количество принятого? (можно написать)"
 msgstr "¿Cuánto tomaste? (puedes escribir)"
 
 #. NOTE list of frustration words. Used when user says he had a headache.
 #. Separate with '|'
-#: fsm_forms/report_paincase_form.py:44
+#: fsm_forms/report_paincase_form.py:43
 msgid "Ну вот.|Ёмаё!|Тфу!|Ого, надеюсь, не слишком сильно!|Тысяча чертей!"
 msgstr ""
 "¡Lamento oír eso!|¡Mierda!|¡Dios mío!|¡Uf!|¡Oh, vamos!|¡Espero que el dolor no "
 "haya sido muy fuerte!|¡Lamento oír eso... |¡Espero que te sientas mejor ahora!|"
 "¡Aguanta!|Estoy aquí para ayudarte."
 
-#: fsm_forms/report_paincase_form.py:56 fsm_forms/report_paincase_form.py:59
+#: fsm_forms/report_paincase_form.py:55 fsm_forms/report_paincase_form.py:58
 msgid "Когда?"
 msgstr "¿Cuando?"
 
-#: fsm_forms/report_paincase_form.py:70
+#: fsm_forms/report_paincase_form.py:69
 msgid "Продолжительность в часах (можно написать):"
 msgstr "Duración en horas (puedes escribir):"
 
-#: fsm_forms/report_paincase_form.py:72 fsm_forms/report_paincase_form.py:76
-#: fsm_forms/report_paincase_form.py:84 fsm_forms/report_paincase_form.py:87
-#: fsm_forms/report_paincase_form.py:92
+#: fsm_forms/report_paincase_form.py:71 fsm_forms/report_paincase_form.py:75
+#: fsm_forms/report_paincase_form.py:83 fsm_forms/report_paincase_form.py:86
+#: fsm_forms/report_paincase_form.py:91
 msgid "Весь день"
 msgstr "Todo el dia"
 
-#: fsm_forms/report_paincase_form.py:82
+#: fsm_forms/report_paincase_form.py:81
 msgid "Продолжительность должна быть числом, повторите ввод:"
 msgstr "La duración debe ser un número, inténtalo de nuevo:"
 
-#: fsm_forms/report_paincase_form.py:100
+#: fsm_forms/report_paincase_form.py:99
 msgid "Интенсивность от 1 до 10:"
 msgstr "Intensidad de 1 a 10:"
 
-#: fsm_forms/report_paincase_form.py:108
+#: fsm_forms/report_paincase_form.py:107
 msgid "Интенсивность должна быть числом, повторите ввод:"
 msgstr "La intensidad debe ser un número, inténtalo de nuevo:"
 
-#: fsm_forms/report_paincase_form.py:120
+#: fsm_forms/report_paincase_form.py:119
 msgid "Была ли аура?"
 msgstr "¿Tenías un aura?"
 
-#: fsm_forms/report_paincase_form.py:125 fsm_forms/report_paincase_form.py:180
+#: fsm_forms/report_paincase_form.py:124 fsm_forms/report_paincase_form.py:179
 msgid "Неверный ответ, повторите: "
 msgstr "Respuesta incorrecta, inténtalo de nuevo: "
 
-#: fsm_forms/report_paincase_form.py:133
+#: fsm_forms/report_paincase_form.py:132
 msgid "Выбери триггеры при наличии:"
 msgstr "Seleccione desencadenantes si lo desea:"
 
-#: fsm_forms/report_paincase_form.py:144
+#: fsm_forms/report_paincase_form.py:143
 msgid "Были ли следующие симптомы?"
 msgstr "¿Estaban presentes los siguientes síntomas?"
 
-#: fsm_forms/report_paincase_form.py:153 fsm_forms/report_paincase_form.py:174
-#: fsm_forms/report_paincase_form.py:231
+#: fsm_forms/report_paincase_form.py:152 fsm_forms/report_paincase_form.py:173
+#: fsm_forms/report_paincase_form.py:230
 msgid "Можно добавить ещё или нажать на \"следующий вопрос\""
 msgstr "Puedes agregar más o hacer clic en \"siguiente pregunta\""
 
-#: fsm_forms/report_paincase_form.py:165
+#: fsm_forms/report_paincase_form.py:164
 msgid "Принимались ли пилюли?"
 msgstr "¿Se han tomado las pastillas?"
 
-#: fsm_forms/report_paincase_form.py:187 fsm_forms/report_paincase_form.py:209
+#: fsm_forms/report_paincase_form.py:186 fsm_forms/report_paincase_form.py:208
 msgid "Примечания, если имеются:"
 msgstr "Notas, si las hubiera:"
 
-#: fsm_forms/report_paincase_form.py:192
+#: fsm_forms/report_paincase_form.py:191
 msgid "Название таблетки:"
 msgstr "Nombre del medicamento:"
 
-#: fsm_forms/report_paincase_form.py:216
+#: fsm_forms/report_paincase_form.py:215
 msgid "Количество принятого в мг? (можно написать)"
 msgstr "¿Cantidad tomada en mg? (puedes escribir)"
 
-#: fsm_forms/report_paincase_form.py:247
+#: fsm_forms/report_paincase_form.py:246
 msgid ""
 "\n"
 "Голова болела <b>{pain_date}</b>\n"
@@ -330,63 +302,83 @@ msgstr ""
 "Síntomas: <b>{n_symptoms}</b> \n"
 "Pastillas: <b>{drugs_or_not}</b>\n"
 
-#: fsm_forms/report_paincase_form.py:257
+#: fsm_forms/report_paincase_form.py:256
 msgid "Аура была"
 msgstr "El aura era"
 
-#: fsm_forms/report_paincase_form.py:257
+#: fsm_forms/report_paincase_form.py:256
 msgid "Ауры не было"
 msgstr "No había aura"
 
-#: fsm_forms/report_paincase_form.py:260
+#: fsm_forms/report_paincase_form.py:259
 msgid "не принимали"
 msgstr "no tomó"
 
-#: misc/keyboards.py:12
-msgid "Да :("
-msgstr "Sí :("
+#: misc/init_bot_description.py:33
+msgid "запись бо-бо"
+msgstr "dolor de cabeza"
 
-#: misc/keyboards.py:13
-msgid "Нет, всё хорошо! / Уже добавлено"
-msgstr "¡No, está bien! / Ya añadido"
+#: misc/init_bot_description.py:34
+msgid "приём лекарства"
+msgstr "ingesta de medicamentos"
 
-#: misc/keyboards.py:37 misc/keyboards.py:72 routes/calendar.py:136
-#: routes/settings.py:132 routes/settings.py:168 routes/settings.py:236
-#: routes/settings.py:335 routes/settings.py:356 routes/statistics.py:46
-#: routes/statistics.py:131 routes/statistics.py:194 routes/statistics.py:241
+#: misc/init_bot_description.py:35
+msgid "запись давления"
+msgstr "registro de presión arterial"
+
+#: misc/init_bot_description.py:36
+msgid "список лекарств"
+msgstr "lista de medicamentos"
+
+#: misc/init_bot_description.py:37
+msgid "изменить записи"
+msgstr "modificar registros"
+
+#: misc/init_bot_description.py:38
+msgid "статистика"
+msgstr "estadísticas"
+
+#: misc/init_bot_description.py:39
+msgid "настройки"
+msgstr "ajustes"
+
+#: misc/keyboards.py:30 misc/keyboards.py:65 routes/calendar.py:147
+#: routes/settings.py:141 routes/settings.py:176 routes/settings.py:244
+#: routes/settings.py:342 routes/settings.py:363 routes/statistics.py:43
+#: routes/statistics.py:128 routes/statistics.py:191 routes/statistics.py:238
 msgid "<< Назад"
 msgstr "<< Volver"
 
-#: misc/keyboards.py:73
+#: misc/keyboards.py:66
 msgid "1 день"
 msgstr "1 día"
 
-#: misc/keyboards.py:74
+#: misc/keyboards.py:67
 msgid "2 дня"
 msgstr "2 días"
 
-#: misc/keyboards.py:75
+#: misc/keyboards.py:68
 msgid "3 дня"
 msgstr "3 días"
 
-#: misc/keyboards.py:76
+#: misc/keyboards.py:69
 msgid "1 неделю"
 msgstr "1 semana"
 
-#: misc/keyboards.py:78 routes/statistics.py:36
+#: misc/keyboards.py:71 routes/statistics.py:33
 msgid "1 месяц"
 msgstr "1 mes"
 
-#: misc/keyboards.py:79 routes/statistics.py:39 routes/statistics.py:49
+#: misc/keyboards.py:72 routes/statistics.py:36 routes/statistics.py:46
 msgid "Весь период"
 msgstr "Todo el período"
 
-#: misc/keyboards.py:81
+#: misc/keyboards.py:74
 msgid "Отключить оповещения"
 msgstr "Desactivar notificaciones"
 
 #. NOTE 2 letters for each day of the week
-#: misc/keyboards.py:110
+#: misc/keyboards.py:103
 msgid "Пн Вт Ср Чт Пт Сб Вс"
 msgstr "Lu Tu Mi Ju Ju Vie Sa Su"
 
@@ -490,7 +482,7 @@ msgstr "Noviembre"
 msgid "Декабрь"
 msgstr "Diciembre"
 
-#: routes/calendar.py:30 routes/common.py:73
+#: routes/calendar.py:31 routes/common.py:88
 msgid ""
 "Здесь можно посмотреть свои записи за определённый день и удалить их, при "
 "необходимости\n"
@@ -499,125 +491,141 @@ msgstr ""
 "Aquí puede ver las entradas de un día concreto y borrarlas si es necesario.\n"
 "\n"
 
-#: routes/calendar.py:32 routes/common.py:75
+#: routes/calendar.py:32 routes/common.py:89
+msgid ""
+"╳ - головная боль\n"
+"⁘ - приём лекарства\n"
+msgstr ""
+"╳ - dolor de cabeza\n"
+"⁘ - tomar medicamentos\n"
+
+#: routes/calendar.py:35 routes/common.py:92
 msgid "Количество дней с головной болью:"
 msgstr "Número de días con dolor de cabeza:"
 
-#: routes/calendar.py:33 routes/common.py:76
+#: routes/calendar.py:36 routes/common.py:93
 msgid "Количество дней приёма лекарств:"
 msgstr "El número de días de administración de la medicación:"
 
-#: routes/calendar.py:60
+#: routes/calendar.py:63
 msgid "Приняты лекарства: {n_meds} шт."
 msgstr "Medicación tomada: {n_meds} pcs."
 
-#: routes/calendar.py:64
+#: routes/calendar.py:67
 msgid "Без лекарств"
 msgstr "Sin medicación"
 
-#: routes/calendar.py:65
+#: routes/calendar.py:68
 msgid ""
 "<b>Головная боль:</b> {durability} ч. | {intensity} из 10 | {medicine_text}"
 msgstr ""
 "<b>Dolor de cabeza:</b> {durability} h. | {intensity} de 10 | {medicine_text}"
 
-#: routes/calendar.py:71
+#: routes/calendar.py:74
 msgid "<b>Приём лекарства:</b> {amount} {drugname}"
 msgstr "<b>Medicación:</b> {amount} {drugname}"
 
-#: routes/calendar.py:76
+#: routes/calendar.py:79
 msgid "<b>Давление:</b> {systolic}/{diastolic} {pulse}"
 msgstr "<b>Presión:</b> {systolic}/{diastolic} {pulse}"
 
-#: routes/calendar.py:97
+#: routes/calendar.py:100
 msgid "Нет записей на <b>{date_str}</b>"
 msgstr "No hay entradas en <b>{date_str}</b>"
 
-#: routes/calendar.py:99
+#: routes/calendar.py:102
 msgid "Удаление записей за <b>{date_str}</b>"
 msgstr "Eliminación de registros para <b>{date_str}</b>"
 
-#: routes/calendar.py:132
+#: routes/calendar.py:136
 msgid "Запись не найдена"
 msgstr "No se ha encontrado ningún registro"
 
-#: routes/calendar.py:135
+#: routes/calendar.py:145
 msgid "Запись удалена"
 msgstr "Registro eliminado"
 
-#: routes/common.py:29
+#: routes/common.py:20
+msgid ""
+"Бот обновляется. Исправляются ошибки, добавляются новые функции. Скоро вернусь, "
+"честно!"
+msgstr ""
+"El bot se está actualizando. Se están corrigiendo errores y añadiendo nuevas "
+"funciones. ¡Volveré pronto, de verdad!"
+
+#: routes/common.py:44
 msgid "Отменено"
 msgstr "Cancelado"
 
-#: routes/common.py:43
+#: routes/common.py:58
 msgid "Уже на последней странице"
 msgstr "Ya en la ultima pagina"
 
-#: routes/common.py:45
+#: routes/common.py:60
 msgid "Дата не может быть в будущем"
 msgstr "La fecha no puede ser en el futuro"
 
-#: routes/common.py:47
+#: routes/common.py:62
 msgid "Функция пока не реализована"
 msgstr "La función aún no se ha implementado"
 
-#: routes/drugs_management.py:30
+#: routes/drugs_management.py:29
 msgid "Добавить лекарство"
 msgstr "Agregar medicación"
 
-#: routes/drugs_management.py:32
+#: routes/drugs_management.py:31
 msgid "Удалить лекарство"
 msgstr "Eliminar medicación"
 
-#: routes/drugs_management.py:33
+#: routes/drugs_management.py:32
 msgid "Список добавленных лекарств:"
 msgstr "Lista de medicamentos agregados:"
 
-#: routes/drugs_management.py:37
+#: routes/drugs_management.py:36
 msgid "Вы ещё не добавили ни одного лекарства"
 msgstr "Aún no has agregado ningún medicamento"
 
-#: routes/drugs_management.py:54
+#: routes/drugs_management.py:53
 msgid "Удаляем лекарство под номером:"
 msgstr "Retire el medicamento bajo el número:"
 
-#: routes/settings.py:76
+#: routes/settings.py:85
 msgid "Язык 🇷🇺🇺🇦🇬🇧🇫🇷🇪🇸"
 msgstr "Idioma 🇪🇸🇬🇧🇷🇺🇺🇦🇫🇷"
 
-#: routes/settings.py:77
+#: routes/settings.py:86
 msgid "Часовой пояс"
 msgstr "Zona horaria"
 
-#: routes/settings.py:78
+#: routes/settings.py:87
 msgid "Время оповещений"
 msgstr "Hora de notificación"
 
-#: routes/settings.py:79
+#: routes/settings.py:88
 msgid "Частота оповещений"
 msgstr "Frecuencia de notificación"
 
-#: routes/settings.py:93
+#: routes/settings.py:102
 msgid "оповещения отключены"
 msgstr "notificaciones deshabilitadas"
 
-#: routes/settings.py:94
+#: routes/settings.py:103
 msgid "ежедневно"
 msgstr "a diario"
 
-#: routes/settings.py:95
+#: routes/settings.py:104
 msgid "через день"
 msgstr "una vez cada 2 días"
 
-#: routes/settings.py:96
+#: routes/settings.py:105
 msgid "1 раз в 3 дня"
 msgstr "una vez cada 3 días"
 
-#: routes/settings.py:97
+#: routes/settings.py:106
 msgid "еженедельно"
 msgstr "semanalmente"
 
-#: routes/settings.py:106
+#: routes/settings.py:115
 msgid ""
 "Текущий язык: <b>{language}</b>\n"
 "Часовой пояс: <b>{timezone} {utc_offset_formatted}</b>\n"
@@ -629,74 +637,74 @@ msgstr ""
 "Hora de notificación: <b>{notification_time}</b> \n"
 "Frecuencia de notificación: <b>{notification_period} </b>"
 
-#: routes/settings.py:139
+#: routes/settings.py:148
 msgid "Выберите язык:"
 msgstr "Selecciona un idioma:"
 
-#: routes/settings.py:169
+#: routes/settings.py:177
 msgid "Поделиться геолокацией"
 msgstr "Compartir geolocalización"
 
-#: routes/settings.py:170
+#: routes/settings.py:178
 msgid "Выбрать из списка"
 msgstr "Seleccionar de la lista"
 
-#: routes/settings.py:177
+#: routes/settings.py:185
 msgid "Способ изменения часового пояса:"
 msgstr "Una forma de cambiar la zona horaria:"
 
-#: routes/settings.py:185 routes/settings.py:186
+#: routes/settings.py:193 routes/settings.py:194
 msgid "Поделиться геолокацией 📍"
 msgstr "Compartir geolocalización 📍"
 
-#: routes/settings.py:197
+#: routes/settings.py:205
 msgid "Не удалось определить часовой пояс по геолокации, попробуйте другой способ"
 msgstr ""
 "No se ha podido determinar la zona horaria por geolocalización, pruebe otro "
 "método"
 
 #. NOTE all suggested timezones are wrong
-#: routes/settings.py:215
+#: routes/settings.py:223
 msgid "Нет нужного"
 msgstr "No hay una correcta"
 
-#: routes/settings.py:216
+#: routes/settings.py:224
 msgid "Найдено несколько часовых поясов, выберите нужный:"
 msgstr "Se encuentran varias zonas horarias, por favor seleccione la deseada:"
 
-#: routes/settings.py:237
+#: routes/settings.py:245
 msgid "Европа"
 msgstr "Europa"
 
-#: routes/settings.py:238
+#: routes/settings.py:246
 msgid "Азия"
 msgstr "Asia"
 
-#: routes/settings.py:239
+#: routes/settings.py:247
 msgid "Северная Америка"
 msgstr "Norteamérica"
 
-#: routes/settings.py:240
+#: routes/settings.py:248
 msgid "Южная Америка"
 msgstr "Sudamérica"
 
-#: routes/settings.py:241
+#: routes/settings.py:249
 msgid "Африка"
 msgstr "África"
 
-#: routes/settings.py:242
+#: routes/settings.py:250
 msgid "Океания"
 msgstr "Oceanía"
 
-#: routes/settings.py:244
+#: routes/settings.py:252
 msgid "Выберите континент:"
 msgstr "Seleccione un continente:"
 
-#: routes/settings.py:276
+#: routes/settings.py:284
 msgid "Выберите страну:{countries_rows}"
 msgstr "Seleccione un país:{countries_rows}"
 
-#: routes/settings.py:305
+#: routes/settings.py:313
 msgid ""
 "Выберите часовой пояс:\n"
 "{tzs_rows}"
@@ -704,57 +712,58 @@ msgstr ""
 "Seleccione una zona horaria: \n"
 "{tzs_rows}"
 
-#: routes/settings.py:336
+#: routes/settings.py:343
 msgid "до полудня"
 msgstr "antes del mediodía"
 
-#: routes/settings.py:337
+#: routes/settings.py:344
 msgid "после полудня"
 msgstr "por la tarde"
 
-#: routes/settings.py:346
+#: routes/settings.py:353
 msgid ""
 "Бот в определённое время будет спрашивать, болела ли голова.\n"
 "Когда лучше об этом спрашивать?\n"
 "<b>(Текущее время оповещений - {local_notify_at})</b>"
 msgstr ""
-"El bot puede preguntar en un momento determinado si has tenido dolor de cabeza. "
-"¿Cuándo es el mejor momento para preguntar? <b>(Hora de notificación actual: "
-"{local_notify_at})</b>"
+"El bot puede preguntar en un momento determinado si has tenido dolor de "
+"cabeza.\n"
+"¿Cuándo es el mejor momento para preguntar?\n"
+"<b>(Hora de notificación actual: {local_notify_at})</b>"
 
-#: routes/settings.py:364
+#: routes/settings.py:371
 msgid "12 (полдень)"
 msgstr "12 (mediodía)"
 
-#: routes/settings.py:366
+#: routes/settings.py:373
 msgid "12 (полночь)"
 msgstr "12 (medianoche)"
 
-#: routes/settings.py:373
+#: routes/settings.py:380
 msgid "Выберите время оповещений:"
 msgstr "Seleccione la hora de notificación:"
 
-#: routes/settings.py:408 routes/settings.py:412
+#: routes/settings.py:415 routes/settings.py:419
 msgid " день"
 msgstr " día"
 
-#: routes/settings.py:409 routes/settings.py:410
+#: routes/settings.py:416 routes/settings.py:417
 msgid " дня"
 msgstr " días"
 
-#: routes/settings.py:411
+#: routes/settings.py:418
 msgid " дней"
 msgstr " días"
 
-#: routes/settings.py:415
+#: routes/settings.py:422
 msgid "Текущий период оповещений пока не назначен"
 msgstr "Aún no se ha asignado el plazo de notificación actual"
 
-#: routes/settings.py:418
+#: routes/settings.py:425
 msgid "Текущая частота оповещения - 1 раз в {period_text}"
 msgstr "Frecuencia de notificación actual: 1 vez por {period_text}"
 
-#: routes/settings.py:419
+#: routes/settings.py:426
 msgid ""
 "Выбери период опроса (сообщения будут отправляться 1 раз в ...)\n"
 "{text_notif_period}"
@@ -763,31 +772,31 @@ msgstr ""
 "cada...) \n"
 "{text_notif_period}"
 
-#: routes/statistics.py:37
+#: routes/statistics.py:34
 msgid "6 месяцев"
 msgstr "6 meses"
 
-#: routes/statistics.py:38
+#: routes/statistics.py:35
 msgid "1 год"
 msgstr "1 año"
 
-#: routes/statistics.py:59
+#: routes/statistics.py:56
 msgid "Статистика головных болей"
 msgstr "Estadísticas de dolores de cabeza"
 
-#: routes/statistics.py:60
+#: routes/statistics.py:57
 msgid "Статистика приёма лекарств"
 msgstr "Estadísticas de ingesta de medicamentos"
 
-#: routes/statistics.py:61
+#: routes/statistics.py:58
 msgid "Статистика давления"
 msgstr "Estadísticas de presión arterial"
 
-#: routes/statistics.py:62
+#: routes/statistics.py:59
 msgid "Общий отчёт PDF"
 msgstr "Informe general en PDF"
 
-#: routes/statistics.py:63
+#: routes/statistics.py:60
 msgid ""
 "Здесь можно выгрузить статистику по головным болям и приёму лекарств в Excel "
 "формате или сгенерировать общий отчёт в PDF"
@@ -795,47 +804,47 @@ msgstr ""
 "Aquí puedes descargar estadísticas de dolores de cabeza y ingesta de "
 "medicamentos en formato Excel o generar un informe general en PDF"
 
-#: routes/statistics.py:78
+#: routes/statistics.py:75
 msgid "Статистика головных болей за:"
 msgstr "Estadísticas de dolor de cabeza para:"
 
-#: routes/statistics.py:85 routes/statistics.py:172 routes/statistics.py:226
-#: routes/statistics.py:284
+#: routes/statistics.py:82 routes/statistics.py:169 routes/statistics.py:223
+#: routes/statistics.py:281
 msgid "Собираю данные..."
 msgstr "Recopilación de datos..."
 
-#: routes/statistics.py:128 routes/statistics.py:191 routes/statistics.py:238
+#: routes/statistics.py:125 routes/statistics.py:188 routes/statistics.py:235
 msgid "В течение запрошенного периода <b>({period_text})</b> записей нет"
 msgstr "No hay registros durante el periodo solicitado <b>({period_text})</b>"
 
-#: routes/statistics.py:148 routes/statistics.py:200 routes/statistics.py:258
+#: routes/statistics.py:145 routes/statistics.py:197 routes/statistics.py:255
 msgid "Готово! Высылаю файл с данными..."
 msgstr "¡Listo! Enviando el archivo de datos…"
 
-#: routes/statistics.py:152 routes/statistics.py:204 routes/statistics.py:262
-#: routes/statistics.py:294
+#: routes/statistics.py:149 routes/statistics.py:201 routes/statistics.py:259
+#: routes/statistics.py:291
 msgid "В данный момент сервер загружен, повторите, пожалуйста, через пару минут"
 msgstr ""
 "El servidor está actualmente cargado, inténtalo de nuevo en un par de minutos"
 
-#: routes/statistics.py:155 routes/statistics.py:209 routes/statistics.py:267
-#: routes/statistics.py:297
+#: routes/statistics.py:152 routes/statistics.py:206 routes/statistics.py:264
+#: routes/statistics.py:294
 msgid "Неизвестная ошибка, отчёт уже отправлен администратору"
 msgstr "Error desconocido, el informe ya ha sido enviado al administrador"
 
-#: routes/statistics.py:165
+#: routes/statistics.py:162
 msgid "Статистика приёма лекарств за:"
 msgstr "Estadísticas de ingesta de medicamentos para:"
 
-#: routes/statistics.py:219
+#: routes/statistics.py:216
 msgid "Записи давления за:"
 msgstr "Registros de presión arterial para:"
 
-#: routes/statistics.py:277
+#: routes/statistics.py:274
 msgid "Сгенерировать отчёт за:"
 msgstr "Generar un informe para:"
 
-#: routes/user_interactions.py:45
+#: routes/user_interactions.py:41
 msgid ""
 "Привет! Я бот для ведения дневника головных болей, приёма лекарств и давления.\n"
 "    Список доступных команд:\n"
@@ -860,33 +869,41 @@ msgstr ""
 
 #. NOTE 1
 #. NOTE 31
-#: routes/user_interactions.py:69 routes/user_interactions.py:77
+#: routes/user_interactions.py:66 routes/user_interactions.py:74
 msgid "день"
 msgstr "día"
 
 #. NOTE 2
 #. NOTE 3
-#: routes/user_interactions.py:71 routes/user_interactions.py:73
+#: routes/user_interactions.py:68 routes/user_interactions.py:70
 msgid "дня"
 msgstr "días"
 
 #. NOTE 7
-#: routes/user_interactions.py:75
+#: routes/user_interactions.py:72
 msgid "дней"
 msgstr "días"
 
-#: routes/user_interactions.py:84
+#: routes/user_interactions.py:81
 msgid "{greetings}! Болела ли сегодня голова?"
 msgstr "{greetings}! ¿Tuviste dolor de cabeza hoy?"
 
-#: routes/user_interactions.py:86
+#: routes/user_interactions.py:85
 msgid "{greetings}! Болела ли голова за последние {missing_days} {suffix}?"
 msgstr ""
 "{greetings}! ¿Ha tenido dolor de cabeza en los últimos {missing_days} {suffix}?"
 
+#: routes/user_interactions.py:92
+msgid "Да :("
+msgstr "Sí :("
+
+#: routes/user_interactions.py:94
+msgid "Нет, всё хорошо! / Уже добавлено"
+msgstr "¡No, está bien! / Ya añadido"
+
 #. NOTE Give some nice words to user if the user did not have a headache.
 #. Separate by comma + space
-#: routes/user_interactions.py:101
+#: routes/user_interactions.py:107
 msgid ""
 "Прекрасно, Восхитительно, Чудесно, Великолепно, Круто, Здорово, Дивно, Чотко, "
 "Благодать, Потрясающе, Изумительно, Роскошно, Отменно, Бесподобно, Шикарно, "
@@ -899,22 +916,19 @@ msgstr ""
 "fantástica, Súper noticia, Me encanta escuchar eso"
 
 #~ msgid ""
-#~ "Привет! Я бот для ведения дневника головных болей, приёма лекарств и "
-#~ "давления.\n"
-#~ "    Список доступных команд:\n"
-#~ "🔘 /pain - сделать запись бо-бо\n"
-#~ "🔘 /druguse - сделать запись приёма лекарства\n"
-#~ "🔘 /pressure - записать своё давление\n"
-#~ "🔘 /medications - добавить или удалить используемое лекарство\n"
-#~ "🔘 /statistics - выгрузить статистику болей или приёма лекарств\n"
-#~ "🔘 /settings - настройки языка и времени оповещений"
+#~ "Bot for tracking headache, medications intake and pressure. For support "
+#~ "message the bot directly."
 #~ msgstr ""
-#~ "Hola, soy un bot para llevar un diario de dolores de cabeza, ingesta de "
-#~ "medicamentos y presión arterial. \n"
-#~ "Lista de comandos disponibles: \n"
-#~ "🔘 /pain - hacer un registro de abucheos \n"
-#~ "🔘 /druguse - hacer un registro de la toma de medicamentos \n"
-#~ "🔘 /pressure - registrar su presión arterial. \n"
-#~ "🔘 /medications - agrega o elimina los medicamentos que estás usando \n"
-#~ "🔘 /statistics - descarga tus estadísticas de dolor o medicamentos \n"
-#~ "🔘 /settings personaliza el idioma y la hora de las alertas"
+#~ "Bot para el seguimiento de dolores de cabeza, medicamentos y presión. Para "
+#~ "soporte, envíe un mensaje directamente al bot."
+
+#~ msgid ""
+#~ "This bot is intended for tracking headaches.\n"
+#~ "It will track when your head hurt, what medications were taken, your blood "
+#~ "pressure, and will also ask about possible triggers and symptoms.\n"
+#~ "For support and bug reports — message the bot directly."
+#~ msgstr ""
+#~ "Este bot está destinado a rastrear dolores de cabeza.\n"
+#~ "Seguirá cuándo le dolía la cabeza, qué medicamentos se tomaron, su presión "
+#~ "arterial, y también preguntará sobre posibles desencadenantes y síntomas.\n"
+#~ "Para soporte y reportes de errores — envíe un mensaje directamente al bot."

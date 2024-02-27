@@ -2,8 +2,8 @@ import datetime
 
 from sqlalchemy import select, and_
 
-from db.crud import get_session
-from db.redis_crud import update_everyday_report
+from db.sql import get_session
+from db.redis.crud import update_everyday_report
 from db.models import Pressure
 
 

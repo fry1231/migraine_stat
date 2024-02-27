@@ -2,10 +2,10 @@ import datetime
 
 from sqlalchemy import select, func, and_, delete, update
 
-from db.crud import get_session
-from db.redis_crud import update_everyday_report
+from db.sql import get_session
+from db.redis.crud import update_everyday_report
 from db.models import User, PainCase, DrugUse, Pressure, SavedPainCase, SavedDrugUse, SavedUser, SavedPressure
-from db.redis_models import PydanticUser
+from db.redis.models import PydanticUser
 
 
 async def create_user(telegram_id: int,

@@ -7,13 +7,6 @@ from src.bot import _
 from src.misc.utils import get_user_language, month_name
 
 
-def yes_no_missing():
-    keyboard = InlineKeyboardMarkup()
-    keyboard.insert(InlineKeyboardButton(_('Да :('), callback_data='pain'))
-    keyboard.insert(InlineKeyboardButton(_('Нет, всё хорошо! / Уже добавлено'), callback_data='nopain'))
-    return keyboard
-
-
 def ten_things(list_of_el: list[Any],
                back_callback: str,
                navigation_callback: str,

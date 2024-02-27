@@ -4,6 +4,7 @@ import aioredis
 import asyncio
 from pathlib import Path
 from alembic.config import Config
+from db.redis.logger import RedisLogHandler
 
 
 SRC_DIR = Path(__file__).parent
@@ -40,7 +41,7 @@ logging.basicConfig(
     datefmt='%d.%m.%Y_%H:%M:%S',
     handlers=[
         logging.StreamHandler(),
-        # logging.FileHandler('/path/to/your/logfile.log'),
+        RedisLogHandler(redis_conn, key='logs', max_len=10000)
     ]
 )
 logger = logging.getLogger(__name__)

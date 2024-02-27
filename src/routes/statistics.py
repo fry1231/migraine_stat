@@ -5,9 +5,9 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher import FSMContext
 import traceback
 
-from db import crud
+from db import sql
 from db.models import User, PainCase, DrugUse, Pressure
-from db import crud
+from db import sql
 from src.bot import bot, dp, _
 from src.config import logger
 from src.misc.utils import notify_me, write_xlsx, utc_to_local
@@ -85,7 +85,7 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
         return
     try:
         n_days = int(callback_query.data.split('_')[-1])
-        user_paincases: list[PainCase] = await crud.get_user_pains(user_id=user_id, period_days=n_days)
+        user_paincases: list[PainCase] = await sql.get_user_pains(user_id=user_id, period_days=n_days)
         pains_statistics = []
         # Filling data
         for event in user_paincases:
@@ -172,7 +172,7 @@ async def get_medication_statistics_callback(callback_query: types.CallbackQuery
         return
     try:
         n_days = int(callback_query.data.split('_')[-1])
-        user_druguses: list[DrugUse] = await crud.get_user_druguses(user_id=user_id, period_days=n_days)
+        user_druguses: list[DrugUse] = await sql.get_user_druguses(user_id=user_id, period_days=n_days)
         medications_statistics = []
         # Filling data
         for event in user_druguses:
@@ -227,8 +227,8 @@ async def get_pressure_statistics_callback(callback_query: types.CallbackQuery):
         return
     try:
         n_days = int(callback_query.data.split('_')[-1])
-        user: User = await crud.get_user(telegram_id=user_id)
-        user_pressures: list[Pressure] = await crud.get_user_pressures(user_id=user_id, period_days=n_days)
+        user: User = await sql.get_user(telegram_id=user_id)
+        user_pressures: list[Pressure] = await sql.get_user_pressures(user_id=user_id, period_days=n_days)
         # Period text definition
         period_text = days_to_period(n_days)
         if len(user_pressures) == 0:
@@ -284,8 +284,8 @@ async def generate_report_callback(callback_query: types.CallbackQuery):
         return
     try:
         n_days = int(callback_query.data.split('_')[-1])
-        paincases: list[PainCase] = await crud.get_user_pains(user_id=user_id, period_days=n_days)
-        druguses: list[DrugUse] = await crud.get_user_druguses(user_id=user_id, period_days=n_days)
+        paincases: list[PainCase] = await sql.get_user_pains(user_id=user_id, period_days=n_days)
+        druguses: list[DrugUse] = await sql.get_user_druguses(user_id=user_id, period_days=n_days)
 
     except asyncio.TimeoutError:
         await pre_message.edit_text(_('В данный момент сервер загружен, повторите, пожалуйста, через пару минут'))

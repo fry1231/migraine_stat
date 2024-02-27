@@ -5,10 +5,10 @@ import pytz
 import pycountry
 import gettext
 
-from db import crud
+from db import sql
 from src.bot import bot, _
 from src.config import MY_TG_ID, logger, redis_conn
-from db import crud
+from db import sql
 
 domain = 'iso3166-1'
 ru = gettext.translation(domain, pycountry.LOCALES_DIR, languages=['ru'])
@@ -37,7 +37,7 @@ async def notify_me(text):
         for pos in range(0, len(text), 4096):
             await bot.send_message(MY_TG_ID, text[pos:pos + 4096])
     else:
-        await bot.send_message(MY_TG_ID, text)
+        await bot.send_message(MY_TG_ID, text, parse_mode="")
 
 
 async def change_user_language(user_id: str | int,
@@ -55,7 +55,7 @@ async def get_user_language(user_id: str | int) -> str:
     """
     language = await redis_conn.get(str(user_id))
     if language is None:
-        user = await crud.get_user(telegram_id=user_id)
+        user = await sql.get_user(telegram_id=user_id)
         language = user.language
         await redis_conn.set(str(user_id), language)
     return language

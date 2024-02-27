@@ -2,7 +2,7 @@ from sqlalchemy import select, func, and_
 from typing import Type
 import datetime
 
-from db.crud import get_session
+from db.sql import get_session
 from db.models import SavedUser, SavedPressure, SavedDrugUse, SavedPainCase, Base
 
 

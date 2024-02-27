@@ -1,11 +1,9 @@
 from aiogram import types
 from aiogram.contrib.middlewares.i18n import I18nMiddleware
 
-from db.crud import get_user
+from db.sql import get_user
 from db.models import User
 from src.config import redis_conn, logger
-import gettext
-import os
 
 
 async def get_user_language(curr_user: types.User) -> str:
