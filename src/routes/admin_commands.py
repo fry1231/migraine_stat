@@ -177,7 +177,7 @@ async def set_text(message: types.Message, state: FSMContext):
         text = message.text
     add_translation(lang, text)
     await state.finish()
-    await make_announcement(message, state)
+    await make_announcement(message)
 
 
 ### send announcement (show translations)
@@ -257,7 +257,7 @@ async def send_announcement_confirmation(query: types.CallbackQuery):
         except NetworkError:
             await logger.error(err := f'User {user.telegram_id} Network Error')
             await notify_me(err)
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)
         if i % 100 == 0:
             await query.message.edit_text(f'Sending to {group} {i}/{len(users)} users...')
     await query.message.edit_text(f'Sent to {n_sent} users successfully')
