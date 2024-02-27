@@ -5,34 +5,43 @@ services:
     container_name: migrebot
     restart: always
     depends_on:
-#      rabbitmq:
-#        condition: service_started
+      redis:
+        condition: service_started
       db:
         condition: service_started
     build: ./
     command: python -m src.main
     environment:
       - API_TOKEN=${API_TOKEN:?err}
-      - RABBITMQ_USER=${RABBITMQ_USER:?err}
-      - RABBITMQ_PASS=${RABBITMQ_PASS:?err}
-      - RABBITMQ_HOST=${RABBITMQ_HOST:?err}
       - POSTGRES_USER=${POSTGRES_USER:?err}
       - POSTGRES_PASS=${POSTGRES_PASS:?err}
-      - MY_TG_ID=${MY_TG_ID:?err}
+      - MY_TG_ID=${MY_TG_ID}
       - PAYMENTS_TOKEN_RU=${PAYMENTS_TOKEN_RU:?err}
     volumes:
       - persistent-data:/usr/persistent_data
+    networks:
+      - migrebot-network
 
-#  rabbitmq:
-#    container_name: rabbitmq
-#    hostname: ${RABBITMQ_HOST:?err}
-#    image: rabbitmq:3.12-alpine
-#    restart: always
-#    volumes:
-#      - rabbitmq-data:/var/lib/rabbitmq
-#    environment:
-#      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?err}
-#      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:?err}
+  redis:
+    container_name: redis
+    image: redis:7.0.7
+    restart: always
+    expose:
+      - 6379
+    networks:
+      - migrebot-network
+
+  #  rabbitmq:
+  #    container_name: rabbitmq
+  #    hostname: rabbitmq-host
+  #    image: rabbitmq:3.12-alpine
+  #    env_file:
+  #      - .env   # Remove for prod
+  #    volumes:
+  #      - rabbitmq-data:/var/lib/rabbitmq
+  #    environment:
+  #      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?err}
+  #      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:?err}
 
   db:
     container_name: migraine_db
@@ -46,6 +55,8 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:?err}
       - POSTGRES_PASSWORD=${POSTGRES_PASS:?err}
       - POSTGRES_DB=db_prod
+    networks:
+      - migrebot-network
 
 #  pgadmin:
 #    container_name: pgadmin4_container
@@ -67,3 +78,6 @@ volumes:
   persistent-data:
 #  pgadmin-data:
 #  rabbitmq-data:
+
+networks:
+  migrebot-network:
