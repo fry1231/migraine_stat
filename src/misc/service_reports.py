@@ -8,9 +8,17 @@ import db.sql as sql
 
 
 async def everyday_report(reset_old_one: bool = True) -> None:
+    text = await get_report_text()
+    await bot.send_message(chat_id=MY_TG_ID, text=text)
+    if reset_old_one:
+        await redis_crud.init_everyday_report()
+        await redis_crud.init_states(available_fsm_states)
+
+
+async def get_report_text() -> str:
     report: EverydayReport = await redis_crud.get_current_report()
     new_users_text = await notif_of_new_users()
-    
+
     deleted_users: list[PydanticUser] = report.deleted_users
     # Count users with at least one added row in Pains table - they are active_users
     active_users = await sql.get_users(active=True)
@@ -24,17 +32,20 @@ async def everyday_report(reset_old_one: bool = True) -> None:
     n_notifiable_users = n_users - len(not_notifiable_users)
 
     # Who deleted?
-    text_deleted = 'Deleted users:\n'
-    user: PydanticUser
-    for i, user in enumerate(deleted_users):
-        username = '' if user.user_name is None else 't.me/' + user.user_name
-        activities = ''
-        if any([user.n_paincases, user.n_druguses, user.n_pressures, user.n_medications]):
-            activities += f'({user.n_paincases} pains, ' \
-                          f'{user.n_druguses} d_uses, ' \
-                          f'{user.n_pressures} pressures, ' \
-                          f'{user.n_medications} meds)'
-        text_deleted += f'{i+1}. {user.first_name} {username} {activities} deleted\n'
+    if not deleted_users:
+        text_deleted = 'No users deleted\n'
+    else:
+        text_deleted = 'Deleted users:\n'
+        user: PydanticUser
+        for i, user in enumerate(deleted_users):
+            username = '' if user.user_name is None else 't.me/' + user.user_name
+            activities = ''
+            if any([user.n_paincases, user.n_druguses, user.n_pressures, user.n_medications]):
+                activities += f'({user.n_paincases} pains, ' \
+                              f'{user.n_druguses} d_uses, ' \
+                              f'{user.n_pressures} pressures, ' \
+                              f'{user.n_medications} meds)'
+            text_deleted += f'{i + 1}. {user.first_name} {username} {activities} deleted\n'
     text_deleted += '\n'
 
     # number of rows in Pain, DrugUse, Pressure, Drug tables
@@ -53,10 +64,7 @@ async def everyday_report(reset_old_one: bool = True) -> None:
            f'{len(active_users)} active and {n_superactive_users} superactive users\n\n' \
            f'{text_deleted}' \
            f'{stats}'
-    await bot.send_message(chat_id=MY_TG_ID, text=text)
-    if reset_old_one:
-        await redis_crud.init_everyday_report()
-        await redis_crud.init_states(available_fsm_states)
+    return text
 
 
 async def notif_of_new_users() -> str:
@@ -96,9 +104,9 @@ async def notif_of_new_users() -> str:
         last_name = user.last_name or ''
         user_name = user.user_name
         language = user.language
-        new_users_text += f'\n{i + 1}. ({telegram_id}) {first_name} {last_name} ({language})'
+        new_users_text += f'\n{i + 1}. {telegram_id} {first_name} {last_name} ({language})'
         if user_name:
-            new_users_text += f't.me/{user_name}'
+            new_users_text += f' t.me/{user_name}'
     # Get notification text about users joined during the day
-    new_users_text += f'\n{report.n_notified_users} users notified\n'
+    new_users_text += f'\n\n{report.n_notified_users} users notified\n'
     return new_users_text

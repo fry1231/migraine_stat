@@ -67,7 +67,7 @@ async def scheduler():
     aioschedule.every().hour.at(":00").do(notify_users_hourly)
     aioschedule.every().day.at("21:30").do(everyday_report)
     aioschedule.every(10).minutes.do(db_healthcheck)
-    aioschedule.every().day.at("03:00").do(do_backup)
+    aioschedule.every().day.at("03:30").do(do_backup)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(10)
@@ -80,7 +80,6 @@ async def on_startup(__):
     await set_bot_commands()
     asyncio.create_task(scheduler())
     await notify_me('Bot restarted')
-    logger.info('Bot started')
 
 
 if __name__ == '__main__':
@@ -88,5 +87,5 @@ if __name__ == '__main__':
         logger.info('Starting bot...')
         executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
     except:
-        asyncio.run(notify_me(traceback.format_exc()))
         logger.error(traceback.format_exc())
+        asyncio.run(notify_me(traceback.format_exc()))

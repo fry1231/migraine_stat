@@ -2,10 +2,12 @@ import random
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import traceback
 
 from db import sql
 from db.models import User
 from src.bot import dp, bot, _
+from src.config import logger
 
 
 @dp.message_handler(commands=['start', 'help'], state='*')
@@ -108,13 +110,11 @@ async def process_no_pain(callback_query: types.CallbackQuery, state: FSMContext
                        "Потрясающе, Изумительно, Роскошно, Отменно, Бесподобно, Шикарно, Распрекрасно, Прелестно, "
                        "Любо-дорого, Похвально, Обворожительно, Балдёж, Кайф, Неплохо, Превосходно")
     nice_words = nice_words_str.split(', ')
-    try:
-        text = callback_query.message.text
-        text += '\n'
-        text += _('Нет, всё хорошо! / Уже добавлено')
-        await callback_query.message.edit_text(text=text, reply_markup=types.ReplyKeyboardRemove())
-    except Exception:
-        pass
+    text = callback_query.message.text
+    text += '\n\n<b>'
+    text += _('Нет, всё хорошо! / Уже добавлено')
+    text += '</b>'
+    await callback_query.message.edit_text(text=text)
     await callback_query.message.reply(f'{random.choice(nice_words)}!', reply_markup=types.ReplyKeyboardRemove())
 
 # For c.data == 'pain' handler in fsm_forms/report_paincase_form.py

@@ -4,7 +4,7 @@ import sys
 import asyncio
 
 from src.bot import bot, _
-from src.config import logger
+from src.config import logger, IN_PRODUCTION
 
 
 async def set_bot_name():
@@ -19,10 +19,11 @@ async def set_bot_name():
                 None: 'Migraine'
             }
             language_code = locale if locale else ''
+            bot_name = names[locale] if IN_PRODUCTION else 'test'
             result = await bot.request(
                 'setMyName',
                 data={
-                    'name': names[locale],
+                    'name': bot_name,
                     'language_code': language_code
                 },
             )

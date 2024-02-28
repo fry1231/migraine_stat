@@ -38,4 +38,4 @@ async def test_send_messages():
 
 async def test_notification_new_users():
     text = await notif_of_new_users()
-    assert "5 new users:\n1. (123123123121)" in text and '4QQ' in text
+    assert "5 new users:\n1. 123123123121" in text and '4QQ' in text
