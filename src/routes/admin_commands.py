@@ -8,9 +8,10 @@ import orjson
 import yadisk
 import traceback
 import os
+import random
 
-from src.bot import dp, bot
-from src.config import PERSISTENT_DATA_DIR, logger
+from src.bot import dp, bot, _
+from src.config import PERSISTENT_DATA_DIR, logger, MY_TG_ID
 from src.misc.utils import notify_me
 from db.models import User
 from src.misc.filters import IsAdmin
@@ -326,3 +327,50 @@ async def maintenance_off(message: types.Message):
     os.environ['MAINTENANCE'] = '0'
     await message.reply(f'Maintenance mode is {os.getenv("MAINTENANCE")}')
 
+
+@dp.message_handler(IsAdmin(), commands=['trigger'], state='*')
+async def trigger(message: types.Message):
+    user_instance = await sql.get_user(telegram_id=MY_TG_ID)
+    missing_days = 1
+    hi_s = ["Салам алейкум", "Hi", "Hello", "Ahlan wa sahlan", "Marhaba", "Hola", "Прывитанне", "Здравейте", "Jo napot",
+            "Chao", "Aloha", "Hallo", "Geia sou", "Гамарджоба", "Shalom", "Selamat", "Godan daginn", "Buenas dias",
+            "Buon giorno", "Ave", "Lab dien", "Sveiki", "Sveikas", "Guten Tag", "Goddag", "Dzien dobry", "Ola", "Buna",
+            "Здраво", "Dobry den", "Sawatdi", "Merhaba", "Привіт", "Paivaa", "Bonjour", "Namaste", "Zdravo",
+            "Dobry den", "God dag", "Saluton", "Tervist", "Konnichi wa"]
+    language = user_instance.language
+    temp = {
+        # NOTE 1
+        '1': _('день', locale=language),
+        # NOTE 2
+        '2': _('дня', locale=language),
+        # NOTE 3
+        '3': _('дня', locale=language),
+        # NOTE 7
+        '7': _('дней', locale=language),
+        # NOTE 31
+        '31': _('день', locale=language)
+    }
+    if str(missing_days) in temp:
+        suffix = temp[str(missing_days)]
+    else:
+        suffix = 'дней'
+    if missing_days == 1:
+        text = _("{greetings}! Болела ли сегодня голова?", locale=language).format(
+            greetings=random.choice(hi_s)
+        )
+    else:
+        text = _("{greetings}! "
+                 "Болела ли голова за последние {missing_days} {suffix}?", locale=language).format(
+            greetings=random.choice(hi_s),
+            missing_days=missing_days,
+            suffix=suffix
+        )
+    keyboard = InlineKeyboardMarkup()
+    keyboard.insert(InlineKeyboardButton(_('Да :(', locale=language), callback_data='pain'))
+    keyboard.insert(
+        InlineKeyboardButton(_('Нет, всё хорошо! / Уже добавлено', locale=language), callback_data='nopain'))
+    await bot.send_message(
+        user_instance.telegram_id,
+        text,
+        reply_markup=keyboard
+    )

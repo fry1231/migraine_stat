@@ -9,15 +9,11 @@ import db.sql as sql
 
 async def everyday_report(reset_old_one: bool = True) -> None:
     report: EverydayReport = await redis_crud.get_current_report()
+    new_users_text = await notif_of_new_users()
+    
     deleted_users: list[PydanticUser] = report.deleted_users
-
-    # Get notification text about users joined during the day
-    new_users_text = await notif_of_new_users() + '\n\n'
-    new_users_text += f'{report.n_notified_users} users notified\n'
-
     # Count users with at least one added row in Pains table - they are active_users
     active_users = await sql.get_users(active=True)
-    active_users_ids = [user.telegram_id for user in active_users]
 
     # Users who have something recorded within the last 31 days - superactive users
     n_superactive_users = await sql.get_users(super_active=True, return_count=True)
@@ -32,10 +28,13 @@ async def everyday_report(reset_old_one: bool = True) -> None:
     user: PydanticUser
     for i, user in enumerate(deleted_users):
         username = '' if user.user_name is None else 't.me/' + user.user_name
-        active = ''
+        activities = ''
         if any([user.n_paincases, user.n_druguses, user.n_pressures, user.n_medications]):
-            active += f' ({user.n_paincases} pain, {user.n_druguses} druguses, {user.n_pressures} pressures, {user.n_medications} meds)'
-        text_deleted += f'{i+1}. {user.first_name} {username} {active} deleted\n'
+            activities += f'({user.n_paincases} pains, ' \
+                          f'{user.n_druguses} d_uses, ' \
+                          f'{user.n_pressures} pressures, ' \
+                          f'{user.n_medications} meds)'
+        text_deleted += f'{i+1}. {user.first_name} {username} {activities} deleted\n'
     text_deleted += '\n'
 
     # number of rows in Pain, DrugUse, Pressure, Drug tables
@@ -49,7 +48,8 @@ async def everyday_report(reset_old_one: bool = True) -> None:
             f'Pressures: {report.n_pressures} / {n_pressures}\n' \
             f'Drugs: {report.n_medications} / {n_medications}\n'
 
-    text = f'{n_notifiable_users}/{n_users} users with notification\n' \
+    text = f'{new_users_text}\n' \
+           f'{n_notifiable_users}/{n_users} users with notification\n' \
            f'{len(active_users)} active and {n_superactive_users} superactive users\n\n' \
            f'{text_deleted}' \
            f'{stats}'
@@ -82,21 +82,23 @@ async def notif_of_new_users() -> str:
     #                 if i == n_messages:
     #                     break
 
-    current_report = await redis_crud.get_current_report()
-    users_list: list[PydanticUser] = current_report.new_users
+    report: EverydayReport = await redis_crud.get_current_report()
+    new_users: list[PydanticUser] = report.new_users
 
     # Construct notification text
-    text = f'{len(users_list)} new users'
-    if len(users_list) != 0:
-        text += ':'
+    new_users_text = f'{len(new_users)} new users'
+    if len(new_users) != 0:
+        new_users_text += ':'
     user: PydanticUser
-    for i, user in enumerate(users_list):
+    for i, user in enumerate(new_users):
         telegram_id = user.telegram_id
         first_name = user.first_name
         last_name = user.last_name or ''
         user_name = user.user_name
         language = user.language
-        text += f'\n{i+1}. ({telegram_id}) {first_name} {last_name} ({language})'
+        new_users_text += f'\n{i + 1}. ({telegram_id}) {first_name} {last_name} ({language})'
         if user_name:
-            text += f't.me/{user_name}'
-    return text
+            new_users_text += f't.me/{user_name}'
+    # Get notification text about users joined during the day
+    new_users_text += f'\n{report.n_notified_users} users notified\n'
+    return new_users_text

@@ -5,6 +5,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import StatesGroup
 from src.fsm_forms._custom import CustomState as State
 from aiogram.types import ParseMode
+from aiogram.utils import exceptions
 import random
 import pytz
 
@@ -12,6 +13,7 @@ from src.bot import dp, bot, _
 from src.fsm_forms import _keyboards as kb
 from src.config import logger
 from db import sql
+from db.redis.crud import remove_user_state
 from datetime import date, datetime, timedelta
 
 
@@ -69,7 +71,10 @@ async def process_datetime(callback_query: types.CallbackQuery, state: FSMContex
     text = f'<b>{ddate}</b>\n' + _("Продолжительность в часах (можно написать):")
     await bot.send_message(callback_query.from_user.id, text,
                            reply_markup=kb.durability_kb([_('Весь день'), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16]))
-    await callback_query.message.delete()
+    try:
+        await callback_query.message.delete()
+    except Exception:
+        pass
 
 
 @dp.message_handler(lambda message: not message.text.isdigit() and message.text != _('Весь день'),
@@ -261,3 +266,4 @@ async def process_description(message: types.Message, state: FSMContext):
     await bot.send_message(message.chat.id, text, reply_markup=types.ReplyKeyboardRemove())
     # Finish conversation
     await state.finish()
+    await remove_user_state(message.from_user.id)

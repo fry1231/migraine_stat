@@ -8,6 +8,7 @@ import pytz
 from src.bot import dp, bot, _
 from src.fsm_forms import _keyboards as kb
 from db import sql
+from db.redis.crud import remove_user_state
 
 
 class ReportDrugUseForm(StatesGroup):
@@ -39,7 +40,10 @@ async def du_process_datetime(callback_query: types.CallbackQuery, state: FSMCon
     await ReportDrugUseForm.drugname.set()
     text = f'<b>{ddate}</b>\n' + _("Что принимали? (можно написать)")
     await bot.send_message(callback_query.from_user.id, text, reply_markup=reply_markup)
-    await callback_query.message.delete()
+    try:
+        await callback_query.message.delete()
+    except Exception:
+        pass
 
 
 @dp.message_handler(lambda message: message.text.strip() == '', state=ReportDrugUseForm.drugname)
@@ -71,3 +75,4 @@ async def du_process_amount(message: types.Message, state: FSMContext):
     await bot.send_message(message.chat.id, text, reply_markup=types.ReplyKeyboardRemove())
     # Finish conversation
     await state.finish()
+    await remove_user_state(message.from_user.id)

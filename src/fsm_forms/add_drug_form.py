@@ -7,6 +7,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from src.bot import dp
 from src.fsm_forms import _keyboards as kb
 from db import sql
+from db.redis.crud import remove_user_state
 from src.bot import _
 
 
@@ -106,3 +107,4 @@ async def process_is_temp_reducer(callback_query: types.CallbackQuery, state: FS
             )
     # Finish conversation
     await state.finish()
+    await remove_user_state(callback_query.from_user.id)

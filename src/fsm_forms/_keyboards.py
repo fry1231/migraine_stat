@@ -111,7 +111,8 @@ def get_provocateurs_kb(exclude: list = None):
         _('Кофе'),
         _('Сильные запахи'),
         _('Погода'),
-        _('Гормоны')
+        _('Гормоны'),
+        _('Физическая нагрузка')
     ]
 
     provocateurs_kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)

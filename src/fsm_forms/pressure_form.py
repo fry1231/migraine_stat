@@ -6,6 +6,7 @@ from src.fsm_forms._custom import CustomState as State
 from aiogram.dispatcher import FSMContext
 
 from db import sql
+from db.redis.crud import remove_user_state
 from src.bot import bot, dp, _
 
 
@@ -140,3 +141,4 @@ async def process_pulse_ones(callback_query: types.CallbackQuery, state: FSMCont
     await state.finish()
     text = f"{data['systolic']}/{data['diastolic']} {data['pulse']}\n" + _("Успешно добавлено!")
     await callback_query.message.edit_text(text)
+    await remove_user_state(callback_query.from_user.id)

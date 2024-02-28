@@ -108,6 +108,13 @@ async def process_no_pain(callback_query: types.CallbackQuery, state: FSMContext
                        "Потрясающе, Изумительно, Роскошно, Отменно, Бесподобно, Шикарно, Распрекрасно, Прелестно, "
                        "Любо-дорого, Похвально, Обворожительно, Балдёж, Кайф, Неплохо, Превосходно")
     nice_words = nice_words_str.split(', ')
+    try:
+        text = callback_query.message.text
+        text += '\n'
+        text += _('Нет, всё хорошо! / Уже добавлено')
+        await callback_query.message.edit_text(text=text, reply_markup=types.ReplyKeyboardRemove())
+    except Exception:
+        pass
     await callback_query.message.reply(f'{random.choice(nice_words)}!', reply_markup=types.ReplyKeyboardRemove())
 
 # For c.data == 'pain' handler in fsm_forms/report_paincase_form.py

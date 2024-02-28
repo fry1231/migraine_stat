@@ -12,7 +12,7 @@ async def report_pressure(systolic: int,
                           pulse: int,
                           owner_id: int) -> Pressure:
     async with get_session() as session:
-        db_pressure = Pressure(datetime=datetime.datetime.now(),
+        db_pressure = Pressure(datetime=datetime.datetime.utcnow(),
                                systolic=systolic,
                                diastolic=diastolic,
                                pulse=pulse,

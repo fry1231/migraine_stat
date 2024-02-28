@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-02-27 02:53+0100\n"
-"PO-Revision-Date: 2024-02-27 02:55+0100\n"
+"POT-Creation-Date: 2024-02-27 20:36+0100\n"
+"PO-Revision-Date: 2024-02-27 20:36+0100\n"
 "Last-Translator: \n"
 "Language-Team: uk <LL@li.org>\n"
 "Language: uk\n"
@@ -17,25 +17,25 @@ msgstr ""
 "X-Generator: Poedit 3.4.2\n"
 
 #: fsm_forms/_keyboards.py:23 fsm_forms/_keyboards.py:30
-#: fsm_forms/add_drug_form.py:100 fsm_forms/add_drug_form.py:101
-#: fsm_forms/report_paincase_form.py:122 fsm_forms/report_paincase_form.py:130
-#: fsm_forms/report_paincase_form.py:177
+#: fsm_forms/add_drug_form.py:101 fsm_forms/add_drug_form.py:102
+#: fsm_forms/report_paincase_form.py:123 fsm_forms/report_paincase_form.py:131
+#: fsm_forms/report_paincase_form.py:178
 msgid "Да"
 msgstr "Так"
 
 #: fsm_forms/_keyboards.py:23 fsm_forms/_keyboards.py:31
-#: fsm_forms/add_drug_form.py:100 fsm_forms/add_drug_form.py:101
-#: fsm_forms/report_paincase_form.py:122 fsm_forms/report_paincase_form.py:177
-#: fsm_forms/report_paincase_form.py:184
+#: fsm_forms/add_drug_form.py:101 fsm_forms/add_drug_form.py:102
+#: fsm_forms/report_paincase_form.py:123 fsm_forms/report_paincase_form.py:178
+#: fsm_forms/report_paincase_form.py:185
 msgid "Нет"
 msgstr "Ні"
 
 #: fsm_forms/_keyboards.py:32 fsm_forms/_keyboards.py:79 fsm_forms/_keyboards.py:96
-#: fsm_forms/add_drug_form.py:34 fsm_forms/pressure_form.py:53 routes/common.py:25
+#: fsm_forms/add_drug_form.py:35 fsm_forms/pressure_form.py:54 routes/common.py:25
 msgid "Отмена"
 msgstr "Відміна"
 
-#: fsm_forms/_keyboards.py:38 fsm_forms/report_paincase_form.py:238
+#: fsm_forms/_keyboards.py:38 fsm_forms/report_paincase_form.py:239
 msgid "Не имеются"
 msgstr "Немає"
 
@@ -51,9 +51,9 @@ msgstr "Вчора"
 msgid "Выбрать другую дату"
 msgstr "Виберіть іншу дату"
 
-#: fsm_forms/_keyboards.py:94 fsm_forms/_keyboards.py:123
-#: fsm_forms/_keyboards.py:140 fsm_forms/report_paincase_form.py:139
-#: fsm_forms/report_paincase_form.py:160 fsm_forms/report_paincase_form.py:206
+#: fsm_forms/_keyboards.py:94 fsm_forms/_keyboards.py:124
+#: fsm_forms/_keyboards.py:141 fsm_forms/report_paincase_form.py:140
+#: fsm_forms/report_paincase_form.py:161 fsm_forms/report_paincase_form.py:207
 msgid "Следующий вопрос"
 msgstr "Наступне питання"
 
@@ -109,31 +109,35 @@ msgstr "Погода"
 msgid "Гормоны"
 msgstr "Гормони"
 
-#: fsm_forms/_keyboards.py:129
+#: fsm_forms/_keyboards.py:115
+msgid "Физическая нагрузка"
+msgstr "Фізичне навантаження"
+
+#: fsm_forms/_keyboards.py:130
 msgid "Тошнота"
 msgstr "Нудота"
 
-#: fsm_forms/_keyboards.py:130
+#: fsm_forms/_keyboards.py:131
 msgid "Рвота"
 msgstr "Блювання"
 
-#: fsm_forms/_keyboards.py:131
+#: fsm_forms/_keyboards.py:132
 msgid "Боль в шее"
 msgstr "Біль у шиї"
 
-#: fsm_forms/_keyboards.py:132
+#: fsm_forms/_keyboards.py:133
 msgid "Светочувствительность"
 msgstr "Світлочутливість"
 
-#: fsm_forms/_keyboards.py:133
+#: fsm_forms/_keyboards.py:134
 msgid "Чувствительность к звукам"
 msgstr "Чутливість до звуків"
 
-#: fsm_forms/add_drug_form.py:25
+#: fsm_forms/add_drug_form.py:26
 msgid "Введите название медикамента:"
 msgstr "Введіть назву препарату:"
 
-#: fsm_forms/add_drug_form.py:46
+#: fsm_forms/add_drug_form.py:47
 msgid ""
 "Какова максимальная суточная доза (в мг)? - выберите из предложенных или "
 "напишите свой вариант"
@@ -141,19 +145,19 @@ msgstr ""
 "Яка максимальна добова доза (мг)? - Виберіть із запропонованих або напишіть свій "
 "варіант"
 
-#: fsm_forms/add_drug_form.py:55
+#: fsm_forms/add_drug_form.py:56
 msgid "Количество должно быть числом, повторите ввод:"
 msgstr "Кількість має бути числом, спробуйте ще раз:"
 
-#: fsm_forms/add_drug_form.py:66 fsm_forms/add_drug_form.py:69
+#: fsm_forms/add_drug_form.py:67 fsm_forms/add_drug_form.py:70
 msgid "Является обезболивающим?"
 msgstr "Це знеболюючий засіб?"
 
-#: fsm_forms/add_drug_form.py:78
+#: fsm_forms/add_drug_form.py:79
 msgid "Является жаропонижающим?"
 msgstr "Це жарознижуюче?"
 
-#: fsm_forms/add_drug_form.py:94
+#: fsm_forms/add_drug_form.py:95
 msgid ""
 "Добавлен {name}\n"
 "Дозировка макс.: {daily_max}\n"
@@ -165,15 +169,15 @@ msgstr ""
 "Знеболювальний: {is_painkiller}\n"
 "Жарознижуючий: {is_temp_reducer}"
 
-#: fsm_forms/add_drug_form.py:104
+#: fsm_forms/add_drug_form.py:105
 msgid "Отлично!"
 msgstr "Чудово!"
 
-#: fsm_forms/pressure_form.py:52
+#: fsm_forms/pressure_form.py:53
 msgid "Не знаю"
 msgstr "Не знаю"
 
-#: fsm_forms/pressure_form.py:68
+#: fsm_forms/pressure_form.py:69
 msgid ""
 "Бот запишет ваши показатели давления и пульса на текущий момент. \n"
 "Выберите систолическое давление (верхнее значение)"
@@ -181,108 +185,108 @@ msgstr ""
 "Бот запише ваші показники тиску і пульсу на поточний момент. \n"
 "Виберіть систолічний тиск (верхнє значення)"
 
-#: fsm_forms/pressure_form.py:91
+#: fsm_forms/pressure_form.py:92
 msgid "Диастолическое давление (нижнее значение):"
 msgstr "Діастолічний тиск (нижнє значення):"
 
-#: fsm_forms/pressure_form.py:114
+#: fsm_forms/pressure_form.py:115
 msgid "Ваш пульс?"
 msgstr "Який у вас пульс?"
 
-#: fsm_forms/pressure_form.py:141 fsm_forms/report_druguse_form.py:69
-#: fsm_forms/report_paincase_form.py:245
+#: fsm_forms/pressure_form.py:142 fsm_forms/report_druguse_form.py:70
+#: fsm_forms/report_paincase_form.py:246
 msgid "Успешно добавлено!"
 msgstr "Успішно додано!"
 
 #. NOTE Date of a medication intake
-#: fsm_forms/report_druguse_form.py:30
+#: fsm_forms/report_druguse_form.py:31
 msgid "Дата приёма?"
 msgstr "Дата прийому?"
 
-#: fsm_forms/report_druguse_form.py:40
+#: fsm_forms/report_druguse_form.py:41
 msgid "Что принимали? (можно написать)"
 msgstr "Що приймали? (можна написати)"
 
-#: fsm_forms/report_druguse_form.py:48 fsm_forms/report_paincase_form.py:198
+#: fsm_forms/report_druguse_form.py:49 fsm_forms/report_paincase_form.py:199
 msgid "Сообщение не может быть пустым, повторите"
 msgstr "Повідомлення не може бути порожнім, спробуйте ще раз"
 
-#: fsm_forms/report_druguse_form.py:57
+#: fsm_forms/report_druguse_form.py:58
 msgid "Количество принятого? (можно написать)"
 msgstr "Кількість прийнятого? (можна написати)"
 
 #. NOTE list of frustration words. Used when user says he had a headache.
 #. Separate with '|'
-#: fsm_forms/report_paincase_form.py:43
+#: fsm_forms/report_paincase_form.py:44
 msgid "Ну вот.|Ёмаё!|Тфу!|Ого, надеюсь, не слишком сильно!|Тысяча чертей!"
 msgstr ""
 "Ну ось.|Черт!|Ой боже!|Тьфу!|Сподіваюся, біль був не дуже сильним!|Мені шкода це "
 "чути... |Сподіваюся, зараз тобі стало краще!|Тримайся!|Я тут для тебе."
 
-#: fsm_forms/report_paincase_form.py:55 fsm_forms/report_paincase_form.py:58
+#: fsm_forms/report_paincase_form.py:56 fsm_forms/report_paincase_form.py:59
 msgid "Когда?"
 msgstr "Коли?"
 
-#: fsm_forms/report_paincase_form.py:69
+#: fsm_forms/report_paincase_form.py:70
 msgid "Продолжительность в часах (можно написать):"
 msgstr "Тривалість у годинах (можна записати):"
 
-#: fsm_forms/report_paincase_form.py:71 fsm_forms/report_paincase_form.py:75
-#: fsm_forms/report_paincase_form.py:83 fsm_forms/report_paincase_form.py:86
-#: fsm_forms/report_paincase_form.py:91
+#: fsm_forms/report_paincase_form.py:72 fsm_forms/report_paincase_form.py:76
+#: fsm_forms/report_paincase_form.py:84 fsm_forms/report_paincase_form.py:87
+#: fsm_forms/report_paincase_form.py:92
 msgid "Весь день"
 msgstr "Весь день"
 
-#: fsm_forms/report_paincase_form.py:81
+#: fsm_forms/report_paincase_form.py:82
 msgid "Продолжительность должна быть числом, повторите ввод:"
 msgstr "Тривалість має бути числом, спробуйте ще раз:"
 
-#: fsm_forms/report_paincase_form.py:99
+#: fsm_forms/report_paincase_form.py:100
 msgid "Интенсивность от 1 до 10:"
 msgstr "Інтенсивність від 1 до 10:"
 
-#: fsm_forms/report_paincase_form.py:107
+#: fsm_forms/report_paincase_form.py:108
 msgid "Интенсивность должна быть числом, повторите ввод:"
 msgstr "Інтенсивність має бути числом, спробуйте ще раз:"
 
-#: fsm_forms/report_paincase_form.py:119
+#: fsm_forms/report_paincase_form.py:120
 msgid "Была ли аура?"
 msgstr "Чи була аура?"
 
-#: fsm_forms/report_paincase_form.py:124 fsm_forms/report_paincase_form.py:179
+#: fsm_forms/report_paincase_form.py:125 fsm_forms/report_paincase_form.py:180
 msgid "Неверный ответ, повторите: "
 msgstr "Неправильна відповідь, спробуйте ще раз: "
 
-#: fsm_forms/report_paincase_form.py:132
+#: fsm_forms/report_paincase_form.py:133
 msgid "Выбери триггеры при наличии:"
 msgstr "Оберіть тригери за наявності:"
 
-#: fsm_forms/report_paincase_form.py:143
+#: fsm_forms/report_paincase_form.py:144
 msgid "Были ли следующие симптомы?"
 msgstr "Чи були такі симптоми?"
 
-#: fsm_forms/report_paincase_form.py:152 fsm_forms/report_paincase_form.py:173
-#: fsm_forms/report_paincase_form.py:230
+#: fsm_forms/report_paincase_form.py:153 fsm_forms/report_paincase_form.py:174
+#: fsm_forms/report_paincase_form.py:231
 msgid "Можно добавить ещё или нажать на \"следующий вопрос\""
 msgstr "Можна додати ще або натиснути на \"наступне запитання\""
 
-#: fsm_forms/report_paincase_form.py:164
+#: fsm_forms/report_paincase_form.py:165
 msgid "Принимались ли пилюли?"
 msgstr "Чи приймали таблетки?"
 
-#: fsm_forms/report_paincase_form.py:186 fsm_forms/report_paincase_form.py:208
+#: fsm_forms/report_paincase_form.py:187 fsm_forms/report_paincase_form.py:209
 msgid "Примечания, если имеются:"
 msgstr "Примітки, якщо такі є:"
 
-#: fsm_forms/report_paincase_form.py:191
+#: fsm_forms/report_paincase_form.py:192
 msgid "Название таблетки:"
 msgstr "Назва препарату:"
 
-#: fsm_forms/report_paincase_form.py:215
+#: fsm_forms/report_paincase_form.py:216
 msgid "Количество принятого в мг? (можно написать)"
 msgstr "Кількість прийнята в мг? (можна писати)"
 
-#: fsm_forms/report_paincase_form.py:246
+#: fsm_forms/report_paincase_form.py:247
 msgid ""
 "\n"
 "Голова болела <b>{pain_date}</b>\n"
@@ -302,50 +306,50 @@ msgstr ""
 "Симптоми: <b>{n_symptoms}</b>\n"
 "Таблетки: <b>{drugs_or_not}</b>\n"
 
-#: fsm_forms/report_paincase_form.py:256
+#: fsm_forms/report_paincase_form.py:257
 msgid "Аура была"
 msgstr "Була аура"
 
-#: fsm_forms/report_paincase_form.py:256
+#: fsm_forms/report_paincase_form.py:257
 msgid "Ауры не было"
 msgstr "Без аури"
 
-#: fsm_forms/report_paincase_form.py:259
+#: fsm_forms/report_paincase_form.py:260
 msgid "не принимали"
 msgstr "не приймали"
 
-#: misc/init_bot_description.py:33
+#: misc/init_bot_description.py:39
 msgid "запись бо-бо"
 msgstr "головний біль"
 
-#: misc/init_bot_description.py:34
+#: misc/init_bot_description.py:40
 msgid "приём лекарства"
 msgstr "прийом ліків"
 
-#: misc/init_bot_description.py:35
+#: misc/init_bot_description.py:41
 msgid "запись давления"
 msgstr "запис тиску"
 
-#: misc/init_bot_description.py:36
+#: misc/init_bot_description.py:42
 msgid "список лекарств"
 msgstr "список ліків"
 
-#: misc/init_bot_description.py:37
+#: misc/init_bot_description.py:43
 msgid "изменить записи"
 msgstr "змінити записи"
 
-#: misc/init_bot_description.py:38
+#: misc/init_bot_description.py:44
 msgid "статистика"
 msgstr "статистика"
 
-#: misc/init_bot_description.py:39
+#: misc/init_bot_description.py:45
 msgid "настройки"
 msgstr "налаштування"
 
-#: misc/keyboards.py:30 misc/keyboards.py:65 routes/calendar.py:147
-#: routes/settings.py:141 routes/settings.py:176 routes/settings.py:244
-#: routes/settings.py:342 routes/settings.py:363 routes/statistics.py:43
-#: routes/statistics.py:128 routes/statistics.py:191 routes/statistics.py:238
+#: misc/keyboards.py:30 misc/keyboards.py:65 routes/calendar.py:148
+#: routes/settings.py:141 routes/settings.py:177 routes/settings.py:257
+#: routes/settings.py:355 routes/settings.py:376 routes/statistics.py:43
+#: routes/statistics.py:128 routes/statistics.py:192 routes/statistics.py:240
 msgid "<< Назад"
 msgstr "<< Назад"
 
@@ -539,7 +543,7 @@ msgstr "Видалення записів за <b>{date_str}</b>"
 msgid "Запись не найдена"
 msgstr "Запис не знайдено"
 
-#: routes/calendar.py:145
+#: routes/calendar.py:146
 msgid "Запись удалена"
 msgstr "Запис видалено"
 
@@ -567,23 +571,23 @@ msgstr "Дата не може бути в майбутньому"
 msgid "Функция пока не реализована"
 msgstr "Функція ще не реалізована"
 
-#: routes/drugs_management.py:29
+#: routes/drugs_management.py:30
 msgid "Добавить лекарство"
 msgstr "Додати ліки"
 
-#: routes/drugs_management.py:31
+#: routes/drugs_management.py:32
 msgid "Удалить лекарство"
 msgstr "Видалити ліки"
 
-#: routes/drugs_management.py:32
+#: routes/drugs_management.py:33
 msgid "Список добавленных лекарств:"
 msgstr "Список доданих препаратів:"
 
-#: routes/drugs_management.py:36
+#: routes/drugs_management.py:37
 msgid "Вы ещё не добавили ни одного лекарства"
 msgstr "Ви ще не додали жодних ліків"
 
-#: routes/drugs_management.py:53
+#: routes/drugs_management.py:54
 msgid "Удаляем лекарство под номером:"
 msgstr "Видаляємо ліки під номером:"
 
@@ -639,68 +643,68 @@ msgstr ""
 msgid "Выберите язык:"
 msgstr "Виберіть мову:"
 
-#: routes/settings.py:177
+#: routes/settings.py:178
 msgid "Поделиться геолокацией"
 msgstr "Обмін геоданими"
 
-#: routes/settings.py:178
+#: routes/settings.py:179
 msgid "Выбрать из списка"
 msgstr "Виберіть зі списку"
 
-#: routes/settings.py:185
+#: routes/settings.py:186
 msgid "Способ изменения часового пояса:"
 msgstr "Спосіб зміни часового поясу:"
 
-#: routes/settings.py:193 routes/settings.py:194
+#: routes/settings.py:194 routes/settings.py:195
 msgid "Поделиться геолокацией 📍"
 msgstr "Поділитися геолокацією 📍"
 
-#: routes/settings.py:205
+#: routes/settings.py:206 routes/settings.py:220
 msgid "Не удалось определить часовой пояс по геолокации, попробуйте другой способ"
 msgstr "Не вдалося визначити часовий пояс за геолокацією, спробуйте інший спосіб"
 
 #. NOTE all suggested timezones are wrong
-#: routes/settings.py:223
+#: routes/settings.py:235
 msgid "Нет нужного"
 msgstr "Немає потрібного"
 
-#: routes/settings.py:224
+#: routes/settings.py:236
 msgid "Найдено несколько часовых поясов, выберите нужный:"
 msgstr "Знайдено кілька часових поясів, виберіть потрібний:"
 
-#: routes/settings.py:245
+#: routes/settings.py:258
 msgid "Европа"
 msgstr "Європа"
 
-#: routes/settings.py:246
+#: routes/settings.py:259
 msgid "Азия"
 msgstr "Азії"
 
-#: routes/settings.py:247
+#: routes/settings.py:260
 msgid "Северная Америка"
 msgstr "Північна Америка"
 
-#: routes/settings.py:248
+#: routes/settings.py:261
 msgid "Южная Америка"
 msgstr "Південна Америка"
 
-#: routes/settings.py:249
+#: routes/settings.py:262
 msgid "Африка"
 msgstr "Африка"
 
-#: routes/settings.py:250
+#: routes/settings.py:263
 msgid "Океания"
 msgstr "Океанія"
 
-#: routes/settings.py:252
+#: routes/settings.py:265
 msgid "Выберите континент:"
 msgstr "Виберіть континент:"
 
-#: routes/settings.py:284
+#: routes/settings.py:297
 msgid "Выберите страну:{countries_rows}"
 msgstr "Виберіть країну:{countries_rows}"
 
-#: routes/settings.py:313
+#: routes/settings.py:326
 msgid ""
 "Выберите часовой пояс:\n"
 "{tzs_rows}"
@@ -708,15 +712,15 @@ msgstr ""
 "Виберіть часовий пояс:\n"
 "{tzs_rows}"
 
-#: routes/settings.py:343
+#: routes/settings.py:356
 msgid "до полудня"
 msgstr "до полудня"
 
-#: routes/settings.py:344
+#: routes/settings.py:357
 msgid "после полудня"
 msgstr "після полудня"
 
-#: routes/settings.py:353
+#: routes/settings.py:366
 msgid ""
 "Бот в определённое время будет спрашивать, болела ли голова.\n"
 "Когда лучше об этом спрашивать?\n"
@@ -726,39 +730,39 @@ msgstr ""
 "Коли краще про це запитувати?\n"
 "<b>(Поточний час сповіщення - {local_notify_at})</b>"
 
-#: routes/settings.py:371
+#: routes/settings.py:384
 msgid "12 (полдень)"
 msgstr "12 (опівдні)"
 
-#: routes/settings.py:373
+#: routes/settings.py:386
 msgid "12 (полночь)"
 msgstr "12 (опівночі)"
 
-#: routes/settings.py:380
+#: routes/settings.py:393
 msgid "Выберите время оповещений:"
 msgstr "Виберіть час сповіщення:"
 
-#: routes/settings.py:415 routes/settings.py:419
+#: routes/settings.py:429 routes/settings.py:433
 msgid " день"
 msgstr " день"
 
-#: routes/settings.py:416 routes/settings.py:417
+#: routes/settings.py:430 routes/settings.py:431
 msgid " дня"
 msgstr " днів"
 
-#: routes/settings.py:418
+#: routes/settings.py:432
 msgid " дней"
 msgstr " днів"
 
-#: routes/settings.py:422
+#: routes/settings.py:436
 msgid "Текущий период оповещений пока не назначен"
 msgstr "Поточний період повiдомлень поки що не призначений"
 
-#: routes/settings.py:425
+#: routes/settings.py:439
 msgid "Текущая частота оповещения - 1 раз в {period_text}"
 msgstr "Поточна частота повiдомлень - 1 раз на {period_text}"
 
-#: routes/settings.py:426
+#: routes/settings.py:440
 msgid ""
 "Выбери период опроса (сообщения будут отправляться 1 раз в ...)\n"
 "{text_notif_period}"
@@ -802,38 +806,38 @@ msgstr ""
 msgid "Статистика головных болей за:"
 msgstr "Статистика головного болю для:"
 
-#: routes/statistics.py:82 routes/statistics.py:169 routes/statistics.py:223
-#: routes/statistics.py:281
+#: routes/statistics.py:82 routes/statistics.py:170 routes/statistics.py:225
+#: routes/statistics.py:284
 msgid "Собираю данные..."
 msgstr "Збір даних..."
 
-#: routes/statistics.py:125 routes/statistics.py:188 routes/statistics.py:235
+#: routes/statistics.py:125 routes/statistics.py:189 routes/statistics.py:237
 msgid "В течение запрошенного периода <b>({period_text})</b> записей нет"
 msgstr "За запитуваний період <b>({period_text})</b> немає записів"
 
-#: routes/statistics.py:145 routes/statistics.py:197 routes/statistics.py:255
+#: routes/statistics.py:145 routes/statistics.py:198 routes/statistics.py:257
 msgid "Готово! Высылаю файл с данными..."
 msgstr "Готово!Надсилаю вам файл з даними…"
 
-#: routes/statistics.py:149 routes/statistics.py:201 routes/statistics.py:259
-#: routes/statistics.py:291
+#: routes/statistics.py:150 routes/statistics.py:203 routes/statistics.py:262
+#: routes/statistics.py:294
 msgid "В данный момент сервер загружен, повторите, пожалуйста, через пару минут"
 msgstr "Наразі сервер завантажений, спробуйте ще раз через кілька хвилин"
 
-#: routes/statistics.py:152 routes/statistics.py:206 routes/statistics.py:264
-#: routes/statistics.py:294
+#: routes/statistics.py:153 routes/statistics.py:208 routes/statistics.py:267
+#: routes/statistics.py:297
 msgid "Неизвестная ошибка, отчёт уже отправлен администратору"
 msgstr "Невідома помилка, звіт уже надіслано адміністратору"
 
-#: routes/statistics.py:162
+#: routes/statistics.py:163
 msgid "Статистика приёма лекарств за:"
 msgstr "Статистика прийому ліків за:"
 
-#: routes/statistics.py:216
+#: routes/statistics.py:218
 msgid "Записи давления за:"
 msgstr "Записи артеріального тиску за:"
 
-#: routes/statistics.py:274
+#: routes/statistics.py:277
 msgid "Сгенерировать отчёт за:"
 msgstr "Створити звіт за:"
 

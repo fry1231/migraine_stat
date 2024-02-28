@@ -7,6 +7,7 @@ from src.fsm_forms._custom import CustomState as State
 from src.bot import dp, bot
 from src.fsm_forms import _keyboards as kb
 from db import sql
+from db.redis.crud import remove_user_state
 from src.misc.utils import notify_me
 from src.config import PAYMENTS_TOKEN_RU
 
@@ -83,3 +84,4 @@ async def got_payment(message: types.Message):
     await bot.send_message(message.chat.id,
                            'Ура, спасибо!',
                            reply_markup=types.ReplyKeyboardRemove())
+    await remove_user_state(message.from_user.id)
