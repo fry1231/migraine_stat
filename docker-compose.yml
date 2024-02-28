@@ -17,6 +17,7 @@ services:
       - POSTGRES_PASS=${POSTGRES_PASS:?err}
       - MY_TG_ID=${MY_TG_ID}
       - PAYMENTS_TOKEN_RU=${PAYMENTS_TOKEN_RU:?err}
+      - IN_PRODUCTION=${IN_PRODUCTION:?err}
     volumes:
       - persistent-data:/usr/persistent_data
     networks:
