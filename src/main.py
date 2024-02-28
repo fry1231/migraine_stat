@@ -5,7 +5,7 @@ from src.routes import *
 from db import sql
 from db.models import User
 from db.redis.models import PydanticUser
-from db.redis.crud import init_states
+from db.redis.crud import init_states, update_everyday_report
 from src.fsm_forms import available_fsm_states
 from src.misc.utils import notify_me
 from src.misc.db_backup import do_backup
@@ -51,6 +51,7 @@ async def notify_users_hourly():
     # Change 'last_notified' for notified users
     if notified_users_ids:
         await sql.batch_change_last_notified(notified_users_ids, time_notified)
+        await update_everyday_report(n_notified_users=len(notified_users_ids))
         logger.info(f'{len(notified_users_ids)} users notified')
 
 

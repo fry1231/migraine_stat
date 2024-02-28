@@ -11,7 +11,8 @@ from db.models import User, Drug, DrugUse, PainCase, SavedUser, SavedDrugUse, Sa
 from db.models import Base
 from db.database import test_engine, database_exists, create_database
 from db import sql
-from src.config import logger
+from db.redis.crud import get_current_report
+from src.config import logger, redis_conn
 
 
 @pytest.fixture(scope="session")
@@ -27,6 +28,8 @@ async def resource():
     Force crud operations to perform on a test database "sqlite:///db/db_file/test.db"
     Creates all necessary tables at the beginning of the testing and drops them in the end
     """
+    assert redis_conn.connection_pool.connection_kwargs['db'] == 5
+    await redis_conn.flushdb()
     if not await database_exists(test_engine.url):
         await create_database(test_engine.url)
     assert 'db_test' in sql.use_engine.url.database, f'URL database is not db_test ' \
@@ -34,12 +37,15 @@ async def resource():
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
+
     # ------
     yield
     # ------
-    os.environ["IS_TESTING"] = '0'
+
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+    await redis_conn.flushdb()
+    os.environ["IS_TESTING"] = '0'
 
 
 async def test_db_connection():
@@ -205,6 +211,12 @@ async def test_users_info_after_deletion():
     assert len(saved_users) == 2
     assert len(saved_paincases) == 3
     assert len(saved_druguses) == 5
+
+
+async def test_deleted_user_in_redis():
+    report = await get_current_report()
+    assert report.deleted_users[0].telegram_id == 123
+    assert report.deleted_users[1].telegram_id == 456
 
 
 async def test_multiple_connections():

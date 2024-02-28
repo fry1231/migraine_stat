@@ -4,8 +4,8 @@ os.environ["IS_TESTING"] = '1'
 
 import pytest
 import asyncio
-from db.redis.models import PydanticUser
-from db.redis.crud import update_everyday_report
+from db.redis.models import PydanticUser, EverydayReport
+from db.redis.crud import update_everyday_report, get_current_report
 from src.misc.service_reports import notif_of_new_users
 from src.config import redis_conn
 
@@ -19,11 +19,13 @@ def event_loop():
 
 @pytest.fixture(scope="module", autouse=True)
 async def resource():
-    assert redis_conn
+    assert redis_conn.connection_pool.connection_kwargs['db'] == 5
     await redis_conn.flushdb()
+
     yield
-    os.environ["IS_TESTING"] = '0'
+
     await redis_conn.flushdb()
+    os.environ["IS_TESTING"] = '0'
 
 
 async def test_send_messages():

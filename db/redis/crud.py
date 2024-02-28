@@ -65,6 +65,16 @@ async def update_everyday_report(n_notified_users: int = 0,
                                  n_druguses: int = 0,
                                  n_pressures: int = 0,
                                  n_medications: int = 0):
+    """
+    Update everyday report in Redis, each function call appends users or increment counters
+    :param n_notified_users: increment value
+    :param new_users: extend list of new users
+    :param deleted_users: extend list of deleted users
+    :param n_pains: increment value
+    :param n_druguses: increment value
+    :param n_pressures: increment value
+    :param n_medications: increment value
+    """
     current_report = await get_current_report()
     current_report.n_notified_users += n_notified_users
     if new_users:
