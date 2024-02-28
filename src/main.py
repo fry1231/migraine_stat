@@ -23,7 +23,7 @@ async def notify_users_hourly():
     utc_hour = datetime.datetime.utcnow().hour
     user_list: list[User] = await sql.users_by_notif_hour(utc_hour)
     if user_list:
-        logger.info(f'Notifying {len(user_list)} users')
+        logger.info(f'Notifying {len([el for el in user_list if el.notify_every != -1])} users')
     t = datetime.datetime.today()
     time_notified = datetime.datetime.now()
     notified_users_ids = []
@@ -32,7 +32,6 @@ async def notify_users_hourly():
         notification_period_days = user.notify_every
         if notification_period_days == -1:   # If user did not specify it yet
             continue
-
         notification_period_minutes = notification_period_days * 24 * 60  # Notification period in minutes
         dt = (t - user.last_notified).total_seconds() / 60   # How many minutes since last notification
         if dt >= notification_period_minutes - 65:   # Check if notif. period has passed (safety interval 65 mins incl.)

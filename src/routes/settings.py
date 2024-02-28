@@ -81,13 +81,9 @@ async def change_settings(message_or_query: types.Message | types.CallbackQuery,
         await state.finish()
     await i18n.trigger(action='pre_process_callback_query',
                        args=(message_or_query, None))  # kostyl, otherwise does not change language immediately
-    keyboard = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    keyboard.row(InlineKeyboardButton(_('Язык 🇷🇺🇺🇦🇬🇧🇫🇷🇪🇸'), callback_data='change_lang'))
-    keyboard.row(InlineKeyboardButton(_('Часовой пояс'), callback_data='change_timezone'))
-    keyboard.row(InlineKeyboardButton(_('Время оповещений'), callback_data='change_notif_time'))
-    keyboard.row(InlineKeyboardButton(_('Частота оповещений'), callback_data='change_notif_freq'))
 
     user: User = await sql.get_user(telegram_id=message_or_query.from_user.id)
+
     language: str = user.language
     tz_str = user.timezone
     tz = pytz.timezone(tz_str)
@@ -112,6 +108,15 @@ async def change_settings(message_or_query: types.Message | types.CallbackQuery,
         'fr': '🇫🇷 Français',
         'es': '🇪🇸 Español'
     }
+    notif_period = notification_period_mapper[notification_period]
+    notification_time = notif_period if user.notify_every == -1 else notification_time
+    notif_time_callback = 'change_notif_time' if user.notify_every != -1 else f'alert_{notif_period}'
+    keyboard = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.row(InlineKeyboardButton(_('Язык 🇷🇺🇺🇦🇬🇧🇫🇷🇪🇸'), callback_data='change_lang'))
+    keyboard.row(InlineKeyboardButton(_('Часовой пояс'), callback_data='change_timezone'))
+    keyboard.row(InlineKeyboardButton(_('Время оповещений'), callback_data=notif_time_callback))
+    keyboard.row(InlineKeyboardButton(_('Частота оповещений'), callback_data='change_notif_freq'))
+
     text = _('Текущий язык: <b>{language}</b>\n'
              'Часовой пояс: <b>{timezone} {utc_offset_formatted}</b>\n'
              'Время оповещений: <b>{notification_time}</b>\n'
@@ -120,7 +125,7 @@ async def change_settings(message_or_query: types.Message | types.CallbackQuery,
                 timezone=tz_str,
                 utc_offset_formatted=utc_offset_str,
                 notification_time=notification_time,
-                notification_period=notification_period_mapper[notification_period])
+                notification_period=notif_period)
 
     if isinstance(message_or_query, types.Message):
         message: types.Message = message_or_query
