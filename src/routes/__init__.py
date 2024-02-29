@@ -1,10 +1,10 @@
 import aiogram
 from src.routes.common import *    # always import first
+from src.routes.user_interactions import *
 from src.routes.admin_commands import *
 from src.routes.drugs_management import *
 from src.routes.settings import *
 from src.routes.statistics import *
-from src.routes.user_interactions import *
 
 from src.routes.calendar import *
 from src.fsm_forms import *

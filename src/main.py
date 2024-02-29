@@ -4,7 +4,6 @@ import aioschedule
 from src.routes import *
 from db import sql
 from db.models import User
-from db.redis.models import PydanticUser
 from db.redis.crud import init_states, update_everyday_report
 from src.fsm_forms import available_fsm_states
 from src.misc.utils import notify_me
