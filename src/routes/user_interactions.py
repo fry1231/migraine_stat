@@ -2,12 +2,11 @@ import random
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-import traceback
+from aiogram.utils import exceptions
 
 from db import sql
 from db.models import User
 from src.bot import dp, bot, _
-from src.config import logger
 
 
 @dp.message_handler(commands=['start', 'help'], state='*')
@@ -57,8 +56,8 @@ async def regular_report(user_instance: User, missing_days: int):
     Ask each user if there was pain during the days
     If so - start report_paincase_form
     """
-    hi_s = ["Салам алейкум", "Hi", "Hello", "Ahlan wa sahlan", "Marhaba", "Hola", "Прывитанне", "Здравейте", "Jo napot",
-            "Chao", "Aloha", "Hallo", "Geia sou", "Гамарджоба", "Shalom", "Selamat", "Godan daginn", "Buenas dias",
+    hi_s = ["Салам алейкум", "Hi", "Hello", "Ahlan wa sahlan", "Marhaba", "Hola", "Прывiтанне", "Здравейте", "Jo napot",
+            "Chao", "Aloha", "Hallo", "Geia sou", "Gamarjoba", "Shalom", "Selamat", "Godan daginn", "¡Buenos días",
             "Buon giorno", "Ave", "Lab dien", "Sveiki", "Sveikas", "Guten Tag", "Goddag", "Dzien dobry", "Ola", "Buna",
             "Здраво", "Dobry den", "Sawatdi", "Merhaba", "Привіт", "Paivaa", "Bonjour", "Namaste", "Zdravo",
             "Dobry den", "God dag", "Saluton", "Tervist", "Konnichi wa"]
@@ -103,8 +102,6 @@ async def regular_report(user_instance: User, missing_days: int):
 
 @dp.callback_query_handler(lambda c: c.data and c.data == 'nopain', state='*')
 async def process_no_pain(callback_query: types.CallbackQuery, state: FSMContext):
-    if state and await state.get_state():
-        await state.finish()
     # NOTE Give some nice words to user if the user did not have a headache. Separate by comma + space
     nice_words_str = _("Прекрасно, Восхитительно, Чудесно, Великолепно, Круто, Здорово, Дивно, Чотко, Благодать, "
                        "Потрясающе, Изумительно, Роскошно, Отменно, Бесподобно, Шикарно, Распрекрасно, Прелестно, "
@@ -114,7 +111,10 @@ async def process_no_pain(callback_query: types.CallbackQuery, state: FSMContext
     text += '\n\n<b>'
     text += _('Нет, всё хорошо! / Уже добавлено')
     text += '</b>'
-    await callback_query.message.edit_text(text=text)
+    try:
+        await callback_query.message.edit_text(text=text)
+    except exceptions.MessageNotModified:
+        pass
     await callback_query.message.reply(f'{random.choice(nice_words)}!', reply_markup=types.ReplyKeyboardRemove())
 
 # For c.data == 'pain' handler in fsm_forms/report_paincase_form.py
