@@ -8,17 +8,17 @@ import db.sql as sql
 
 
 async def everyday_report(reset_old_one: bool = True) -> None:
-    text = await get_report_text()
+    report: EverydayReport = await redis_crud.get_current_report()
+    text = await get_report_text(report)
     await bot.send_message(chat_id=MY_TG_ID, text=text)
     if reset_old_one:
         await redis_crud.init_everyday_report()
         await redis_crud.init_states(available_fsm_states)
+        await sql.report_everyday_stats(report)
 
 
-async def get_report_text() -> str:
-    report: EverydayReport = await redis_crud.get_current_report()
+async def get_report_text(report: EverydayReport) -> str:
     new_users_text = await notif_of_new_users()
-
     deleted_users: list[PydanticUser] = report.deleted_users
     # Count users with at least one added row in Pains table - they are active_users
     active_users = await sql.get_users(active=True)
