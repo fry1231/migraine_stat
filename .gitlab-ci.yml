@@ -39,6 +39,8 @@ build:
 start_dbs:
   stage: start_dbs
   when: on_success
+  needs:
+    - build
   script:
     - cd /usr/migrebot
     - docker compose up -d migraine_db
