@@ -43,7 +43,7 @@ start_dbs:
     - build
   script:
     - cd /usr/migrebot
-    - docker compose up -d migraine_db
+    - docker compose up -d db
     - docker compose up -d redis
 
 migration:
