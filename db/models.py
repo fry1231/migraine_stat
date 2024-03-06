@@ -16,6 +16,7 @@ class User(Base):
     last_notified = Column(DateTime, default=datetime.datetime.min)
     notify_every = Column(SmallInteger, default=-1)
     first_name = Column(String)
+    last_name = Column(String)
     user_name = Column(String)
     joined = Column(Date)
     timezone = Column(String, default='Europe/Moscow')
@@ -89,6 +90,7 @@ class SavedUser(Base):
     id = Column(Integer, primary_key=True, index=True)
     telegram_id = Column(BigInteger)
     first_name = Column(String)
+    last_name = Column(String)
     user_name = Column(String)
     joined = Column(Date)
     deleted = Column(Date)
@@ -102,6 +104,7 @@ class SavedUser(Base):
         return SavedUser(
             telegram_id=user.telegram_id,
             first_name=user.first_name,
+            last_name=user.last_name,
             user_name=user.user_name,
             joined=user.joined,
             deleted=datetime.date.today(),

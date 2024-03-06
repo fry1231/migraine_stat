@@ -46,6 +46,8 @@ async def add_paincase_entry(message_or_query: types.Message | types.CallbackQue
     wtf_words += ['😱', '😔', '😢', '😞', '😦']
     user_id = message_or_query.from_user.id
     user = await sql.get_user(telegram_id=user_id)
+    if not user:
+        logger.error(f"User {user_id} not found in the database!")
     tz = user.timezone
     date_today = datetime.now(pytz.timezone(tz)).date()
     # if user.notify_every == 1:   # If everyday notification, skip the date question??

@@ -7,6 +7,7 @@ import pytz
 
 from src.bot import dp, bot, _
 from src.fsm_forms import _keyboards as kb
+from src.config import logger
 from db import sql
 from db.redis.crud import remove_user_state
 
@@ -24,6 +25,8 @@ async def du_add_drug_entry(message: types.Message, state: FSMContext = None):
         await state.finish()
     user_id = message.from_user.id
     user = await sql.get_user(telegram_id=user_id)
+    if not user:
+        logger.error(f"User {user_id} not found in the database!")
     tz = user.timezone
     date_today = datetime.datetime.now(pytz.timezone(tz)).date()
     await ReportDrugUseForm.date.set()

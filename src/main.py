@@ -74,9 +74,9 @@ async def scheduler():
 
 async def on_startup(__):
     await init_states(available_fsm_states)
-    await set_bot_name()
-    await set_bot_description()
-    await set_bot_commands()
+    # await set_bot_name()
+    # await set_bot_description()
+    # await set_bot_commands()
     asyncio.create_task(scheduler())
     await notify_me('Bot restarted')
 

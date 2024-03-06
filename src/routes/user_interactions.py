@@ -26,6 +26,7 @@ async def send_welcome(message: types.Message, state: FSMContext = None):
     if not user:
         # User info
         first_name = message.from_user.first_name
+        last_name = message.from_user.last_name
         user_name = message.from_user.username
         locale = message.from_user.locale
         language = locale.language
@@ -35,6 +36,7 @@ async def send_welcome(message: types.Message, state: FSMContext = None):
         await sql.create_user(
             telegram_id=user_id,
             first_name=first_name,
+            last_name=last_name,
             user_name=user_name,
             language=language
         )

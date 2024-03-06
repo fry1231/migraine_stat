@@ -9,13 +9,15 @@ from db.redis.models import PydanticUser
 
 
 async def create_user(telegram_id: int,
-                      first_name: str,
-                      user_name: str,
+                      first_name: str = None,
+                      last_name: str = None,
+                      user_name: str = None,
                       language: str = 'ru') -> User:
     async with get_session() as session:
         db_user = User(
             telegram_id=telegram_id,
             first_name=first_name,
+            last_name=last_name,
             user_name=user_name,
             joined=datetime.date.today(),
             language=language
@@ -25,7 +27,7 @@ async def create_user(telegram_id: int,
             PydanticUser(
                 telegram_id=telegram_id,
                 first_name=first_name,
-                last_name=None,
+                last_name=last_name,
                 user_name=user_name,
                 language=language
             )

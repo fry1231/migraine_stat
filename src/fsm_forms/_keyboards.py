@@ -58,6 +58,7 @@ def get_date_kb(date_today: date, callback_prefix: str):
     |  01.01.2024 | 02.01.2024 | 03.01.2024 |   (3 days back)
     |Choose another date %from the calendar%|
     |                 Cancel                |
+
     :param date_today: today's date, it's needed to take into account the time zone
     :param callback_prefix: prefix for callback data (pain or druguse)
     :return: InlineKeyboardMarkup

@@ -1,11 +1,3 @@
-stages:
-  - check_vars
-  - pull
-  - build
-  - copy_db
-  - test
-  - run
-
 check_vars:
   stage: check_vars
   when: manual
@@ -35,12 +27,26 @@ build:
     - cd /usr/migrebot
     - docker compose build
 
+start_dbs:
+  stage: start_dbs
+  when: on_success
+  script:
+    - cd /usr/migrebot
+    - docker compose up -d migraine_db
+    - docker compose up -d redis
+
+migration:
+  stage: migration
+  when: manual
+  script:
+    - cd /usr/migrebot
+    - docker compose run migrebot alembic upgrade head
+
 test:
   stage: test
   when: manual
   script:
     - cd /usr/migrebot
-    - docker compose up -d redis
     - docker compose run migrebot pytest --verbose
 
 run:
