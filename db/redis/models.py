@@ -41,6 +41,13 @@ class StateUpdate(BaseModel):
     incr_value: int
 
 
+class States(BaseModel):
+    """
+    All states with names and users, belonging to these states
+    """
+    state_name: list[int]
+
+
 class LogUpdate(BaseModel):
     """
     Log update, sent to 'channel:logs' to reflect the changes

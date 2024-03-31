@@ -1,7 +1,10 @@
 import orjson
+import datetime
+import pytz
 
 from src.config import logger, redis_conn
 from db.redis.models import PydanticUser, EverydayReport, StateUpdate
+
 
 ### Language:
 # User language is stored under the key 'user_id'
@@ -174,3 +177,24 @@ async def init_states(fsm_states) -> None:
                                          action='refresh',
                                          incr_value=0).json())
     await redis_conn.set('incr_value', 0)
+
+
+async def pain_started(user_id: int) -> None:
+    """
+    Set current time to 'pain_started:{user_id}' key
+    """
+    await redis_conn.set(f'pain_started:{user_id}', datetime.datetime.now(tz=pytz.UTC).isoformat())
+
+
+async def pain_stopped_hours(user_id: int) -> int:
+    """
+    Get time difference between 'pain_started:{user_id}' and now
+    :param user_id:
+    :return: Number of hours of pain, 0 if no pain_started for the user
+    """
+    pain_started = await redis_conn.get(f'pain_started:{user_id}')
+    if not pain_started:
+        return 0
+    pain_started = datetime.datetime.fromisoformat(pain_started)
+    pain_stopped = datetime.datetime.now(tz=pytz.UTC)
+    return int((pain_stopped - pain_started).total_seconds() / 3600)

@@ -17,7 +17,12 @@ async def get_user_language(curr_user: types.User) -> str:
             language = curr_user.locale.language
             if language not in ['ru', 'uk', 'en', 'fr', 'es']:
                 logger.warning(f'Unsupported language: {language}')
-                language = 'en'
+                if language in ['hy', 'az', 'uz', 'kk', 'ky', 'tk', 'tt', 'tg', 'mn', 'ba', 'cv', 'udm', 'sah', 'kbd',
+                                'krc', 'ab', 'os', 'ce', 'ady', 'mhr', 'xal', 'kkj', 'koi', 'kum', 'av', 'tyv', 'alt',
+                                'sah', 'chm', 'inh', 'bua']:
+                    language = 'ru'
+                else:
+                    language = 'en'
         await redis_conn.set(str(user_id), language)
     return language
 
@@ -34,6 +39,9 @@ class CustomI18nMiddleware(I18nMiddleware):
         :param args: event arguments
         :return: locale name
         """
-        curr_user = types.User.get_current()
+        curr_user = types.User.get_current()   # TODO: Why None sometimes?
+        if curr_user is None:
+            logger.error('User is None')
+            return 'ru'
         language = await get_user_language(curr_user)
         return language

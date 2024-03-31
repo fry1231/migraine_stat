@@ -1,11 +1,8 @@
-from aiogram import Bot, Dispatcher, types
-import aiogram.utils.markdown as md
+from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import StatesGroup
 from src.fsm_forms._custom import CustomState as State
 from aiogram.types import ParseMode
-from aiogram.utils import exceptions
 import random
 import pytz
 
@@ -14,7 +11,7 @@ from src.fsm_forms import _keyboards as kb
 from src.config import logger
 from db import sql
 from db.redis.crud import remove_user_state
-from datetime import date, datetime, timedelta
+import datetime
 
 
 class ReportPainCaseForm(StatesGroup):
@@ -49,7 +46,7 @@ async def add_paincase_entry(message_or_query: types.Message | types.CallbackQue
     if not user:
         logger.error(f"User {user_id} not found in the database!")
     tz = user.timezone
-    date_today = datetime.now(pytz.timezone(tz)).date()
+    date_today = datetime.datetime.now(pytz.timezone(tz)).date()
     # if user.notify_every == 1:   # If everyday notification, skip the date question??
     #     await ReportPainCaseForm.durability.set()
     #     await message_or_query.reply(_("Продолжительность в часах (можно написать):"),
@@ -99,7 +96,7 @@ async def process_durability(message: types.Message, state: FSMContext):
             data['durability'] = 24
         else:
             durability = int(message.text.strip())
-            durability = min(24, durability)
+            durability = min(24*7, durability)
             durability = max(1, durability)
             data['durability'] = durability
     await ReportPainCaseForm.intensity.set()

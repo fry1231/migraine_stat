@@ -32,3 +32,4 @@ class RedisLogHandler(logging.Handler):
         self.incr_value += 1
         log_update = LogUpdate(log_record=log_entry, log_incr_value=self.incr_value)
         await self.redis_conn.publish('channel:logs', log_update.json())
+        await self.redis_conn.set('log_incr_value', self.incr_value)

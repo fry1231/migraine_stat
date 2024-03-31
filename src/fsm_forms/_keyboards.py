@@ -1,5 +1,6 @@
 from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
-from datetime import date, timedelta
+import datetime
+from datetime import timedelta
 
 from db import sql
 from src.bot import _
@@ -51,7 +52,7 @@ def durability_kb(numbers: list = None):
     return kb
 
 
-def get_date_kb(date_today: date, callback_prefix: str):
+def get_date_kb(date_today: datetime.date, callback_prefix: str):
     """
     Creates a keyboard for choosing the date
     |            Today  |  Yesterday        |
