@@ -132,7 +132,7 @@ async def add_user_to_state(state_name: str, user_id: int):
         state_users = await redis_conn.get(f'state:{state_name}')
         state_users = orjson.loads(state_users)
         state_users.append(user_id)
-    await redis_conn.set(state_name, orjson.dumps(state_users))
+    await redis_conn.set(f'state:{state_name}', orjson.dumps(state_users))
     # Add current_state to user_state
     await redis_conn.set(f'user_state:{user_id}', state_name)
     await send_state_update(user_id, state_name, 'set')
