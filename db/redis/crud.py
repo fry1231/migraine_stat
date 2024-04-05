@@ -138,7 +138,7 @@ async def add_user_to_state(state_name: str, user_id: int):
     await send_state_update(user_id, state_name, 'set')
 
 
-async def remove_user_state(user_id: int) -> None:
+async def remove_user_state(user_id: int, from_state: str | None = None) -> None:
     """
     Used to remove user from state when user has finished filling out the form or to clear previous state
     """
@@ -146,6 +146,10 @@ async def remove_user_state(user_id: int) -> None:
     if not await redis_conn.exists(f'user_state:{user_id}'):
         return
     current_state = await redis_conn.get(f'user_state:{user_id}')
+
+    # We don't remove from the state if it's not in the `from_state` that we want
+    if from_state and current_state != from_state:
+        return
 
     # Remove user_id from state
     if not await redis_conn.exists(f'state:{current_state}'):
@@ -167,9 +171,8 @@ async def init_states(fsm_states) -> None:
     """
     for state in fsm_states:
         key = f'state:{state}'
-        if not await redis_conn.exists(key):
-            await redis_conn.set(key, '[]')
-            logger.debug(f'Initialized state {state}')
+        await redis_conn.set(key, '[]')
+        logger.debug(f'Initialized state {state}')
     # Publish update to channel, incr_value = 0 to trigger update of all states on client side
     await redis_conn.publish('channel:states',
                              StateUpdate(user_id=0,
@@ -177,6 +180,9 @@ async def init_states(fsm_states) -> None:
                                          action='refresh',
                                          incr_value=0).json())
     await redis_conn.set('incr_value', 0)
+    keys = await redis_conn.keys('user_state:*')
+    if keys:
+        await redis_conn.delete(*keys)
 
 
 async def pain_started(user_id: int) -> None:

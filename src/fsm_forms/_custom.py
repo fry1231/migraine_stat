@@ -1,8 +1,20 @@
 from aiogram import types
 from aiogram.dispatcher.filters.state import State
-from src.bot import dp
+import asyncio
 
-from db.redis.crud import add_user_to_state
+from src.bot import dp
+from db.redis.crud import add_user_to_state, remove_user_state
+
+
+async def delayed(delay: int, action: callable, *args, **kwargs):
+    """
+    Delayed action
+    :param delay: delay in seconds
+    :param action: action to be performed
+    :param args: arguments for the action
+    """
+    await asyncio.sleep(delay)
+    await action(*args, **kwargs)
 
 
 class CustomState(State):
@@ -16,4 +28,8 @@ class CustomState(State):
         group = self.group.get_root()
         state_index = group.states_names.index(self.state)
         group_name, state_name = self.state.split(':')
-        await add_user_to_state(f'{group_name}:{state_index}:{state_name}', types.User.get_current().id)
+
+        user_id = types.User.get_current().id
+        full_state_name = f'{group_name}:{state_index}:{state_name}'
+        await add_user_to_state(full_state_name, user_id)
+        await delayed(120, remove_user_state, {'user_id': user_id, 'from_state': full_state_name})
