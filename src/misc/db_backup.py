@@ -48,8 +48,6 @@ async def do_backup() -> bool:
     token = get_token()
     client = yadisk.AsyncClient(token=token)
     prefix = 'Приложения/migrebot/'
-
-    # You can either use the with statement or manually call client.close() later
     async with client:
         # Check if the token is valid
         if not await client.check_token():
@@ -61,13 +59,13 @@ async def do_backup() -> bool:
             await client.upload(filepath, f"{prefix}{time_now}.migraine_backup")
             await client.rename(f"{prefix}{time_now}.migraine_backup", f"{time_now}.gz")
 
-            # Deleting old backups (older than 31 days)
+            # Deleting old backups (older than 180 days)
             async for file in await client.listdir(prefix):
                 if file.name.endswith('.gz'):
                     date = datetime.datetime.strptime(file.name.split('.')[0], '%Y-%m-%d_%H:%M:%S%z')
-                    if (datetime.datetime.now(tz=datetime.timezone.utc) - date).days > 31:
+                    if (datetime.datetime.now(tz=datetime.timezone.utc) - date).days > 180:
                         logger.info(f'Deleting old backup {file.name}')
-                        await client.remove(prefix + file.path)
+                        await client.remove(file.path)
                         pathlib.Path(filepath).unlink()
             logger.info(f'Backup finished successfully in {time.time() - t0:.2f} sec')
             return True

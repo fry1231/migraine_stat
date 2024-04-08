@@ -44,14 +44,18 @@ logging.basicConfig(
         RedisLogHandler(redis_conn, key='logs', max_len=10000)
     ]
 )
+
+loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+for logger_ in loggers:
+    if logger_.name == __name__:
+        if IN_PRODUCTION:
+            logger_.setLevel(logging.INFO)
+        else:
+            logger_.setLevel(logging.DEBUG)
+    else:
+        logger_.setLevel(logging.ERROR)
+
 logger = logging.getLogger(__name__)
-logging.getLogger('schedule').setLevel(logging.ERROR)
-
-if IN_PRODUCTION:
-    logger.setLevel(logging.INFO)
-else:
-    logger.setLevel(logging.DEBUG)
-
 
 # @asynccontextmanager
 # async def rabbit_channel() -> AbstractChannel:
