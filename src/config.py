@@ -45,8 +45,10 @@ logging.basicConfig(
     ]
 )
 
-loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-for logger_ in loggers:
+logger = logging.getLogger(__name__)
+
+all_loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+for logger_ in all_loggers:
     if logger_.name == __name__:
         if IN_PRODUCTION:
             logger_.setLevel(logging.INFO)
@@ -54,8 +56,8 @@ for logger_ in loggers:
             logger_.setLevel(logging.DEBUG)
     else:
         logger_.setLevel(logging.ERROR)
+        logger.info(f'Logger {logger_.name} set to ERROR level')
 
-logger = logging.getLogger(__name__)
 
 # @asynccontextmanager
 # async def rabbit_channel() -> AbstractChannel:
