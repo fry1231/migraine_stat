@@ -32,4 +32,4 @@ class CustomState(State):
         user_id = types.User.get_current().id
         full_state_name = f'{group_name}:{state_index}:{state_name}'
         await add_user_to_state(full_state_name, user_id)
-        asyncio.create_task(delayed(120, remove_user_state, {'user_id': user_id, 'from_state': full_state_name}))
+        asyncio.get_event_loop().create_task(delayed(120, remove_user_state, {'user_id': user_id, 'from_state': full_state_name}))
