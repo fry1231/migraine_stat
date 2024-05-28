@@ -56,7 +56,6 @@ for logger_ in all_loggers:
             logger_.setLevel(logging.DEBUG)
     else:
         logger_.setLevel(logging.ERROR)
-        logger.info(f'Logger {logger_.name} set to ERROR level')
 
 
 # @asynccontextmanager

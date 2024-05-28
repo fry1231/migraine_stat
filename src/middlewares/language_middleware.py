@@ -1,5 +1,6 @@
 from aiogram import types
 from aiogram.contrib.middlewares.i18n import I18nMiddleware
+import traceback
 
 from db.sql import get_user
 from db.models import User
@@ -7,6 +8,11 @@ from src.config import redis_conn, logger
 
 
 async def get_user_language(curr_user: types.User) -> str:
+    """
+    Get user language from Redis or DB if not found in Redis
+    :param curr_user: User object
+    :return: user language 2-letter code (or maybe 3)
+    """
     user_id = curr_user.id
     language = await redis_conn.get(str(user_id))
     if language is None:
@@ -40,8 +46,9 @@ class CustomI18nMiddleware(I18nMiddleware):
         :return: locale name
         """
         curr_user = types.User.get_current()   # TODO: Why None sometimes?
+        stack = "\n".join(traceback.format_stack())
         if curr_user is None:
-            logger.error('User is None')
+            logger.error(f'User is None. Call stack: {stack}')
             return 'ru'
         language = await get_user_language(curr_user)
         return language

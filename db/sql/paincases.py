@@ -36,7 +36,7 @@ async def report_paincase(owner_id: int,
                 db_pain.medecine_taken.append(db_druguse)
         session.add(db_pain)
         await update_everyday_report(n_pains=1)
-    return db_pain
+        return db_pain
 
 
 async def get_user_pains(user_id: int,

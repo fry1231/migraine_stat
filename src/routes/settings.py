@@ -157,8 +157,9 @@ async def change_lang(callback_query: types.CallbackQuery):
 async def change_lang_callback(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     language = callback_query.data.split('_')[-1]
+    current_lang = await get_user_language(user_id)
     await sql.change_user_props(telegram_id=user_id, language=language)
-    logger.info(f'User {user_id} changed language to {language}')
+    logger.info(f'User {user_id} changed language from {current_lang} to {language}')
     await change_user_language(user_id, language)
     await change_settings(callback_query)
 
