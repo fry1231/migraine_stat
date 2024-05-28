@@ -48,7 +48,8 @@ class CustomI18nMiddleware(I18nMiddleware):
         curr_user = types.User.get_current()   # TODO: Why None sometimes?
         stack = "\n".join(traceback.format_stack())
         if curr_user is None:
-            logger.error(f'User is None. Call stack: {stack}')
+            logger.warning(f'User is None! Setting lang to default'
+                           f'\nCall stack: {stack}')
             return 'ru'
         language = await get_user_language(curr_user)
         return language
