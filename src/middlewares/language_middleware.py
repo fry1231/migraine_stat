@@ -33,6 +33,24 @@ async def get_user_language(curr_user: types.User) -> str:
     return language
 
 
+async def get_user_language_by_id(user_id: int) -> str:
+    """
+    Get user language from Redis or DB if not found in Redis
+    :param user_id: User ID
+    :return: user language 2(3)-letter code
+    """
+    language = await redis_conn.get(str(user_id))
+    if language is None:
+        user: User = await get_user(user_id)
+        if user:
+            language = user.language
+        else:
+            language = 'ru'
+            logger.warning(f'User {user_id} not found in DB, setting language to default: {language}')
+        await redis_conn.set(str(user_id), language)
+    return language
+
+
 class CustomI18nMiddleware(I18nMiddleware):
     """Custom I18n middleware with get_user_locale method overriden to get user locale from Redis"""
     async def get_user_locale(self, action: str, args: tuple) -> str:
@@ -45,11 +63,19 @@ class CustomI18nMiddleware(I18nMiddleware):
         :param args: event arguments
         :return: locale name
         """
+        default_language = 'ru'
         curr_user = types.User.get_current()   # TODO: Why None sometimes?
-        stack = "\n".join(traceback.format_stack())
-        if curr_user is None:
-            logger.warning(f'User is None! Setting lang to default'
-                           f'\nCall stack: {stack}')
-            return 'ru'
-        language = await get_user_language(curr_user)
-        return language
+        # If not None - nice
+        if curr_user:
+            language = await get_user_language(curr_user)
+            return language
+        # If None - try to get message or callback query obj from args and retrieve user ID from it
+        for arg in args:
+            if isinstance(arg, types.Message) or isinstance(arg, types.CallbackQuery):
+                if arg.from_user:
+                    language = await get_user_language_by_id(arg.from_user.id)
+                    return language
+        # If no user ID in args - return default language
+        logger.warning(f'User ID cannot be retrieved from {[type(arg) for arg in args]} args: {args}, '
+                       f'setting language to default: {default_language}')
+        return default_language
