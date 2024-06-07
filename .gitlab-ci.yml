@@ -9,7 +9,7 @@ stages:
 
 check_vars:
   stage: check_vars
-  when: manual
+  when: always
   script:
     - |
       if [ -z "$API_TOKEN" ] || [ -z "$MY_TG_ID" ] || [ -z "$POSTGRES_USER" ] || [ -z "$POSTGRES_PASS" ] || [ -z "$PAYMENTS_TOKEN_RU" ] || [ -z "IN_PRODUCTION" ]; then
@@ -48,10 +48,14 @@ start_dbs:
 
 migration:
   stage: migration
-  when: manual
   script:
     - cd /usr/migrebot
     - docker compose run migrebot alembic upgrade head
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /migration/
+      when: on_success
+      needs:
+        - start_dbs
 
 test:
   stage: test

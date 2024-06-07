@@ -75,7 +75,13 @@ class CustomI18nMiddleware(I18nMiddleware):
                 if arg.from_user:
                     language = await get_user_language_by_id(arg.from_user.id)
                     return language
-        # If no user ID in args - return default language
-        logger.warning(f'User ID cannot be retrieved from {[type(arg) for arg in args]} args: {args}, '
-                       f'setting language to default: {default_language}')
+        # If no user ID in args and message not from a channel - return default language
+        error_flag = False
+        for arg in args:
+            if ('sender_chat' in arg) and ('type' in arg['sender_chat']) and (arg['sender_chat']['type'] != 'channel'):
+                error_flag = True
+                break
+        if error_flag:
+            logger.warning(f'User ID cannot be retrieved from {[type(arg) for arg in args]} args: {args}, '
+                           f'setting language to default: {default_language}')
         return default_language
