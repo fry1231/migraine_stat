@@ -1,3 +1,5 @@
+from aiogram.utils.exceptions import CantParseEntities
+
 from src.bot import bot
 from src.config import MY_TG_ID
 from src.fsm_forms import available_fsm_states
@@ -10,7 +12,10 @@ import db.sql as sql
 async def everyday_report(reset_old_one: bool = True) -> None:
     report: EverydayReport = await redis_crud.get_current_report()
     text = await get_report_text(report)
-    await bot.send_message(chat_id=MY_TG_ID, text=text)
+    try:
+        await bot.send_message(chat_id=MY_TG_ID, text=text, parse_mode='HTML')
+    except CantParseEntities:
+        await bot.send_message(chat_id=MY_TG_ID, text='Error while parsing entities in the report')
     if reset_old_one:
         await redis_crud.init_everyday_report()
         await redis_crud.init_states(available_fsm_states)
