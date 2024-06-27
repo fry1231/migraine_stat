@@ -27,6 +27,9 @@ class RedisLogHandler(logging.Handler):
 
     async def _async_emit(self, record):
         log_entry = self.format(record)
+        if isinstance(log_entry, str):
+            if '_client.py:1758' in log_entry:   # Skip yadisk entries
+                return
         await self.redis_conn.lpush(self.key, log_entry.encode('utf-8'))
         await self.redis_conn.ltrim(self.key, 0, self.max_len - 1)
         self.incr_value += 1

@@ -12,6 +12,7 @@ from src.misc.service_reports import everyday_report
 from src.misc.init_bot_description import set_bot_name, set_bot_description, set_bot_commands
 from src.config import logger
 import datetime
+from time import time
 
 
 # Schedule notification task
@@ -20,17 +21,18 @@ async def notify_users_hourly():
     Ask if there was a headache during missing period, defined in notify_every attribute
     """
     utc_hour = datetime.datetime.utcnow().hour
+    # Get users who should be notified at this hour
     user_list: list[User] = await sql.users_by_notif_hour(utc_hour)
-    if user_list:
-        logger.info(f'Notifying {len([el for el in user_list if el.notify_every != -1])} users')
+    # if user_list:
+    #     logger.info(f'Notifying {len([el for el in user_list if el.notify_every != -1])} users')
     t = datetime.datetime.today()
     time_notified = datetime.datetime.now()
     notified_users_ids = []
-    # Message to notify me about notification process
-    for i, user in enumerate(user_list):
+    for user in user_list:
         notification_period_days = user.notify_every
         if notification_period_days == -1:   # If user did not specify it yet
             continue
+        # Check if user should be notified
         notification_period_minutes = notification_period_days * 24 * 60  # Notification period in minutes
         dt = (t - user.last_notified).total_seconds() / 60   # How many minutes since last notification
         if dt >= notification_period_minutes - 65:   # Check if notif. period has passed (safety interval 65 mins incl.)
@@ -38,7 +40,7 @@ async def notify_users_hourly():
                 # Ask user about pains during the day(s)
                 await regular_report(user_instance=user, missing_days=notification_period_days)
                 notified_users_ids.append(user.telegram_id)
-            except (BotBlocked, UserDeactivated):
+            except (BotBlocked, UserDeactivated):   # user blocked the bot - delete user
                 result = await sql.delete_user(user.telegram_id)
                 if not result:
                     await notify_me(f'Error while deleting user {user.telegram_id} ({user.user_name} / {user.first_name})')
@@ -50,7 +52,6 @@ async def notify_users_hourly():
     if notified_users_ids:
         await sql.batch_change_last_notified(notified_users_ids, time_notified)
         await update_everyday_report(n_notified_users=len(notified_users_ids))
-        logger.info(f'{len(notified_users_ids)} users notified')
 
 
 async def db_healthcheck():
@@ -69,7 +70,7 @@ async def scheduler():
     aioschedule.every().day.at("03:30").do(do_backup)
     while True:
         await aioschedule.run_pending()
-        await asyncio.sleep(10)
+        await asyncio.sleep(30)
 
 
 async def on_startup(__):
