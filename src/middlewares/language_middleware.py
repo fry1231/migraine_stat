@@ -25,7 +25,7 @@ async def get_user_language(curr_user: types.User) -> str:
                 logger.warning(f'Unsupported language: {language}')
                 if language in ['hy', 'az', 'uz', 'kk', 'ky', 'tk', 'tt', 'tg', 'mn', 'ba', 'cv', 'udm', 'sah', 'kbd',
                                 'krc', 'ab', 'os', 'ce', 'ady', 'mhr', 'xal', 'kkj', 'koi', 'kum', 'av', 'tyv', 'alt',
-                                'sah', 'chm', 'inh', 'bua']:
+                                'sah', 'chm', 'inh', 'bua', 'be']:
                     language = 'ru'
                 else:
                     language = 'en'

@@ -1,5 +1,6 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from aiogram.utils.exceptions import MessageCantBeDeleted
 
 from db import sql
 from db.redis.crud import remove_user_state
@@ -8,6 +9,7 @@ from src.misc.keyboards import calendar_kb
 from src.misc.utils import month_name, notify_me
 from src.middlewares import get_user_language
 from src.misc.filters import MaintenanceMode
+from src.config import logger
 
 
 # Reply while in maintenance mode. It should be the first handler to be registered
@@ -42,7 +44,10 @@ async def cancel_handler(message_or_query: types.Message | types.CallbackQuery,
     if isinstance(message_or_query, types.CallbackQuery):
         message_or_query = message_or_query.message
     await message_or_query.reply(_('Отменено'), reply_markup=types.ReplyKeyboardRemove())
-    await bot.delete_message(chat_id=message_or_query.chat.id, message_id=message_or_query.message_id)
+    try:
+        await bot.delete_message(chat_id=message_or_query.chat.id, message_id=message_or_query.message_id)
+    except MessageCantBeDeleted:
+        pass
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data == 'ignore', state='*')

@@ -2,6 +2,8 @@ from aiogram import types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, \
     ReplyKeyboardRemove
 from aiogram.dispatcher.filters.state import StatesGroup
+from aiogram.utils.exceptions import MessageCantBeDeleted
+
 from src.fsm_forms._custom import CustomState as State
 from aiogram.dispatcher import FSMContext
 
@@ -65,7 +67,10 @@ async def medications_entry(message: types.Message, state: FSMContext = None):
     if state and await state.get_state():
         await state.finish()
     empty_mes = await bot.send_message(message.from_user.id, '.', reply_markup=ReplyKeyboardRemove())
-    await bot.delete_message(message.from_user.id, empty_mes.message_id)
+    try:
+        await bot.delete_message(message.from_user.id, empty_mes.message_id)
+    except MessageCantBeDeleted:
+        pass
     text = _('Бот запишет ваши показатели давления и пульса на текущий момент. \n'
              'Выберите систолическое давление (верхнее значение)')
     await ReportPressureForm.systolic.set()

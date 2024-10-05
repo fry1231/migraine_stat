@@ -44,6 +44,7 @@ async def set_bot_commands():
                 types.bot_command.BotCommand('calendar', _('изменить записи', locale=locale)),
                 types.bot_command.BotCommand('statistics', _('статистика', locale=locale)),
                 types.bot_command.BotCommand('settings', _('настройки', locale=locale)),
+                types.bot_command.BotCommand('donate', _('поблагодарить', locale=locale)),
             ], language_code=locale)
             if not result:
                 logger.error(f'Error while setting bot commands for {locale}')

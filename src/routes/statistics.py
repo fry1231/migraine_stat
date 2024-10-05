@@ -3,6 +3,7 @@ import io
 from aiogram import types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher import FSMContext
+from aiogram.utils.exceptions import MessageCantBeDeleted
 import traceback
 
 from db import sql
@@ -145,7 +146,10 @@ async def get_pain_statistics_callback(callback_query: types.CallbackQuery):
                 await pre_message.edit_text(_('Готово! Высылаю файл с данными...'))
                 await bot.send_document(user_id, types.InputFile(buf, 'pains_statistics.xlsx'))
                 logger.info(f'User {user_id}. Sent PAIN statistics for {n_days} days')
-                await bot.delete_message(user_id, pre_message.message_id)
+                try:
+                    await bot.delete_message(user_id, pre_message.message_id)
+                except MessageCantBeDeleted:
+                    pass
     except asyncio.TimeoutError:
         await pre_message.edit_text(_('В данный момент сервер загружен, повторите, пожалуйста, через пару минут'))
         logger.warning(f'User {user_id}. TimeoutError while get_pain_statistics_callback, waiting request has been sent')
@@ -198,7 +202,10 @@ async def get_medication_statistics_callback(callback_query: types.CallbackQuery
                 await pre_message.edit_text(_('Готово! Высылаю файл с данными...'))
                 await bot.send_document(user_id, types.InputFile(buf, 'medications_statistics.xlsx'))
                 logger.info(f'User {user_id}. Sent MEDICATION statistics for {n_days} days')
-                await bot.delete_message(user_id, pre_message.message_id)
+                try:
+                    await bot.delete_message(user_id, pre_message.message_id)
+                except MessageCantBeDeleted:
+                    pass
     except asyncio.TimeoutError:
         await pre_message.edit_text(_('В данный момент сервер загружен, повторите, пожалуйста, через пару минут')
                                     , reply_markup=kb_period('medications_stats'))
@@ -257,7 +264,10 @@ async def get_pressure_statistics_callback(callback_query: types.CallbackQuery):
                 await pre_message.edit_text(_('Готово! Высылаю файл с данными...'))
                 await bot.send_document(user_id, types.InputFile(buf, 'pressure_statistics.xlsx'))
                 logger.info(f'User {user_id}. Sent PRESSURE statistics for {n_days} days')
-                await bot.delete_message(user_id, pre_message.message_id)
+                try:
+                    await bot.delete_message(user_id, pre_message.message_id)
+                except MessageCantBeDeleted:
+                    pass
     except asyncio.TimeoutError:
         await pre_message.edit_text(_('В данный момент сервер загружен, повторите, пожалуйста, через пару минут')
                                     , reply_markup=kb_period('pressure_stats'))
