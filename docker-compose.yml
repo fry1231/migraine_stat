@@ -31,8 +31,9 @@ services:
       - migrebot-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.redis.rule=Host(`${WG_GATE}`) && PathPrefix(`/redis-nl`)"
-      - "traefik.http.services.redis.loadbalancer.server.port=6397"
+      - "traefik.tcp.routers.redis.entrypoints=redis"
+      - "traefik.tcp.routers.redis.rule=HostSNI(`*`)"
+      - "traefik.tcp.services.redis.loadbalancer.server.port=6379"
 
   #  rabbitmq:
   #    container_name: rabbitmq
@@ -62,8 +63,10 @@ services:
       - migrebot-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.postgres.rule=Host(`${WG_GATE}`) && PathPrefix(`/postgres-nl`)"
-      - "traefik.http.services.postgres.loadbalancer.server.port=5432"
+      - "traefik.tcp.routers.postgres.entrypoints=postgres"
+      - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
+      - "traefik.tcp.services.postgres.loadbalancer.server.port=5432"
+
 
 #  pgadmin:
 #    container_name: pgadmin4_container
