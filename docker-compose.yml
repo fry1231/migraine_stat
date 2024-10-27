@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   migrebot:
     container_name: migrebot
@@ -31,6 +29,10 @@ services:
       - 6379
     networks:
       - migrebot-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node.rule=Host(`${WG_GATE}`) && PathPrefix(`/redis-nl`)"
+      - "traefik.http.services.node.loadbalancer.server.port=6397"
 
   #  rabbitmq:
   #    container_name: rabbitmq
