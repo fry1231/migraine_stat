@@ -60,6 +60,10 @@ services:
       - POSTGRES_DB=db_prod
     networks:
       - migrebot-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node.rule=Host(`${WG_GATE}`) && PathPrefix(`/postgres-nl`)"
+      - "traefik.http.services.node.loadbalancer.server.port=5432"
 
 #  pgadmin:
 #    container_name: pgadmin4_container
