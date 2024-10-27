@@ -32,7 +32,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.tcp.routers.redis.entrypoints=redis"
-      - "traefik.tcp.routers.redis.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.redis.rule=ClientIP(`${WG_SUBNET:?err}`)"
       - "traefik.tcp.services.redis.loadbalancer.server.port=6379"
 
   #  rabbitmq:
@@ -64,9 +64,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.tcp.routers.postgres.entrypoints=postgres"
-      - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.postgres.rule=ClientIP(`${WG_SUBNET:?err}`)"
       - "traefik.tcp.services.postgres.loadbalancer.server.port=5432"
-
 
 #  pgadmin:
 #    container_name: pgadmin4_container
